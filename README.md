@@ -1,5 +1,42 @@
-# Vue 3 + Vite
+# 仓秘书V2 (CangMiShu OMS V2)
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+基于 Vue 3 + Vite 开发的仓秘书订单管理系统(OMS)第二版。
 
-Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://vuejs.org/guide/scaling-up/tooling.html#ide-support).
+## 技术栈
+
+- Vue 3 (使用 `<script setup>` SFC)
+- Vite
+- Quasar UI
+- Vue Router
+- Vuex/Pinia
+- Axios
+
+## 开发
+
+```bash
+# 安装依赖
+npm install
+
+# 启动开发服务器
+npm run dev
+
+# 构建生产版本
+npm run build
+```
+
+## IDE 支持
+
+推荐使用 VSCode 进行开发。更多关于 Vue 的 IDE 支持信息,请参考 [Vue 文档](https://vuejs.org/guide/scaling-up/tooling.html#ide-support)。
+
+## 项目结构
+
+```
+src/
+├── api/        # API 接口
+├── assets/     # 静态资源
+├── components/ # 公共组件
+├── router/     # 路由配置
+├── store/      # 状态管理
+├── utils/      # 工具函数
+└── views/      # 页面视图
+```
