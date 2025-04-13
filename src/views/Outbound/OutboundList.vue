@@ -24,8 +24,33 @@
 
       <!-- 搜索过滤区域 -->
       <div class="row items-center">
+
+        <!-- 来源和平台筛选 -->
+        <div class="row items-center no-wrap filter-group ">
+          <q-select
+            outlined
+            dense
+            v-model="filters.source"
+            :options="sourceOptions"
+            emit-value
+            map-options
+            :label="t('来源')"
+            class="q-mr-sm"
+            style="min-width: 150px"
+          />
+          <q-select
+            outlined
+            dense
+            v-model="filters.platform"
+            :options="platformOptions"
+            emit-value
+            map-options
+            :label="t('平台')"
+            style="min-width: 150px"
+          />
+        </div>
         <!-- 时间筛选模块 -->
-        <div class="row items-center no-wrap time-group">
+        <div class="row items-center no-wrap q-ml-md time-group">
           <div class="col-3">
             <q-select
               outlined
@@ -130,13 +155,43 @@
     <!-- 操作按钮和表格容器 -->
     <div class="outbound-container">
       <div class="row justify-end q-mb-md">
+        
         <q-btn
           color="primary"
           :label="t('新建')"
           icon="add"
+          class="q-mr-sm"
           @click="handleCreate"
         />
+        <q-btn
+          color="primary"
+          class="q-mr-sm"
+          :label="t('导入')"
+          icon="file_upload"
+          @click="handleImport"
+        />
+        <!-- <q-btn-dropdown color="primary" :label="t('导出')" icon="file_download">
+          <q-list>
+            <q-item clickable v-close-popup @click="handleExport('selected')">
+              <q-item-section>
+                <q-item-label>{{ t("按勾选导出") }}</q-item-label>
+              </q-item-section>
+            </q-item>
+            <q-item clickable v-close-popup @click="handleExport('all')">
+              <q-item-section>
+                <q-item-label>{{ t("按筛选导出") }}</q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </q-btn-dropdown> -->
       </div>
+
+      <!-- 导入弹窗 -->
+      <import-dialog
+        ref="importDialogRef"
+        type="orders"
+        @success="handleImportSuccess"
+      />
 
       <!-- 数据表格 -->
       <div class="bg-white rounded-borders">
@@ -153,18 +208,24 @@
           selection="multiple"
           v-model:selected="selected"
         >
+        <template v-slot:no-data="{ icon, filter }">
+          <div class="full-width row flex-center text-grey-6 q-gutter-sm">
+            <q-icon size="2em" :name="filter ? 'filter_b_and_w' : icon" />
+            <span> {{ t('暂无数据') }} </span>
+          </div>
+        </template>
           <template v-slot:header="props">
             <q-tr :props="props">
               <q-th auto-width class="text-left" style="padding-left: 16px; width: 50px;">
                 <q-checkbox v-model="props.selected" />
               </q-th>
-              <q-th class="text-left" style="padding-left: 16px;">订单信息</q-th>
-              <q-th class="text-left">收件人&地区</q-th>
-              <q-th class="text-left">运单号</q-th>
-              <q-th class="text-left">平台</q-th>
-              <q-th class="text-left">时间</q-th>
-              <q-th class="text-center">状态</q-th>
-              <q-th class="text-center">操作</q-th>
+              <q-th class="text-left" style="padding-left: 16px;">{{ t('订单信息') }}</q-th>
+              <q-th class="text-left">{{ t('收件人&地区') }}</q-th>
+              <q-th class="text-left">{{ t('运单号') }}</q-th>
+              <q-th class="text-left">{{ t('平台') }}</q-th>
+              <q-th class="text-left">{{ t('时间') }}</q-th>
+              <q-th class="text-center">{{ t('状态') }}</q-th>
+              <q-th class="text-center">{{ t('操作') }}</q-th>
             </q-tr>
           </template>
 
@@ -177,10 +238,10 @@
               <q-td colspan="8" class="order-info q-pa-none">
                 <div class="row items-center justify-between" style="padding: 8px">
                   <div class="order-basic-info">
-                    <span class="q-mr-md">订单号：{{ props.row.order_number }}</span>
-                    <span class="q-mr-md">包裹号：{{ props.row.packages?.[0]?.package_number || '--' }}</span>
+                    <span class="q-mr-md">{{ t('订单号') }}：{{ props.row.order_number }}</span>
+                    <span class="q-mr-md">{{ t('包裹号') }}：{{ props.row.packages?.[0]?.package_number || '--' }}</span>
                   </div>
-                  <div>OMS创建</div>
+                  <div>{{ sourceMap[props.row.source] || props.row.source }}</div>
                 </div>
               </q-td>
             </q-tr>
@@ -214,7 +275,7 @@
               </q-td>
               <q-td>{{ props.row.platform }}</q-td>
               <q-td>
-                <div>创建：{{ props.row.created_at }}</div>
+                <div>{{ t('创建') }}：{{ props.row.created_at }}</div>
               </q-td>
               <q-td class="text-center">{{ t(statusMap[props.row.status]) }}</q-td>
               <q-td class="text-center">
@@ -227,7 +288,7 @@
                     size="sm"
                     @click="handleView(props.row)"
                   >
-                    <q-tooltip>{{ t("查看") }}</q-tooltip>
+                    <q-tooltip>{{ t('查看') }}</q-tooltip>
                   </q-btn>
                   <q-btn flat round color="grey-8" icon="more_vert" size="sm">
                     <q-menu>
@@ -236,9 +297,17 @@
                           clickable
                           v-close-popup
                           v-if="props.row.status === 'draft'"
+                          @click="handleEdit(props.row)"
+                        >
+                          <q-item-section>{{ t('编辑') }}</q-item-section>
+                        </q-item>
+                        <q-item
+                          clickable
+                          v-close-popup
+                          v-if="props.row.status === 'draft'"
                           @click="handleSubmitOutbound(props.row)"
                         >
-                          <q-item-section>{{ t("提交订单") }}</q-item-section>
+                          <q-item-section>{{ t('提交订单') }}</q-item-section>
                         </q-item>
                         <q-item
                           clickable
@@ -246,23 +315,31 @@
                           v-if="props.row.status === 'draft'"
                           @click="handleDelete(props.row)"
                         >
-                          <q-item-section>{{ t("删除订单") }}</q-item-section>
+                          <q-item-section>{{ t('删除订单') }}</q-item-section>
                         </q-item>
                         <q-item
                           clickable
                           v-close-popup
                           v-if="props.row.status === 'pending_shipment'"
-                          @click="handleApplyHold(props.row)"
+                          @click="handleRevert(props.row)"
                         >
-                          <q-item-section>{{ t("申请截单") }}</q-item-section>
+                          <q-item-section>{{ t('撤回订单') }}</q-item-section>
                         </q-item>
                         <q-item
                           clickable
                           v-close-popup
-                          v-if="props.row.status === 'exception'"
+                          v-if="props.row.is_allow_intercept && props.row.intercept_status === 'no_intercept'"
+                          @click="handleApplyHold(props.row)"
+                        >
+                          <q-item-section>{{ t('申请截单') }}</q-item-section>
+                        </q-item>
+                        <q-item
+                          clickable
+                          v-close-popup
+                          v-if="props.row.intercept_status === 'intercept_requested'"
                           @click="handleCancelHold(props.row)"
                         >
-                          <q-item-section>{{ t("取消截单") }}</q-item-section>
+                          <q-item-section>{{ t('取消截单') }}</q-item-section>
                         </q-item>
                       </q-list>
                     </q-menu>
@@ -289,11 +366,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { useQuasar } from "quasar";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import Pagination from "@/components/Pagination.vue";
+import ImportDialog from "@/components/ImportDialog.vue";
 import api from "@/api/index";
 
 const $q = useQuasar();
@@ -311,6 +389,8 @@ const filters = ref({
   search_type: "sku",
   keywords: "",
   search_mode: "exact",
+  source: "",
+  platform: ""
 });
 
 // 日期类型选项
@@ -334,6 +414,22 @@ const searchModeOptions = [
   { label: t("模糊搜索"), value: "fuzzy" },
 ];
 
+// 来源选项
+const sourceOptions = [
+  { label: t('全部'), value: '' },
+  { label: t('ERP推送'), value: 'erp_push' },
+  { label: t('OMS创建'), value: 'oms_create' },
+  { label: t('平台推送'), value: 'platform_push' }
+];
+
+// 平台选项
+const platformOptions = [
+  { label: t('全部'), value: '' },
+  { label: t('客户平台'), value: 'customer' },
+  { label: t('代发平台'), value: 'dsfulfill' },
+  { label: t('其他平台'), value: 'other' }
+];
+
 // 在 script 部分添加状态映射
 const statusMap = {
   draft: '草稿',
@@ -341,6 +437,13 @@ const statusMap = {
   exception: '异常',
   shipped: '已发货',
   cancelled: '已取消'
+};
+
+// 在 script setup 中添加 source 映射
+const sourceMap = {
+  'erp_push': t('ERP推送'),
+  'oms_create': t('OMS创建'),
+  'platform_push': t('平台推送')
 };
 
 // 表格数据
@@ -402,55 +505,7 @@ const columns = [
 ];
 
 // 修改模拟数据结构
-const mockTableData = [
-  {
-    id: 1,
-    order_number: "1231",
-    package_number: "PN3HB00042",
-    warehouse: "USC",  // 修改为订单级别的仓库信息
-    skus: [
-      { sku: "C-001", qty: 1 },
-      { sku: "C-002", qty: 1 },
-      { sku: "C-003", qty: 1 }
-    ],
-    logistics_type: "线下物流",
-    logistics_line: "美国专线",
-    tracking_number: "--",
-    platform: "amazon",
-    created_at: "2025-04-10 00:34",
-    status: "pending_shipment"
-  },
-  {
-    id: 2,
-    order_number: "12312",
-    package_number: "PN3HB00041",
-    warehouse: "USC",
-    skus: [
-      { sku: "C-001", qty: 2 }
-    ],
-    logistics_type: "线下物流",
-    logistics_line: "美国专线",
-    tracking_number: "--",
-    platform: "amazon",
-    created_at: "2025-04-09 23:30",
-    status: "pending_shipment"
-  },
-  {
-    id: 3,
-    order_number: "121",
-    package_number: "PN3HB00040",
-    warehouse: "USC",
-    skus: [
-      { sku: "A-001", qty: 4 }
-    ],
-    logistics_type: "线下物流",
-    logistics_line: "美国专线",
-    tracking_number: "--",
-    platform: "amazon",
-    created_at: "2025-04-09 23:29",
-    status: "pending_shipment"
-  }
-];
+const mockTableData = [];
 
 // 使用模拟数据
 const tableData = ref(mockTableData);
@@ -476,6 +531,9 @@ const tablePagination = ref({
 // 选中的行
 const selected = ref([]);
 
+// 导入相关
+const importDialogRef = ref(null);
+
 // 获取出库单列表
 const fetchOutboundList = async () => {
   loading.value = true;
@@ -489,7 +547,9 @@ const fetchOutboundList = async () => {
       search_type: filters.value.search_type,
       keywords: filters.value.keywords,
       search_mode: filters.value.search_mode,
-      status: tab.value === "all" ? "" : tab.value,
+      status: tab.value === "all" ? "" : [tab.value],
+      source: filters.value.source ? [filters.value.source] : undefined,
+      platform: filters.value.platform ? [filters.value.platform] : undefined
     };
 
     const response = await api.getOutboundList(params);
@@ -552,8 +612,8 @@ const handleView = (row) => {
 // 处理编辑
 const handleEdit = (row) => {
   router.push({
-    path: "/outbound/create",
-    query: { id: row.id },
+    path: '/outbound/create',
+    query: { id: row.id }
   });
 };
 
@@ -632,6 +692,42 @@ const handleCancelHold = async (row) => {
     });
   }
 };
+
+// 处理撤回订单
+const handleRevert = async (row) => {
+  try {
+    const response = await api.orderRevert(row.id);
+    if (response.success) {
+      $q.notify({
+        type: 'positive',
+        message: t('撤回成功')
+      });
+      fetchOutboundList();
+    }
+  } catch (error) {
+    console.error("撤回订单失败:", error);
+    $q.notify({
+      type: 'negative',
+      message: t('撤回失败')
+    });
+  }
+};
+
+// 处理导入按钮点击
+const handleImport = () => {
+  importDialogRef.value.open();
+};
+
+// 处理导入成功
+const handleImportSuccess = () => {
+  fetchOutboundList(); // 刷新列表
+};
+
+// 监听标签页变化
+watch(tab, () => {
+  pagination.value.page = 1; // 切换标签页时重置为第一页
+  fetchOutboundList();
+});
 
 // 初始化
 onMounted(() => {

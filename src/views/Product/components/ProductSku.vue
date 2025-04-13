@@ -32,7 +32,7 @@
       <!-- 无数据时的显示 -->
       <template v-slot:no-data>
         <div v-if="!loading && (!rows || rows.length === 0)" class="full-width row flex-center q-my-lg">
-          <span class="text-grey">暂无数据</span>
+          <span class="text-grey">{{ t('暂无数据') }}</span>
         </div>
       </template>
 
@@ -64,7 +64,7 @@
               <div class="ellipsis">
                 <div>SKU: {{ props.row?.sku || '-' }}</div>
                 <div class="ellipsis">{{ props.row?.product?.name || '-' }}</div>
-                <div>规格: {{ props.row?.name || '-' }}</div>
+                <div>{{ t('规格') }}: {{ props.row?.name || '-' }}</div>
               </div>
             </div>
           </q-td>
@@ -75,8 +75,8 @@
             {{ `${props.row?.warehouse_size_length || 0}*${props.row?.warehouse_size_width || 0}*${props.row?.warehouse_size_height || 0} cm\n${props.row?.warehouse_weight || 0} g` }}
           </q-td>
           <q-td key="timeInfo" class="text-center">
-            <div>创建: {{ props.row?.created_at || '-' }}</div>
-            <div>更新: {{ props.row?.updated_at || '-' }}</div>
+            <div>{{ t('创建') }}: {{ props.row?.created_at || '-' }}</div>
+            <div>{{ t('更新') }}: {{ props.row?.updated_at || '-' }}</div>
           </q-td>
           <q-td key="operations" class="text-center">
             <q-btn
@@ -100,9 +100,9 @@
       </template>
 
       <!-- 底部选中记录数显示 -->
-      <template v-slot:bottom>
+      <template v-slot:bottom v-if="selected.length">
         <div v-if="selected.length > 0" class="q-pa-sm text-grey-8 text-center">
-          已选择 {{ selected.length }} 条记录
+          {{ t('已选择') }} {{ selected.length }} {{ t('条记录') }}
         </div>
       </template>
     </q-table>
@@ -156,34 +156,34 @@ const columns = [
   {
     name: "skuInfo",
     required: true,
-    label: "SKU信息",
+    label: t("SKU信息"),
     align: "left",
     field: (row) => row?.sku || '',
     style: "width: 25%"
   },
   { 
     name: "applySpec", 
-    label: "申报规格", 
+    label: t("申请规格"), 
     field: row => `${row.size_length || 0}*${row.size_width || 0}*${row.size_height || 0} cm\n${row.weight || 0} g`, 
     align: "center",
     style: "width: 20%"
   },
   { 
     name: "realSpec", 
-    label: "实际规格", 
+    label: t("实际规格"), 
     field: row => `${row.warehouse_size_length || 0}*${row.warehouse_size_width || 0}*${row.warehouse_size_height || 0} cm\n${row.warehouse_weight || 0} g`,
     align: "center",
     style: "width: 20%"
   },
   { 
     name: "timeInfo", 
-    label: "时间", 
+    label: t("时间"), 
     align: "center",
     style: "width: 25%"
   },
   { 
     name: "operations", 
-    label: "操作", 
+    label: t("操作"), 
     align: "center",
     style: "width: 10%"
   }
@@ -204,21 +204,21 @@ const handleEdit = (row) => {
 const handleDelete = async () => {
   if (selected.value.length === 0) {
     $q.notify({
-      message: "请选择要删除的商品",
+      message: t("请选择要删除的商品"),
       color: "warning",
     });
     return;
   }
   
   $q.dialog({
-    title: "确认删除",
-    message: `确定要删除选中的 ${selected.value.length} 个商品吗？`,
+    title: t("确认删除"),
+    message: t("确定要删除选中的") + ` ${selected.value.length} ` + t("个商品吗？"),
     cancel: {
-      label: '取消',
+      label: t('取消'),
       flat: true
     },
     ok: {
-      label: '确认',
+      label: t('确认'),
       color: 'negative'
     },
     persistent: true,
@@ -233,7 +233,7 @@ const handleDelete = async () => {
         emit("refresh"); // 刷新列表
       }
     } catch (error) {
-      console.error('删除失败:', error);
+      console.error(t('删除失败') + ':', error);
     }
   });
 };
@@ -241,14 +241,14 @@ const handleDelete = async () => {
 // 处理单个删除
 const handleSingleDelete = (row) => {
   $q.dialog({
-    title: "确认删除",
-    message: `确定要删除该商品吗？`,
+    title: t("确认删除"),
+    message: t("确定要删除该商品吗？"),
     cancel: {
-      label: '取消',
+      label: t('取消'),
       flat: true
     },
     ok: {
-      label: '确认',
+      label: t('确认'),
       color: 'negative'
     },
     persistent: true,
@@ -262,7 +262,7 @@ const handleSingleDelete = (row) => {
         emit("refresh"); // 刷新列表
       }
     } catch (error) {
-      console.error('删除失败:', error);
+      console.error(t('删除失败') + ':', error);
     }
   });
 };
@@ -271,17 +271,17 @@ const handleSingleDelete = (row) => {
 const handleVoid = () => {
   if (selected.value.length === 0) {
     $q.notify({
-      message: "请选择要作废的商品",
+      message: t("请选择要作废的商品"),
       color: "warning",
     });
     return;
   }
   
-  console.log('选中的商品:', selected.value);
+  console.log(t('选中的商品') + ':', selected.value);
   
   $q.dialog({
-    title: "确认作废",
-    message: `确定要作废选中的 ${selected.value.length} 个商品吗？`,
+    title: t("确认作废"),
+    message: t("确定要作废选中的") + ` ${selected.value.length} ` + t("个商品吗？"),
     cancel: true,
     persistent: true,
   }).onOk(() => {

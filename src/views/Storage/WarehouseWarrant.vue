@@ -147,11 +147,16 @@
           row-key="id"
           flat
           bordered
-          :rows-per-page-options="[10, 20, 50]"
-          v-model:pagination="tablePagination"
+          :pagination="tablePagination"
           hide-pagination
           :loading="loading"
         >
+          <template v-slot:no-data="{ icon, filter }">
+            <div class="full-width row flex-center text-grey-6 q-gutter-sm">
+              <q-icon size="2em" :name="filter ? 'filter_b_and_w' : icon" />
+              <span> {{ t('暂无数据') }} </span>
+            </div>
+          </template>
           <!-- 自定义SKU单元格 -->
           <template v-slot:body-cell-sku="props">
             <q-td :props="props">
@@ -251,11 +256,10 @@
         </q-table>
 
         <!-- 分页 -->
-        <div class="q-pa-md">
+        <div class="row justify-end q-pa-md">
           <Pagination
             :total-count="pagination.total"
             v-model:page="pagination.page"
-            :max-page="pagination.maxPage"
             v-model:rows-per-page="pagination.rowsPerPage"
             @page-change="handlePageChange"
           />
@@ -467,7 +471,7 @@ const tablePagination = ref({
   sortBy: "",
   descending: false,
   page: 1,
-  rowsPerPage: 0, // 设置为0表示不使用表格内置分页
+  rowsPerPage: 0, // 设置为0以禁用表格内置分页
 });
 
 // 打印相关的状态
@@ -493,6 +497,12 @@ watch(printDialogVisible, (newVal) => {
     // 重置当前选中的入库单ID
     currentInboundId.value = null;
   }
+});
+
+// 监听标签页变化
+watch(tab, () => {
+  pagination.value.page = 1; // 重置页码到第一页
+  fetchInboundList();
 });
 
 // 箱子大小选项
@@ -523,7 +533,7 @@ const fetchInboundList = async () => {
       search_type: filters.value.search_type,
       keywords: filters.value.keywords,
       search_mode: filters.value.search_mode,
-      status: tab.value === "all" ? "" : tab.value,
+      inbound_status: tab.value === "all" ? "" : tab.value,
     };
 
     const response = await api.getInboundList(params);

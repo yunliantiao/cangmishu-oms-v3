@@ -15,7 +15,7 @@
           <img src="https://cdn.quasar.dev/img/avatar.png" />
         </q-avatar>
         <q-toolbar-title shrink class="text-weight-bold">
-          仓秘书-oms
+          {{ warehouse.name }}
         </q-toolbar-title>
       </q-btn>
 
@@ -46,7 +46,7 @@
             <q-list>
               <q-item>
                 <q-item-section class="pointer">
-                  <q-item-label @click="handleLogout">退出</q-item-label>
+                  <q-item-label @click="handleLogout" class="cursor-pointer">退出</q-item-label>
                 </q-item-section>
               </q-item>
             </q-list>
@@ -105,6 +105,8 @@ export default {
       store.commit('DESTROY_TOKEN');
     }
 
+    const warehouse = computed(() => window.warehouse);
+
     // 初始化语言
     onMounted(() => {
       const savedLang = localStorage.getItem('lang');
@@ -112,6 +114,8 @@ export default {
         locale.value = savedLang;
         currentLang.value = savedLang;
       }
+      console.log(warehouse.value,'78978979');
+      
     });
 
     return {
@@ -123,6 +127,7 @@ export default {
       langOptions,
       currentLang,
       handleLangChange,
+      warehouse,
     };
   },
 };
@@ -157,5 +162,9 @@ export default {
   :deep(.q-field--outlined .q-field__control:hover:before) {
     border: 1px solid rgba(255, 255, 255, 0.8) !important;
   }
+}
+
+.cursor-pointer {
+  cursor: pointer;
 }
 </style>

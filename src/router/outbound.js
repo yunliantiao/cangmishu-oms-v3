@@ -29,7 +29,7 @@ export default [
                 component: () => import('@/views/Outbound/OutboundCreate.vue'),
                 id: 2002,
                 meta: {
-                    level: 2,
+                    level: 3,
                     group: '出库',
                     name: '新建出库单',
                 },

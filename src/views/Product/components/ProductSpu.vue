@@ -22,7 +22,7 @@
       <!-- 无数据时的显示 -->
       <template v-slot:no-data>
         <div v-if="!loading && (!rows || rows.length === 0)" class="full-width row flex-center q-my-lg">
-          <span class="text-grey">暂无数据</span>
+          <span class="text-grey">{{ t('暂无数据') }}</span>
         </div>
       </template>
 
@@ -74,7 +74,7 @@
               </div>
               <div class="ellipsis">
                 <div>{{ props.row?.name || '-' }}</div>
-                <div>SPU: {{ props.row?.id || '-' }}</div>
+                <div>{{ t('SPU') }}: {{ props.row?.id || '-' }}</div>
               </div>
             </div>
           </q-td>
@@ -130,9 +130,9 @@
                         />
                       </div>
                       <div class="ellipsis">
-                        <div>SKU: {{ slotProps.row?.sku || '-' }}</div>
-                        <div class="ellipsis">名称: {{ slotProps.row?.product?.name || '-' }}</div>
-                        <div>规格: {{ slotProps.row?.name || '-' }}</div>
+                        <div>{{ t('SKU') }}: {{ slotProps.row?.sku || '-' }}</div>
+                        <div class="ellipsis">{{ t('名称') }}: {{ slotProps.row?.product?.name || '-' }}</div>
+                        <div>{{ t('规格') }}: {{ slotProps.row?.name || '-' }}</div>
                       </div>
                     </div>
                   </q-td>
@@ -152,8 +152,8 @@
 
                 <template v-slot:body-cell-timeInfo="slotProps">
                   <q-td :props="slotProps" style="text-align: center">
-                    <div>创建: 2025-03-31 02:42</div>
-                    <div>更新: 2025-03-31 18:27</div>
+                    <div>{{ t('创建') }}: 2025-03-31 02:42</div>
+                    <div>{{ t('更新') }}: 2025-03-31 18:27</div>
                   </q-td>
                 </template>
 
@@ -184,9 +184,9 @@
       </template>
 
       <!-- 底部选中记录数显示 -->
-      <template v-slot:bottom>
-        <div v-if="selected.length > 0" class="q-pa-sm text-grey-8 text-center">
-          已选择 {{ selected.length }} 条记录
+      <template v-slot:bottom v-if="selected.length > 0">
+        <div class="q-pa-sm text-grey-8 text-center">
+          {{ t('已选择') }} {{ selected.length }} {{ t('条记录') }}
         </div>
       </template>
     </q-table>
@@ -197,10 +197,12 @@
 import { ref, defineProps, defineEmits, defineExpose } from "vue";
 import { useQuasar } from "quasar";
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import api from '@/api/index';
 
 const router = useRouter();
 const $q = useQuasar();
+const { t } = useI18n();
 
 const props = defineProps({
   rows: {
@@ -232,35 +234,35 @@ const columns = [
   {
     name: "spuInfo",
     required: true,
-    label: "spu",
+    label: t("SPU信息"),
     align: "left",
     field: (row) => row.name,
     style: "width: 25%"
   },
   {
     name: "category",
-    label: "分类",
+    label: t("分类"),
     field: "category",
     align: "center",
     style: "width: 20%"
   },
   {
     name: "creator",
-    label: "创建人员",
+    label: t("创建人员"),
     field: "creator",
     align: "center",
     style: "width: 20%"
   },
   {
     name: "createTime",
-    label: "创建时间",
+    label: t("创建时间"),
     field: "updated_at",
     align: "center",
     style: "width: 20%"
   },
   {
     name: "operations",
-    label: "操作",
+    label: t("操作"),
     align: "center",
     style: "width: 15%"
   }
@@ -271,28 +273,28 @@ const skuColumns = [
   {
     name: "skuInfo",
     required: true,
-    label: "SKU信息",
+    label: t("SKU信息"),
     align: "left",
     field: (row) => row?.sku || '',
     style: "width: 35%"
   },
   { 
     name: "applySpec", 
-    label: "申报规格", 
+    label: t("申报规格"), 
     field: row => `${row.size_length || 0}*${row.size_width || 0}*${row.size_height || 0} cm\n${row.weight || 0} g`, 
     align: "center",
     style: "width: 20%"
   },
   { 
     name: "realSpec", 
-    label: "实际规格", 
+    label: t("实际规格"), 
     field: row => `${row.warehouse_size_length || 0}*${row.warehouse_size_width || 0}*${row.warehouse_size_height || 0} cm\n${row.warehouse_weight || 0} g`,
     align: "center",
     style: "width: 20%"
   },
   { 
     name: "timeInfo", 
-    label: "时间", 
+    label: t("时间"), 
     align: "center",
     format: () => ({
       created: "2025-03-31 02:42",
@@ -302,7 +304,7 @@ const skuColumns = [
   },
   { 
     name: "operations", 
-    label: "操作", 
+    label: t("操作"), 
     align: "center",
     style: "width: 10%"
   }
@@ -317,21 +319,21 @@ const handleEdit = (row) => {
 const handleDelete = async () => {
   if (selected.value.length === 0) {
     $q.notify({
-      message: "请选择要删除的商品",
+      message: t("请选择要删除的商品"),
       color: "warning",
     });
     return;
   }
   
   $q.dialog({
-    title: "确认删除",
-    message: `确定要删除选中的 ${selected.value.length} 个商品吗？`,
+    title: t("确认删除"),
+    message: t("确定要删除选中的") + ` ${selected.value.length} ` + t("个商品吗？"),
     cancel: {
-      label: '取消',
+      label: t('取消'),
       flat: true
     },
     ok: {
-      label: '确认',
+      label: t('确认'),
       color: 'negative'
     },
     persistent: true,
@@ -346,7 +348,7 @@ const handleDelete = async () => {
         emit("refresh"); // 刷新列表
       }
     } catch (error) {
-      console.error('删除失败:', error);
+      console.error(t('删除失败') + ':', error);
     }
   });
 };
@@ -354,14 +356,14 @@ const handleDelete = async () => {
 // 处理单个删除
 const handleSingleDelete = (row) => {
   $q.dialog({
-    title: "确认删除",
-    message: `确定要删除该商品吗？`,
+    title: t("确认删除"),
+    message: t("确定要删除该商品吗？"),
     cancel: {
-      label: '取消',
+      label: t('取消'),
       flat: true
     },
     ok: {
-      label: '确认',
+      label: t('确认'),
       color: 'negative'
     },
     persistent: true,
@@ -375,7 +377,7 @@ const handleSingleDelete = (row) => {
         emit("refresh"); // 刷新列表
       }
     } catch (error) {
-      console.error('删除失败:', error);
+      console.error(t('删除失败') + ':', error);
     }
   });
 };

@@ -183,27 +183,27 @@
           :columns="[
             {
               name: 'skuInfo',
-              label: '商品信息',
+              label: t('商品信息'),
               field: row => row.sku,
               align: 'left',
               style: 'width: 40%'
             },
             {
               name: 'spec',
-              label: '实际规格',
+              label: t('实际规格'),
               field: row => `${row.warehouse_size_length || 0}*${row.warehouse_size_width || 0}*${row.warehouse_size_height || 0} cm\n${row.warehouse_weight || 0} g`,
               align: 'center',
               style: 'width: 20%'
             },
             {
               name: 'quantity',
-              label: '数量',
+              label: t('数量'),
               field: 'quantity',
               align: 'right',
             },
             {
               name: 'unit_price',
-              label: '单价',
+              label: t('单价'),
               field: 'unit_price',
               align: 'right',
             }
@@ -234,9 +234,9 @@
                   />
                 </div>
                 <div class="ellipsis">
-                  <div>SKU: {{ props.row?.sku || '-' }}</div>
+                  <div>{{ t('SKU编号') }}: {{ props.row?.sku || '-' }}</div>
                   <div class="ellipsis">{{ props.row?.product_name || '-' }}</div>
-                  <div>规格: {{ props.row?.sku_name || '-' }}</div>
+                  <div>{{ t('规格') }}: {{ props.row?.sku_name || '-' }}</div>
                 </div>
               </div>
             </q-td>

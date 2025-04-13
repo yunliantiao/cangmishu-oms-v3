@@ -5,21 +5,21 @@
       <q-card flat bordered>
         <!-- 基本信息区域 -->
         <q-card-section>
-          <div class="text-h6 q-mb-md">{{ $t('基本信息') }}</div>
+          <div class="text-h6 q-mb-md">{{ t('基本信息') }}</div>
 
           <div class="row q-col-gutter-md">
             <!-- 第一行 -->
             <div class="col-12 col-md-4">
               <div class="form-item">
                 <div class="form-item-label">
-                  {{ $t('订单号') }} <span class="text-negative">*</span>
+                  {{ t('订单号') }} <span class="text-negative">*</span>
                 </div>
                 <q-input
                   v-model="form.order_number"
                   outlined
                   dense
-                  :placeholder="$t('请输入')"
-                  :rules="[(val) => !!val || $t('请输入订单号')]"
+                  :placeholder="t('请输入')"
+                  :rules="[(val) => !!val || t('请输入订单号')]"
                 />
               </div>
             </div>
@@ -27,7 +27,7 @@
             <div class="col-12 col-md-4">
               <div class="form-item">
                 <div class="form-item-label">
-                  {{ $t('平台') }} <span class="text-negative">*</span>
+                  {{ t('平台') }} <span class="text-negative">*</span>
                 </div>
                 <q-select
                   v-model="form.platform"
@@ -36,8 +36,8 @@
                   dense
                   emit-value
                   map-options
-                  :label="$t('请选择平台')"
-                  :rules="[(val) => !!val || $t('请选择平台')]"
+                  :label="t('请选择平台')"
+                  :rules="[(val) => !!val || t('请选择平台')]"
                 />
               </div>
             </div>
@@ -45,7 +45,7 @@
             <div class="col-12 col-md-4">
               <div class="form-item">
                 <div class="form-item-label">
-                  {{ $t('面单类型') }} <span class="text-negative">*</span>
+                  {{ t('面单类型') }} <span class="text-negative">*</span>
                 </div>
                 <q-select
                   v-model="form.label_type"
@@ -54,8 +54,8 @@
                   dense
                   emit-value
                   map-options
-                  :label="$t('请选择面单类型')"
-                  :rules="[(val) => !!val || $t('请选择面单类型')]"
+                  :label="t('请选择面单类型')"
+                  :rules="[(val) => !!val || t('请选择面单类型')]"
                 />
               </div>
             </div>
@@ -63,12 +63,12 @@
             <!-- 第二行 -->
             <div class="col-12 col-md-4">
               <div class="form-item">
-                <div class="form-item-label">{{ $t('参考号') }}</div>
+                <div class="form-item-label">{{ t('参考号') }}</div>
                 <q-input
                   v-model="form.reference_number"
                   outlined
                   dense
-                  :placeholder="$t('请输入')"
+                  :placeholder="t('请输入')"
                 />
               </div>
             </div>
@@ -77,7 +77,7 @@
             <div class="col-12 col-md-4">
               <div class="form-item">
                 <div class="form-item-label">
-                  {{ $t('订单金额') }}
+                  {{ t('订单金额') }}
                 </div>
                 <div class="row q-col-gutter-sm">
                   <div class="col-8">
@@ -86,7 +86,7 @@
                       outlined
                       dense
                       type="number"
-                      :placeholder="$t('请输入')"
+                      :placeholder="t('请输入')"
                     />
                   </div>
                   <div class="col-4">
@@ -97,8 +97,8 @@
                       dense
                       emit-value
                       map-options
-                      :label="$t('币种')"
-                      :hint="!form.currency ? $t('请选择币种') : ''"
+                      :label="t('币种')"
+                      :hint="!form.currency ? t('请选择币种') : ''"
                     />
                   </div>
                 </div>
@@ -109,14 +109,14 @@
             <div v-if="form.label_type === 'self_label'" class="col-12 col-md-4">
               <div class="form-item">
                 <div class="form-item-label">
-                  {{ $t('运单号') }} <span class="text-negative">*</span>
+                  {{ t('运单号') }} <span class="text-negative">*</span>
                 </div>
                 <q-input
                   v-model="form.tracking_number"
                   outlined
                   dense
-                  :placeholder="$t('请输入运单号')"
-                  :rules="[(val) => !!val || $t('请输入运单号')]"
+                  :placeholder="t('请输入运单号')"
+                  :rules="[(val) => !!val || t('请输入运单号')]"
                 />
               </div>
             </div>
@@ -125,14 +125,14 @@
             <div class="col-12">
               <div class="form-item">
                 <div class="form-item-label">
-                  {{ $t('备注') }}
+                  {{ t('备注') }}
                 </div>
                 <q-input
                   v-model="form.remark"
                   outlined
                   dense
                   type="textarea"
-                  :placeholder="$t('请输入')"
+                  :placeholder="t('请输入')"
                   rows="4"
                   maxlength="200"
                   counter
@@ -145,12 +145,12 @@
         <q-separator />
         <!-- 自有面单上传区域 - 在面单类型为自有面单时显示 -->
         <q-card-section v-if="form.label_type === 'self_label'">
-          <div class="text-h6 q-mb-md">{{ $t('面单信息') }}</div>
+          <div class="text-h6 q-mb-md">{{ t('面单信息') }}</div>
           <div class="row q-col-gutter-md">
             <div class="col-12">
               <div class="form-item">
                 <div class="form-item-label">
-                  {{ $t('上传面单') }} <span class="text-negative">*</span>
+                  {{ t('上传面单') }} <span class="text-negative">*</span>
                 </div>
                 <div 
                   class="upload-area q-pa-md"
@@ -167,14 +167,14 @@
                     <q-btn
                       outline
                       color="primary"
-                      :label="$t('点击上传')"
+                      :label="t('点击上传')"
                       class="q-mb-sm"
                       icon="upload"
                       @click="$refs.fileInput.click()"
                     >
-                      <q-tooltip>{{ $t('仅限上传PDF格式文件') }}</q-tooltip>
+                      <q-tooltip>{{ t('仅限上传PDF格式文件') }}</q-tooltip>
                     </q-btn>
-                    <div class="text-caption text-grey">{{ $t('仅限上传PDF格式文件') }}</div>
+                    <div class="text-caption text-grey">{{ t('仅限上传PDF格式文件') }}</div>
                   </template>
                   
                   <template v-else>
@@ -192,7 +192,7 @@
                           icon="close"
                           @click="handleRemoveFile"
                         >
-                          <q-tooltip>{{ $t('删除') }}</q-tooltip>
+                          <q-tooltip>{{ t('删除') }}</q-tooltip>
                         </q-btn>
                       </div>
                     </div>
@@ -206,20 +206,20 @@
         <q-separator v-if="form.label_type === 'warehouse_label' || form.label_type === 'self_label'" />
         <!-- 收件信息区域 - 移除条件判断，始终显示 -->
         <q-card-section>
-          <div class="text-h6 q-mb-md">{{ $t('收件信息') }}</div>
+          <div class="text-h6 q-mb-md">{{ t('收件信息') }}</div>
           <div class="row q-col-gutter-md">
             <!-- 第一行 -->
             <div class="col-12 col-md-4">
               <div class="form-item">
                 <div class="form-item-label">
-                  {{ $t('收件人') }} <span class="text-negative">*</span>
+                  {{ t('收件人') }} <span class="text-negative">*</span>
                 </div>
                 <q-input
                   v-model="form.recipient.first_name"
                   outlined
                   dense
-                  :placeholder="$t('请输入')"
-                  :rules="[(val) => !!val || $t('请输入收件人')]"
+                  :placeholder="t('请输入')"
+                  :rules="[(val) => !!val || t('请输入收件人')]"
                 />
               </div>
             </div>
@@ -227,14 +227,14 @@
             <div class="col-12 col-md-4">
               <div class="form-item">
                 <div class="form-item-label">
-                  {{ $t('手机号') }} <span class="text-negative">*</span>
+                  {{ t('手机号') }} <span class="text-negative">*</span>
                 </div>
                 <q-input
                   v-model="form.recipient.phone"
                   outlined
                   dense
-                  :placeholder="$t('请输入')"
-                  :rules="[(val) => !!val || $t('请输入手机号')]"
+                  :placeholder="t('请输入')"
+                  :rules="[(val) => !!val || t('请输入手机号')]"
                 />
               </div>
             </div>
@@ -242,13 +242,13 @@
             <div class="col-12 col-md-4">
               <div class="form-item">
                 <div class="form-item-label">
-                  {{ $t('邮箱') }}
+                  {{ t('邮箱') }}
                 </div>
                 <q-input
                   v-model="form.recipient.email"
                   outlined
                   dense
-                  :placeholder="$t('请输入')"
+                  :placeholder="t('请输入')"
                 />
               </div>
             </div>
@@ -257,14 +257,14 @@
             <div class="col-12 col-md-4">
               <div class="form-item">
                 <div class="form-item-label">
-                  {{ $t('邮政编码') }} <span class="text-negative">*</span>
+                  {{ t('邮政编码') }} <span class="text-negative">*</span>
                 </div>
                 <q-input
                   v-model="form.recipient.postcode"
                   outlined
                   dense
-                  :placeholder="$t('请输入')"
-                  :rules="[(val) => !!val || $t('请输入邮政编码')]"
+                  :placeholder="t('请输入')"
+                  :rules="[(val) => !!val || t('请输入邮政编码')]"
                 />
               </div>
             </div>
@@ -272,7 +272,7 @@
             <div class="col-12 col-md-4">
               <div class="form-item">
                 <div class="form-item-label">
-                  {{ $t('国家/地区') }} <span class="text-negative">*</span>
+                  {{ t('国家/地区') }} <span class="text-negative">*</span>
                 </div>
                 <q-select
                   v-model="form.recipient.country_code"
@@ -281,10 +281,14 @@
                   dense
                   emit-value
                   map-options
-                  :label="$t('请选择')"
+                  :label="t('请选择')"
                   option-label="label"
                   option-value="value"
-                  :rules="[(val) => !!val || $t('请选择国家/地区')]"
+                  :rules="[(val) => !!val || t('请选择国家/地区')]"
+                  use-input
+                  input-debounce="0"
+                  @filter="filterCountry"
+                  :loading="countryLoading"
                 />
               </div>
             </div>
@@ -293,14 +297,14 @@
             <div class="col-12 col-md-4">
               <div class="form-item">
                 <div class="form-item-label">
-                  {{ $t('省/州') }} <span class="text-negative">*</span>
+                  {{ t('省/州') }} <span class="text-negative">*</span>
                 </div>
                 <q-input
                   v-model="form.recipient.province"
                   outlined
                   dense
-                  :placeholder="$t('请输入')"
-                  :rules="[(val) => !!val || $t('请输入省/州')]"
+                  :placeholder="t('请输入')"
+                  :rules="[(val) => !!val || t('请输入省/州')]"
                 />
               </div>
             </div>
@@ -308,14 +312,14 @@
             <div class="col-12 col-md-4">
               <div class="form-item">
                 <div class="form-item-label">
-                  {{ $t('市/府') }} <span class="text-negative">*</span>
+                  {{ t('市/府') }} <span class="text-negative">*</span>
                 </div>
                 <q-input
                   v-model="form.recipient.city"
                   outlined
                   dense
-                  :placeholder="$t('请输入')"
-                  :rules="[(val) => !!val || $t('请输入市/府')]"
+                  :placeholder="t('请输入')"
+                  :rules="[(val) => !!val || t('请输入市/府')]"
                 />
               </div>
             </div>
@@ -323,13 +327,13 @@
             <div class="col-12 col-md-4">
               <div class="form-item">
                 <div class="form-item-label">
-                  {{ $t('区/县') }}
+                  {{ t('区/县') }}
                 </div>
                 <q-input
                   v-model="form.recipient.district"
                   outlined
                   dense
-                  :placeholder="$t('请输入')"
+                  :placeholder="t('请输入')"
                 />
               </div>
             </div>
@@ -338,15 +342,15 @@
             <div class="col-12">
               <div class="form-item">
                 <div class="form-item-label">
-                  {{ $t('地址1') }} <span class="text-negative">*</span>
+                  {{ t('地址1') }} <span class="text-negative">*</span>
                 </div>
                 <q-input
                   v-model="form.recipient.address1"
                   outlined
                   dense
                   type="textarea"
-                  :placeholder="$t('请输入')"
-                  :rules="[(val) => !!val || $t('请输入地址1')]"
+                  :placeholder="t('请输入')"
+                  :rules="[(val) => !!val || t('请输入地址1')]"
                 />
               </div>
             </div>
@@ -354,14 +358,14 @@
             <div class="col-12">
               <div class="form-item">
                 <div class="form-item-label">
-                  {{ $t('地址2') }}
+                  {{ t('地址2') }}
                 </div>
                 <q-input
                   v-model="form.recipient.address2"
                   outlined
                   dense
                   type="textarea"
-                  :placeholder="$t('请输入')"
+                  :placeholder="t('请输入')"
                 />
               </div>
             </div>
@@ -372,9 +376,9 @@
 
         <!-- 商品信息区域 -->
         <q-card-section>
-          <div class="text-h6 q-mb-md">{{ $t('商品信息') }}</div>
+          <div class="text-h6 q-mb-md">{{ t('商品信息') }}</div>
           <div class="q-mb-md">
-            <q-btn color="primary" :label="$t('选择商品')" @click="openSkuDialog" />
+            <q-btn color="primary" :label="t('选择商品')" @click="openSkuDialog" />
           </div>
 
           <q-table
@@ -433,7 +437,7 @@
             <!-- 无数据时的显示 -->
             <template v-slot:no-data>
               <div v-if="!loading && (!form.items || form.items.length === 0)" class="full-width row flex-center q-my-lg">
-                <span class="text-grey">{{ $t('暂无商品') }}</span>
+                <span class="text-grey">{{ t('暂无商品') }}</span>
               </div>
             </template>
 
@@ -497,7 +501,7 @@
                   icon="delete"
                   @click="form.items = form.items.filter(item => item !== props.row)"
                 >
-                  <q-tooltip>删除</q-tooltip>
+                  <q-tooltip>{{ t('删除') }}</q-tooltip>
                 </q-btn>
               </q-td>
             </template>
@@ -530,13 +534,16 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useQuasar } from "quasar";
 import SkuSelectDialog from "./components/SelectSkuDialog.vue";
 import api from "@/api/index";
 
 const router = useRouter();
+const route = useRoute();
+const isEdit = computed(() => !!route.query.id);
+const outboundId = computed(() => route.query.id);
 const { t } = useI18n();
 const $q = useQuasar();
 
@@ -587,6 +594,8 @@ const currencyOptions = [
 
 // 国家列表数据
 const countryOptions = ref([]);
+const allCountryOptions = ref([]); // 保存所有国家选项的副本
+const countryLoading = ref(false); // 国家选择加载状态
 
 // 获取国家列表
 const fetchCountryList = async () => {
@@ -597,6 +606,8 @@ const fetchCountryList = async () => {
         label: country.name,
         value: country.code
       }));
+      // 保存所有国家选项的副本
+      allCountryOptions.value = [...countryOptions.value];
     }
     console.log(countryOptions.value,'789');
     
@@ -605,9 +616,27 @@ const fetchCountryList = async () => {
   }
 };
 
-onMounted(() => {
-  fetchCountryList();
-});
+// 过滤国家选项
+const filterCountry = (val, update, abort) => {
+  update(() => {
+    countryLoading.value = true;
+    const needle = val.toLowerCase();
+    
+    // 如果输入为空，显示所有选项
+    if (needle === '') {
+      countryOptions.value = [...allCountryOptions.value];
+      countryLoading.value = false;
+      return;
+    }
+    
+    // 过滤匹配的国家
+    countryOptions.value = allCountryOptions.value.filter(
+      country => country.label.toLowerCase().indexOf(needle) > -1
+    );
+    
+    countryLoading.value = false;
+  });
+};
 
 // SKU选择弹窗引用
 const skuSelectDialog = ref(null);
@@ -648,6 +677,61 @@ const removeItem = (index) => {
 // 在 script setup 中添加 submitting ref
 const submitting = ref(false);
 
+// 获取出库单详情
+const fetchOutboundDetail = async () => {
+  try {
+    const response = await api.getOutboundDetail(outboundId.value);
+    if (response.success) {
+      const detail = response.data;
+      
+      // 填充基本信息
+      form.value = {
+        order_number: detail.order_number,
+        platform: detail.platform,
+        label_type: detail.label_type,
+        label_pdf: detail.label_pdf,
+        tracking_number: detail.tracking_number,
+        reference_number: detail.reference_number,
+        order_amount: detail.order_amount,
+        currency: detail.currency,
+        remark: detail.remark,
+        items: detail.packages[0]?.items.map(item => ({
+          sku: item.sku,
+          name: item.sku_name,
+          product_name: item.product_name,
+          spec: item.sku_name,
+          image: item.sku_image,
+          warehouse_size_length: 0,
+          warehouse_size_width: 0,
+          warehouse_size_height: 0,
+          warehouse_weight: 0,
+          unit_price: item.unit_price,
+          stock: 0,
+          quantity: item.quantity,
+        })) || [],
+        recipient: {
+          first_name: detail.recipient.first_name,
+          phone: detail.recipient.phone,
+          email: detail.recipient.email,
+          postcode: detail.recipient.postcode,
+          country_code: detail.recipient.country_code,
+          province: detail.recipient.province,
+          city: detail.recipient.city,
+          district: detail.recipient.district,
+          address1: detail.recipient.address1,
+          address2: detail.recipient.address2,
+        },
+      };
+    }
+  } catch (error) {
+    console.error('获取出库单详情失败:', error);
+    $q.notify({
+      type: 'negative',
+      message: t('获取出库单详情失败')
+    });
+  }
+};
+
 // 修改现有的保存方法
 const handleSave = async () => {
   try {
@@ -661,18 +745,29 @@ const handleSave = async () => {
       requestData.label_pdf = undefined;
     }
 
-    const data = await api.createOutbound(requestData);
+    const data = isEdit.value 
+      ? await api.editOutbound(outboundId.value, requestData)
+      : await api.createOutbound(requestData);
+      
     if (data.success) {
+      $q.notify({
+        type: 'positive',
+        message: t(isEdit.value ? '编辑成功' : '创建成功')
+      });
       router.push("/outbound/list");
     }
   } catch (error) {
-    console.error('保存失败:', error);
+    console.error(isEdit.value ? '编辑失败:' : '创建失败:', error);
+    $q.notify({
+      type: 'negative',
+      message: t(isEdit.value ? '编辑失败' : '创建失败')
+    });
   } finally {
     submitting.value = false;
   }
 };
 
-// 添加表单提交方法(保存并提交)
+// 修改表单提交方法(保存并提交)
 const submitForm = async () => {
   try {
     submitting.value = true;
@@ -685,17 +780,28 @@ const submitForm = async () => {
       requestData.label_pdf = undefined;
     }
 
-    // 先创建订单
-    const createRes = await api.createOutbound(requestData);
-    if (createRes.success) {
-      // 创建成功后提交
-      const submitRes = await api.submitOutbound(createRes.data.id);
+    // 先创建/编辑订单
+    const saveRes = isEdit.value 
+      ? await api.editOutbound(outboundId.value, requestData)
+      : await api.createOutbound(requestData);
+      
+    if (saveRes.success) {
+      // 创建/编辑成功后提交
+      const submitRes = await api.submitOutbound(isEdit.value ? outboundId.value : saveRes.data.id);
       if (submitRes.success) {
+        $q.notify({
+          type: 'positive',
+          message: t('提交成功')
+        });
         router.push("/outbound/list");
       }
     }
   } catch (error) {
     console.error('操作失败:', error);
+    $q.notify({
+      type: 'negative',
+      message: t('操作失败')
+    });
   } finally {
     submitting.value = false;
   }
@@ -756,6 +862,14 @@ watch(() => form.value.label_type, (newType) => {
   if (newType === 'warehouse_label') {
     form.value.tracking_number = ''; // 清空运单号
   }
+});
+
+// 初始化
+onMounted(async () => {
+  if (isEdit.value) {
+    await fetchOutboundDetail();
+  }
+  fetchCountryList();
 });
 </script>
 

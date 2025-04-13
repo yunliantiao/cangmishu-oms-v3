@@ -1,12 +1,12 @@
 <template>
   <div class="row items-center justify-end full-width custom-pagination">
-    <div class="total-count">Total {{ totalCount }}</div>
+    <div class="total-count">总计 {{ totalCount }}</div>
     <q-pagination
       v-model="currentPage"
       :max="maxPage"
       :direction-links="true"
       :boundary-links="true"
-      :max-pages="5"
+      :max-pages="6"
       size="sm"
       class="q-mx-md"
       @update:model-value="handlePageChange"
@@ -25,7 +25,7 @@
 </template>
 
 <script setup>
-import { ref, watch, defineProps, defineEmits } from 'vue';
+import { ref, watch, defineProps, defineEmits, computed } from 'vue';
 
 const props = defineProps({
   totalCount: {
@@ -36,13 +36,9 @@ const props = defineProps({
     type: Number,
     default: 1
   },
-  maxPage: {
-    type: Number,
-    default: 1
-  },
   rowsPerPage: {
     type: Number,
-    default: 50
+    default: 10
   },
   pageSizeOptions: {
     type: Array,
@@ -54,6 +50,11 @@ const emit = defineEmits(['update:page', 'update:rowsPerPage', 'pageChange']);
 
 const currentPage = ref(props.page);
 const rowsPerPage = ref(props.rowsPerPage);
+
+// 计算最大页数
+const maxPage = computed(() => {
+  return Math.ceil(props.totalCount / rowsPerPage.value) || 1;
+});
 
 // 监听props变化，更新内部状态
 watch(() => props.page, (newVal) => {
@@ -83,4 +84,4 @@ const handleRowsPerPageChange = (size) => {
     margin-right: 12px;
   }
 }
-</style> 
+</style>

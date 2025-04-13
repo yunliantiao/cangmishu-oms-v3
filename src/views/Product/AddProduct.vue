@@ -2,7 +2,7 @@
   <div>
     <q-form @submit="saveProductInfo">
       <div class="text-h5 q-mb-md">
-        {{ route.query.id ? "编辑产品" : "添加产品" }}
+        {{ route.query.id ? t("编辑产品") : t("添加产品") }}
       </div>
 
       <div class="compile-product">
@@ -10,14 +10,14 @@
           <!-- 基础信息卡片 -->
           <q-card class="box-card q-mb-lg" flat id="base-content">
             <q-card-section class="q-pb-none">
-              <div class="text-h6">基础信息</div>
+              <div class="text-h6 bg-white q-pa-sm">{{ t('基础信息') }}</div>
             </q-card-section>
 
             <q-card-section>
               <div class="row q-col-gutter-lg">
                 <!-- 产品图片 -->
                 <div class="col-12">
-                  <div class="q-mb-md">产品图片</div>
+                  <div class="q-mb-md">{{ t('产品图片') }}</div>
 
                   <div class="full-width">
                     <upload-image
@@ -26,7 +26,7 @@
                       @mainImageUpdate="mainImageUpdate"
                     />
                     <div class="text-negative" v-if="images.length == 0">
-                      请上传产品图片
+                      {{ t('请上传产品图片') }}
                     </div>
                   </div>
                 </div>
@@ -35,14 +35,14 @@
                 <div class="col-12">
                   <q-input
                     v-model="product.name"
-                    label="产品名称"
+                    :label="t('产品名称')"
                     outlined
                     lazy-rules
                     dense
-                    placeholder="请输入产品名称"
-                    :rules="[(val) => !!val || '请输入产品名称']"
+                    :placeholder="t('请输入产品名称')"
+                    :rules="[(val) => !!val || t('请输入产品名称')]"
                     class="product-name"
-                    hint="请输入规范的产品名称，便于识别和管理"
+                    :hint="t('请输入规范的产品名称，便于识别和管理')"
                   />
                 </div>
               </div>
@@ -52,18 +52,17 @@
           <!-- 规格信息卡片 -->
           <q-card class="box-card q-mb-lg" flat id="spec-content">
             <q-card-section class="q-pb-none">
-              <div class="text-h6">规格信息</div>
+              <div class="text-h6 bg-white q-pa-sm">{{ t('商品规格') }}</div>
             </q-card-section>
 
             <q-card-section class="q-pa-md">
               <div class="sku-list">
                 <div class="row justify-end items-center q-mb-md">
-                  <!-- <div class="text-subtitle2">商品规格</div> -->
                   <q-btn
                     color="primary"
                     outline
                     icon="add"
-                    label="添加规格"
+                    :label="t('添加规格')"
                     @click="addSkuRow"
                   />
                 </div>
@@ -102,7 +101,7 @@
                               />
                               <div v-else class="upload-placeholder">
                                 <q-icon name="image" size="20px" />
-                                <div class="text-caption">上传图片</div>
+                                <div class="text-caption">{{ t('上传图片') }}</div>
                               </div>
                               <q-circular-progress
                                 v-if="props.row.percent && props.row.percent < 100"
@@ -123,7 +122,7 @@
                               v-model="props.row.sku"
                               dense
                               outlined
-                              placeholder="请输入SKU ID"
+                              :placeholder="t('请输入SKU ID')"
                               class="sku-input"
                             />
                           </div>
@@ -135,7 +134,7 @@
                               v-model="props.row.name"
                               dense
                               outlined
-                              placeholder="请输入规格名称"
+                              :placeholder="t('请输入规格名称')"
                               class="sku-input"
                             />
                           </div>
@@ -206,7 +205,7 @@
           <!-- 申报信息卡片 -->
           <q-card class="box-card q-mb-lg" flat id="declare-content">
             <q-card-section class="q-pb-none">
-              <div class="text-h6">申报信息</div>
+              <div class="text-h6 bg-white q-pa-sm">{{ t('商品价格') }}</div>
             </q-card-section>
 
             <q-card-section>
@@ -215,12 +214,12 @@
                 <div class="col-12 col-md-4">
                   <q-input
                     v-model="product.customs_name_cn"
-                    label="申报中文名"
+                    :label="t('申报中文名')"
                     outlined
                     dense
                     maxlength="100"
                     counter
-                    :rules="[(val) => !!val || '请输入申报中文名']"
+                    :rules="[(val) => !!val || t('请输入申报中文名')]"
                   >
                     <template v-slot:append>
                       {{
@@ -237,12 +236,12 @@
                 <div class="col-12 col-md-4">
                   <q-input
                     v-model="product.customs_name_en"
-                    label="申报英文名"
+                    :label="t('申报英文名')"
                     outlined
                     dense
                     maxlength="100"
                     counter
-                    :rules="[(val) => !!val || '请输入申报英文名']"
+                    :rules="[(val) => !!val || t('请输入申报英文名')]"
                   >
                     <template v-slot:append>
                       {{
@@ -261,12 +260,12 @@
                     <div class="col">
                       <q-input
                         v-model="product.customs_price"
-                        label="申报价格"
+                        :label="t('申报价格')"
                         outlined
                         dense
                         type="number"
                         min="0"
-                        :rules="[(val) => !!val || '请输入申报价格']"
+                        :rules="[(val) => !!val || t('请输入申报价格')]"
                       />
                     </div>
                     <div class="col-auto q-ml-md">
@@ -291,7 +290,7 @@
                 <div class="col-12 col-md-4">
                   <q-select
                     v-model="product.customs_type"
-                    label="报关属性"
+                    :label="t('报关属性')"
                     outlined
                     dense
                     :options="customsTypesList.map(item => ({
@@ -300,7 +299,7 @@
                     }))"
                     emit-value
                     map-options
-                    :rules="[(val) => !!val || '请选择报关属性']"
+                    :rules="[(val) => !!val || t('请选择报关属性')]"
                   />
                 </div>
               </div>
@@ -310,10 +309,7 @@
           <!-- 产品详情卡片 -->
           <q-card class="box-card q-mb-lg" flat id="detail-content">
             <q-card-section class="q-pb-none">
-              <div class="text-h6">产品详情</div>
-              <div class="text-caption text-grey-7 q-mt-xs">
-                编辑产品的详细描述
-              </div>
+              <div class="text-h6 bg-white q-pa-sm">{{ t('商品描述') }}</div>
             </q-card-section>
 
             <q-card-section class="q-pa-md">
@@ -331,10 +327,10 @@
         <!-- 底部固定操作栏 -->
         <div class="fixed-bottom-bar">
           <div class="row justify-center q-pa-md">
-            <q-btn outline label="取消" color="grey-7" @click="$router.back()" />
+            <q-btn outline :label="t('取消')" color="grey-7" @click="$router.back()" />
             <q-btn
               color="primary"
-              label="保存"
+              :label="t('保存')"
               type="submit"
               :loading="$store.state.btnLoading"
               class="q-mx-sm"
@@ -398,6 +394,7 @@ import UploadImage from "@/components/UploadImage.vue";
 import { useStore } from "vuex";
 import EditorModel from "@/components/EditorModel.vue";
 import api from "@/api/index";
+import { useI18n } from "vue-i18n";
 
 export default {
   components: {
@@ -410,6 +407,7 @@ export default {
     const store = useStore();
     const router = useRouter();
     const route = useRoute();
+    const { t } = useI18n();
 
     // 定义一个数组，包含所有锚点的ID
     const anchorIds = [
@@ -807,12 +805,12 @@ export default {
 
     // SKU表格列定义
     const skuColumns = [
-      { name: 'image', label: '图片', field: 'image', align: 'center' },
-      { name: 'sku', label: 'SKU ID', field: 'sku', align: 'center' },
-      { name: 'name', label: '规格名称', field: 'name', align: 'center' },
-      { name: 'dimensions', label: '尺寸(cm)', align: 'center' },
-      { name: 'weight', label: '重量(g)', field: 'weight', align: 'center' },
-      { name: 'operations', label: '操作', field: 'operations', align: 'center' }
+      { name: 'image', label: t('图片'), field: 'image', align: 'center' },
+      { name: 'sku', label: t('SKU ID'), field: 'sku', align: 'center' },
+      { name: 'name', label: t('规格名称'), field: 'name', align: 'center' },
+      { name: 'dimensions', label: t('尺寸(cm)'), align: 'center' },
+      { name: 'weight', label: t('重量(g)'), field: 'weight', align: 'center' },
+      { name: 'operations', label: t('操作'), field: 'operations', align: 'center' }
     ];
 
     // 添加SKU行
@@ -919,6 +917,7 @@ export default {
       skuColumns,
       addSkuRow,
       deleteSkuRow,
+      t,
     };
   },
 };
@@ -1038,11 +1037,12 @@ export default {
     .q-card__section:first-child {
       padding: 20px 24px;
       border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-      background-color: rgba(0, 0, 0, 0.01);
+      background-color: #ffffff;
     }
 
     .q-card__section:not(:first-child) {
       padding: 24px;
+      background-color: #ffffff;
     }
 
     .text-h6 {

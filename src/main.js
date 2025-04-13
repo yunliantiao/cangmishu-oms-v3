@@ -45,16 +45,7 @@ app.use(Quasar, {
       textColor: 'white',
       actions: [{ icon: 'close', color: 'white' }]
     },
-    brand: {
-      primary: '#001f4d',
-      secondary: '#26A69A',
-      accent: '#9C27B0',
-      dark: '#1d1d1d',
-      positive: '#21BA45',
-      negative: '#C10015',
-      info: '#31CCEC',
-      warning: '#F2C037'
-    }
+    brand: window.theme
   }
 }).use(router).use(store).use(i18n)
 

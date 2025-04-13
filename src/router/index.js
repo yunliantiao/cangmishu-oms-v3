@@ -4,6 +4,7 @@ import Product from './product.js'
 import Storage from './storage.js'
 import Stock from './stock.js'
 import Outbound from './outbound.js'
+import User from './user.js'
 
 import { loadonDemand } from '@/utils/common.js'
 const Layout = () => import(`../App.vue`)
@@ -16,6 +17,7 @@ export const routerMap = []
     .concat(Storage)
     .concat(Stock)
     .concat(Outbound)
+    .concat(User)
 const constantRouterMap = [
     {
         path: '/login',

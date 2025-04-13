@@ -2,7 +2,7 @@
   <q-dialog v-model="dialogVisible" persistent>
     <q-card style="min-width: 800px">
       <q-card-section class="row items-center">
-        <div class="text-h6">编辑商品</div>
+        <div class="text-h6">{{ t('编辑商品') }}</div>
         <q-space />
         <q-btn icon="close" flat round dense v-close-popup />
       </q-card-section>
@@ -10,29 +10,29 @@
       <q-card-section class="q-pt-none">
         <q-form @submit="handleSubmit" class="q-gutter-md">
           <div class="row items-center">
-            <div class="col-2">系统SKU:</div>
+            <div class="col-2">{{ t('系统SKU') }}:</div>
             <div class="col-9">{{ skuDetail.sku }}</div>
           </div>
 
           <div class="row items-center">
-            <div class="col-2">产品名称:</div>
+            <div class="col-2">{{ t('产品名称') }}:</div>
             <div class="col-9">{{ skuDetail.product?.name || '-' }}</div>
           </div>
 
           <div class="row items-center">
-            <div class="col-2">sku名称:</div>
+            <div class="col-2">{{ t('sku名称') }}:</div>
             <div class="col-9">
               <q-input
                 v-model="form.name"
                 outlined
                 dense
-                placeholder="请输入商品名称"
+                :placeholder="t('请输入商品名称')"
               />
             </div>
           </div>
 
           <div class="row items-center">
-            <div class="col-2">商品图片:</div>
+            <div class="col-2">{{ t('商品图片') }}:</div>
             <div class="col-9">
               <div
                 class="image-uploader"
@@ -69,7 +69,7 @@
           </div>
 
           <div class="row items-center">
-            <div class="col-2">商品规格:</div>
+            <div class="col-2">{{ t('商品规格') }}:</div>
             <div class="col-9">
               <div class="row q-col-gutter-sm">
                 <div class="col-2">
@@ -78,7 +78,7 @@
                     type="number"
                     outlined
                     dense
-                    placeholder="长"
+                    :placeholder="t('长')"
                   />
                 </div>
                 <div class="col-2">
@@ -87,7 +87,7 @@
                     type="number"
                     outlined
                     dense
-                    placeholder="宽"
+                    :placeholder="t('宽')"
                   />
                 </div>
                 <div class="col-2">
@@ -96,18 +96,18 @@
                     type="number"
                     outlined
                     dense
-                    placeholder="高"
+                    :placeholder="t('高')"
                   />
                 </div>
                 <div class="col-12 text-caption text-grey">
-                  单位: cm
+                  {{ t('单位') }}: cm
                 </div>
               </div>
             </div>
           </div>
 
           <div class="row items-center">
-            <div class="col-2">商品重量:</div>
+            <div class="col-2">{{ t('商品重量') }}:</div>
             <div class="col-9">
               <div class="row items-center">
                 <div class="col-4">
@@ -116,38 +116,38 @@
                     type="number"
                     outlined
                     dense
-                    placeholder="重量"
+                    :placeholder="t('重量')"
                   />
                 </div>
                 <div class="col-8 text-caption text-grey q-pl-sm">
-                  单位: g
+                  {{ t('单位') }}: g
                 </div>
               </div>
             </div>
           </div>
 <!-- 
           <div class="row items-center">
-            <div class="col-2">采购价格:</div>
+            <div class="col-2">{{ t('采购价格') }}:</div>
             <div class="col-9">
               <q-input
                 v-model.number="form.purchase_price"
                 type="number"
                 outlined
                 dense
-                placeholder="请输入采购价格"
+                :placeholder="t('请输入采购价格')"
               />
             </div>
           </div>
 
           <div class="row items-center">
-            <div class="col-2">销售价格:</div>
+            <div class="col-2">{{ t('销售价格') }}:</div>
             <div class="col-9">
               <q-input
                 v-model.number="form.sale_price"
                 type="number"
                 outlined
                 dense
-                placeholder="请输入销售价格"
+                :placeholder="t('请输入销售价格')"
               />
             </div>
           </div> -->
@@ -158,14 +158,14 @@
         <q-btn 
           outline 
           color="primary" 
-          label="取消" 
+          :label="t('取消')" 
           v-close-popup 
           class="q-px-md"
         />
         <q-btn 
           unelevated 
           color="primary" 
-          label="确认" 
+          :label="t('确认')" 
           @click="handleSubmit" 
           :loading="submitting"
           class="q-ml-sm q-px-md"
@@ -178,9 +178,11 @@
 <script setup>
 import { ref, defineEmits, defineExpose } from 'vue';
 import { useQuasar } from 'quasar';
+import { useI18n } from 'vue-i18n';
 import api from '@/api/index';
 
 const $q = useQuasar();
+const { t } = useI18n();
 const emit = defineEmits(['success']);
 
 const dialogVisible = ref(false);
@@ -223,7 +225,7 @@ const open = async (id) => {
       };
     }
   } catch (error) {
-    console.error('获取SKU详情失败:', error);
+    console.error(t('获取SKU详情失败') + ':', error);
   }
 };
 
@@ -251,10 +253,10 @@ const handleImageUpload = async (file) => {
       uploadProgress.value = 100;
     }
   } catch (error) {
-    console.error('上传图片失败:', error);
+    console.error(t('上传图片失败') + ':', error);
     $q.notify({
       type: 'negative',
-      message: '上传图片失败'
+      message: t('上传图片失败')
     });
   }
 };
@@ -269,7 +271,7 @@ const handleSubmit = async () => {
       emit('success');
     }
   } catch (error) {
-    console.error('修改失败:', error);
+    console.error(t('修改失败') + ':', error);
   } finally {
     submitting.value = false;
   }

@@ -110,11 +110,28 @@
         hide-pagination
         :loading="loading"
       >
+      <template v-slot:no-data="{ icon, filter }">
+            <div class="full-width row flex-center text-grey-6 q-gutter-sm">
+              <q-icon size="2em" :name="filter ? 'filter_b_and_w' : icon" />
+              <span> {{ t('暂无数据') }} </span>
+            </div>
+          </template>
         <!-- 商品信息列自定义 -->
         <template v-slot:body-cell-product="props">
           <q-td :props="props">
-            <div>{{ props.row.sku }}</div>
-            <div class="text-grey-7">{{ props.row.product_name }}</div>
+            <div class="row items-center">
+              <q-img
+                v-if="props.row.product_spec_image"
+                :src="props.row.product_spec_image"
+                style="width: 40px; height: 40px; object-fit: cover;"
+                class="q-mr-sm"
+              />
+              <div>
+                <div>{{ props.row.sku }}</div>
+                <div>{{ props.row.product_name }}</div>
+                <div class="text-grey-7">{{ props.row.name }}</div>
+              </div>
+            </div>
           </q-td>
         </template>
 
@@ -137,10 +154,9 @@
               <div class="text-grey-7">{{ t('运单号') }}: {{ props.row.tracking_no || '--' }}</div>
             </template>
             <template v-else>
-              <div class="text-grey-7">{{ t('调整单号') }}:</div>
-              <div>{{ props.row.reference_number || '--' }}</div>
-              <div class="text-grey-7">{{ t('入库批次号') }}: {{ props.row.inbound_batch_number || '--' }}</div>
-              <div class="text-grey-7">{{ t('库位') }}: {{ props.row.warehouse_location_code || '--' }}</div>
+              <div>{{ t('调整单号') }}:{{ props.row.reference_number || '--' }}</div>
+              <div >{{ t('入库批次号') }}: {{ props.row.inbound_batch_number || '--' }}</div>
+              <div >{{ t('库位') }}: {{ props.row.warehouse_location_code || '--' }}</div>
             </template>
           </q-td>
         </template>
@@ -199,7 +215,7 @@ const columns = [
   {
     name: 'time',
     label: t('时间'),
-    field: 'time',
+    field: 'created_at',
     align: 'left',
   },
   {

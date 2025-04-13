@@ -1,6 +1,7 @@
 const Container = () => import(`../views/Layout/Container.vue`)
 const Product = () => import(`../views/Product/Product.vue`)
 const AddProduct = () => import(`../views/Product/AddProduct.vue`)
+const AddCombo = () => import(`../views/Product/AddCombo.vue`)
 
 export default [
     {
@@ -34,7 +35,18 @@ export default [
                     group: '产品',
                     name: '添加产品',
                 },
+            },
+            {
+                path: 'addcombo',
+                name: 'addCombo',
+                component: AddCombo,
+                id: 1002,
+                meta: {
+                    level: 3,
+                    group: '产品',
+                    name: '添加产品',
+                },
             }
         ]
-    }
+    },
 ]
