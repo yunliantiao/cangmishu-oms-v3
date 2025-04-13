@@ -3,18 +3,21 @@
     <div class="login-wrapper">
       <!-- 左侧显示信息区域 -->
       <div class="login-info-section">
+        <div class="bg-overlay"></div>
         <div class="logo-container">
-          <!-- <img src="../../assets/logo.png" alt="Logo" class="logo"> -->
-          <span class="logo-text">仓秘书oms</span>
+          <div class="logo-text">OMS SYSTEM</div>
+          <div class="sub-text">TX</div>
         </div>
         <div class="info-content">
-          <h1 class="info-title">电商仓储管理系统！</h1>
-          <ul class="feature-list">
-            <!-- <li>免注册费！免年费！免ERP对接费、物流对接费！</li> -->
-            <li>对接大量物流，解锁全球！</li>
-            <!-- <li>支持中、英、西、葡、印尼、越、泰等多国语言！</li> -->
-            <li>一对一指导，帮助您快速上手！</li>
-          </ul>
+          <div class="slogan">
+            <div class="slogan-item">专业</div>
+            <div class="slogan-item">简洁</div>
+            <div class="slogan-item">高效</div>
+          </div>
+          <div class="slogan-desc">
+            <div>智能仓储管理系统</div>
+            <div>让仓储更简单</div>
+          </div>
         </div>
       </div>
 
@@ -25,19 +28,19 @@
             <h2 class="login-title">登录</h2>
             <q-input
               v-model="ruleForm.email"
-              filled
+              outlined
               type="email"
-              label="邮箱"
+              :label="t('邮箱')"
               class="q-mb-md"
-              :rules="[(val) => !!val || '请输入邮箱']"
+              :rules="[(val) => !!val || t('请输入邮箱')]"
             />
             <q-input
               v-model="ruleForm.password"
-              filled
+              outlined
               :type="isPwd ? 'password' : 'text'"
-              label="密码"
+              :label="t('密码')"
               class="q-mb-md"
-              :rules="[(val) => !!val || '请输入密码']"
+              :rules="[(val) => !!val || t('请输入密码')]"
             >
               <template v-slot:append>
                 <q-icon
@@ -48,48 +51,13 @@
               </template>
             </q-input>
 
-            <!-- <div class="captcha-container q-mb-md">
-              <q-input
-                v-model="ruleForm.captcha"
-                filled
-                label="请输入图形验证码"
-                :rules="[(val) => !!val || '请输入验证码']"
-              />
-              <div class="captcha-image">
-                <img
-                  src="https://placehold.co/110x40/001F4D/FFFFFF?text=CAPTCHA"
-                  alt="验证码"
-                  @click="refreshCaptcha"
-                />
-              </div>
-            </div> -->
-
             <q-btn
-              label="登录"
+              :label="t('登录')"
               type="submit"
               color="primary"
               class="full-width login-btn"
               :loading="loading"
             />
-
-            <div class="login-options">
-              <span>还没有账号？</span>
-              <q-btn
-                flat
-                color="primary"
-                label="免费注册"
-                class="register-link"
-                @click="loginType = 2"
-              />
-              <q-space />
-              <q-btn
-                flat
-                color="primary"
-                label="找回密码"
-                class="forgot-pwd-link"
-                @click="goToResetPassword"
-              />
-            </div>
           </q-form>
           <div v-show="loginType == 2" style="margin: auto">
             <Register v-model="loginType" />
@@ -97,6 +65,7 @@
         </div>
       </div>
     </div>
+    <div class="footer-text">Copyright © 2025 深圳通晓网络科技有限公司</div>
   </div>
 </template>
 
@@ -105,6 +74,7 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 import { useQuasar } from "quasar";
+import { useI18n } from "vue-i18n";
 import api from "@/api";
 import Register from "./User/Register.vue";
 
@@ -120,6 +90,7 @@ export default {
     const loading = ref(false);
     const $q = useQuasar();
     const loginType = ref(1); //==1 登录 ==2 注册
+    const { t } = useI18n();
 
     const ruleForm = ref({
       email: "",
@@ -188,6 +159,7 @@ export default {
       onSubmit,
       refreshCaptcha,
       goToResetPassword,
+      t,
     };
   },
 };
@@ -198,58 +170,79 @@ export default {
   width: 100vw;
   height: 100vh;
   display: flex;
-  align-items: stretch;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
   background-color: #f8f9fa;
   margin: 0;
   padding: 0;
   overflow: hidden;
+  position: relative;
 }
 
 .login-wrapper {
-  width: 100%;
-  height: 100%;
+  width: 1000px;
+  height: 600px;
   display: flex;
-  align-items: stretch;
-  justify-content: center;
+  background: white;
+  border-radius: 8px;
   overflow: hidden;
-  margin: 0;
-  padding: 0;
-  box-shadow: none;
-  border-radius: 0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
 .login-info-section {
   width: 50%;
-  flex: 0 0 50%;
-  background: #2979ff;
+  background: linear-gradient(135deg, #1976d2, #0d47a1);
   color: white;
   padding: 40px;
   display: flex;
   flex-direction: column;
   position: relative;
   overflow: hidden;
-  box-sizing: border-box;
+  
+  // 添加背景图片和遮罩
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('/src/assets/warehouse-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    opacity: 0.2;
+    z-index: 1;
+  }
 
-  /* 移除之前的背景图和渐变效果，使其与参考图片一致 */
-  &::before,
-  &::after {
-    display: none;
+  .bg-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(25, 118, 210, 0.95), rgba(13, 71, 161, 0.95));
+    z-index: 2;
   }
 }
 
 .logo-container {
-  display: flex;
-  align-items: center;
   position: relative;
-  z-index: 1;
-  margin-bottom: 60px;
-  padding-left: 10px;
+  z-index: 3;
+  margin-bottom: 40px;
 
   .logo-text {
-    font-size: 22px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  
+  .sub-text {
+    font-size: 18px;
+    margin-top: 8px;
+    opacity: 0.9;
+    letter-spacing: 1px;
   }
 }
 
@@ -257,142 +250,116 @@ export default {
   flex: 1;
   display: flex;
   flex-direction: column;
+  align-items: center;
   justify-content: center;
   position: relative;
-  z-index: 1;
-  padding-left: 10px;
-}
-
-.info-title {
-  font-size: 32px;
-  font-weight: 600;
-  margin-bottom: 40px;
-  line-height: 1.3;
-}
-
-.feature-list {
-  list-style-type: none;
-  padding: 0;
-
-  li {
-    padding: 10px 0 10px 24px;
-    position: relative;
-    font-size: 15px;
-    margin-bottom: 12px;
-
-    &:before {
-      content: "•";
-      position: absolute;
-      left: 0;
-      color: white;
-      font-size: 16px;
+  z-index: 3;
+  
+  .slogan {
+    text-align: center;
+    margin-bottom: 40px;
+    
+    .slogan-item {
+      font-size: 42px;
+      font-weight: bold;
+      line-height: 1.4;
+      margin: 16px 0;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+      transform: translateX(-20px);
+      opacity: 0;
+      animation: slideIn 0.5s ease forwards;
+      
+      &:nth-child(1) { animation-delay: 0.2s; }
+      &:nth-child(2) { animation-delay: 0.4s; }
+      &:nth-child(3) { animation-delay: 0.6s; }
     }
+  }
+
+  .slogan-desc {
+    text-align: center;
+    font-size: 20px;
+    line-height: 1.6;
+    opacity: 0;
+    animation: fadeIn 0.8s ease forwards;
+    animation-delay: 1s;
+    
+    div {
+      margin: 8px 0;
+      letter-spacing: 1px;
+    }
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 
 .login-form-section {
   width: 50%;
-  flex: 0 0 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 40px;
-  background-color: white;
-  box-sizing: border-box;
 }
 
 .form-container {
   width: 100%;
-  max-width: 380px;
-  padding: 0 10px;
+  max-width: 360px;
 }
 
 .login-title {
-  text-align: center;
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 500;
-  margin-bottom: 24px;
+  margin-bottom: 32px;
+  margin-top: 0;
   color: #333;
 }
 
-.q-form {
-  .q-mb-md {
-    margin-bottom: 12px !important;
-  }
-}
-
-.q-input {
-  :deep(.q-field__control) {
-    // height: 50px;
-    border-radius: 4px;
-    background-color: #f5f5f5;
-  }
-
-  :deep(.q-field__native) {
-    padding-top: 14px;
-    font-size: 15px;
-  }
-}
-
-.captcha-container {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 12px !important;
-
+.login-form {
   .q-input {
-    flex: 1;
-  }
-
-  .captcha-image {
-    width: 110px;
-    height: 42px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      border-radius: 4px;
-      background-color: #0f1f3d;
-    }
+    margin-bottom: 20px;
   }
 }
 
 .login-btn {
-  height: 42px;
-  font-size: 15px;
+  height: 44px;
+  font-size: 16px;
   font-weight: 500;
-  border-radius: 4px;
   margin-top: 16px;
-  background-color: #0f1f3d !important;
 }
 
-.login-options {
-  display: flex;
-  align-items: center;
-  margin-top: 12px;
-  font-size: 13px;
-
-  span {
-    color: #666;
-  }
-
-  .register-link,
-  .forgot-pwd-link {
-    font-weight: 500;
-    color: #2979ff !important;
-    min-height: 32px !important;
-
-    :deep(.q-btn__content) {
-      padding: 0 4px;
-    }
-  }
+.footer-text {
+  position: absolute;
+  bottom: 20px;
+  color: #666;
+  font-size: 14px;
 }
 
 // 响应式适配
+@media (max-width: 1024px) {
+  .login-wrapper {
+    width: 90%;
+    height: auto;
+    min-height: 500px;
+  }
+}
+
 @media (max-width: 767px) {
   .login-wrapper {
     flex-direction: column;
@@ -401,31 +368,14 @@ export default {
   .login-info-section,
   .login-form-section {
     width: 100%;
-    flex: none;
   }
 
   .login-info-section {
-    height: 40%;
+    padding: 30px;
+  }
+
+  .form-container {
     padding: 20px;
-  }
-
-  .login-form-section {
-    height: 60%;
-    padding: 20px;
-  }
-
-  .logo-container {
-    margin-bottom: 20px;
-  }
-
-  .info-title {
-    font-size: 24px;
-    margin-bottom: 20px;
-  }
-
-  .feature-list li {
-    font-size: 14px;
-    margin-bottom: 6px;
   }
 }
 </style> 

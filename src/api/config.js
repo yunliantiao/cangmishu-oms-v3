@@ -5,6 +5,7 @@ import nprogress from 'nprogress'
 import store from '../store'
 import { Notify } from "quasar";
 import qs from 'qs'
+import router from '../router'
 
 nprogress.configure({ showSpinner: false })
 
@@ -117,7 +118,12 @@ function interceptorsResponseError(error) {
   currentProcessingCount = 0
   store.commit('LOADING', false)
   if (response && response.status === 401) {
-    store.commit('DESTROY_TOKEN')
+    // store.commit('DESTROY_TOKEN')
+    Notify.create({
+      message: '请先登录',
+      color: 'negative',
+    })
+    router.push('/login')
   } else if (response && response.status === 500) {
     msg = response?.data?.message || 'Service Error'
   } else if (response?.data?.data?.message) {
