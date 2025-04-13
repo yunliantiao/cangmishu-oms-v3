@@ -103,6 +103,7 @@
                 row-key="id"
                 flat
                 bordered
+                :pagination="tablePagination"
                 hide-pagination
                 class="spec-table"
               >
@@ -164,6 +165,14 @@ const props = defineProps({
     type: Boolean,
     default: false
   }
+});
+
+// 表格分页配置
+const tablePagination = ref({
+  sortBy: "",
+  descending: false,
+  page: 1,
+  rowsPerPage: 0, // 设置为0以禁用表格内置分页
 });
 
 const emit = defineEmits(['refresh']);

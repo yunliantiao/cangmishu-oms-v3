@@ -117,6 +117,7 @@
                 row-key="id"
                 flat
                 bordered
+                :pagination="tablePagination"
                 hide-pagination
                 class="sku-table"
               >
@@ -228,7 +229,13 @@ const emit = defineEmits([
 
 // 表格数据
 const selected = ref([]);
-
+// 表格分页配置
+const tablePagination = ref({
+  sortBy: "",
+  descending: false,
+  page: 1,
+  rowsPerPage: 0, // 设置为0以禁用表格内置分页
+});
 // SPU表格列定义
 const columns = [
   {

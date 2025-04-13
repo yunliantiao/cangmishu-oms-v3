@@ -18,6 +18,7 @@ import COS from "cos-js-sdk-v5";
 import baseApi from "@/api/baseApi";
 import { basePcd } from "@/api/baseApi";
 import { useQuasar } from "quasar";
+import api from "@/api/index";
 
 export default {
   data() {
@@ -79,27 +80,28 @@ export default {
         });
     };
 
-    this.editor.config.uploadImgServer = `${baseApi}upload/images`;
-    this.editor.config.uploadImgParams = {};
-    this.editor.config.uploadImgHeaders = {
-      Authorization: localStorage.getItem("accessToken"),
-    };
-    this.editor.config.uploadFileName = `images[${0}][file]`;
-    this.editor.config.uploadImgHooks = {
-      customInsert: (insertImg, result) => {
-        if (result.status) {
-          const $q = useQuasar();
-          $q.dialog({
-            title: '提示',
-            message: '上传成功',
-            cancel: true,
-            persistent: true
-          })
-          let url = `${basePcd}${result.data[0].path}`;
-          insertImg(url);
+
+    
+    // 添加自定义上传图片
+    this.editor.config.customUploadImg = (resultFiles, insertImgFn) => {
+      const formData = new FormData();
+      formData.append('file', resultFiles[0]);
+      formData.append('type', 'image');
+      
+      // 使用项目统一的上传接口
+      api.uploads(formData, (e) => {
+        // 上传进度
+        const percent = (e.loaded / e.total) * 100;
+        console.log('upload progress:', percent);
+      }).then(res => {
+        if (res.success) {
+          insertImgFn(res.data.url);
         }
-      },
+      }).catch(err => {
+        console.error('Upload failed:', err);
+      });
     };
+    
     this.editor.config.height = 300;
     this.editor.config.zIndex = 500;
     this.editor.config.showLinkImg = true;

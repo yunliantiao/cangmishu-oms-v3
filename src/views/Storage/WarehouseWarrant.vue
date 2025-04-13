@@ -393,6 +393,14 @@ const searchModeOptions = [
   { label: t("前缀搜索"), value: "prefix" },
   { label: t("模糊搜索"), value: "fuzzy" },
 ];
+const statusMap = {
+  draft: t('草稿'),
+  reported: t('已预报'),
+  in_transit: t('运输中'),
+  pending_inbound: t('待入库'),
+  inbound_processing: t('入库中'),
+  shelved: t('已完成')
+};
 
 // 表格数据
 const columns = [
@@ -432,6 +440,7 @@ const columns = [
     name: "status",
     label: t("状态"),
     field: "status",
+    format: (val) => statusMap[val] || val,
     align: "center",
   },
   {

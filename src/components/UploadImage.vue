@@ -47,15 +47,18 @@
     <!-- 图片预览对话框 -->
     <q-dialog v-model="dialogVisible">
       <q-card class="preview-dialog">
-        <q-card-section>
+        <q-bar class="bg-primary text-white">
+          <div>图片预览</div>
+          <q-space />
+          <q-btn dense flat icon="close" v-close-popup />
+        </q-bar>
+        <q-card-section style="min-width: 550px;" class="preview-content">
           <q-img
             :src="dialogImageUrl"
             class="preview-image"
+            fit="contain"
           />
         </q-card-section>
-        <q-card-actions align="right">
-          <q-btn flat label="关闭" color="primary" v-close-popup />
-        </q-card-actions>
       </q-card>
     </q-dialog>
   </div>
@@ -319,11 +322,34 @@ export default {
   }
   
   .preview-dialog {
-    max-width: 80vw;
+    width: 70vw;
+    height: 70vh;
+    
+    .preview-content {
+      width: 500px!important;
+      height: 500px!important;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f5f5f5;
+      padding: 0;
+    }
     
     .preview-image {
-      width: 100%;
-      max-height: 70vh;
+      width: 100%!important;
+      height: 100%!important;
+      
+      :deep(.q-img__content) {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        
+        img {
+          max-width: 100%;
+          max-height: calc(70vh - 50px);
+          object-fit: contain;
+        }
+      }
     }
   }
 }
