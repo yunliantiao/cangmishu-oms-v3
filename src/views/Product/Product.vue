@@ -305,7 +305,7 @@ const fetchData = async () => {
     
     const params = {
       page,
-      page_size: pageSize,
+      per_page: pageSize,
       date_type: filters.value.date_type,
       start_date: filters.value.start_date,
       end_date: filters.value.end_date,

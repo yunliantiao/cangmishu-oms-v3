@@ -96,7 +96,7 @@
             <q-td :props="props">
               <div class="row items-start">
                 <img
-                  :src="props.row.image || 'https://picsum.photos/200'"
+                  :src="props.row.image || 'https://testoms.cangmishu.com/api/uploads/52331320-d813-40d8-a6db-3cf28f4938b1'"
                   class="q-mr-md"
                   style="
                     width: 60px;

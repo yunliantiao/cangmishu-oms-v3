@@ -1,5 +1,14 @@
 <template>
   <div class="outbound-list">
+    <!-- 添加隐藏的文件输入框 -->
+    <input
+      type="file"
+      ref="fileInput"
+      accept=".pdf"
+      style="display: none"
+      @change="onFileSelected"
+    />
+    
     <!-- 状态选项卡和筛选区域 -->
     <div class="outbound-search">
       <!-- 状态选项卡 -->
@@ -277,7 +286,7 @@
               <q-td>
                 <div>{{ t('创建') }}：{{ props.row.created_at }}</div>
               </q-td>
-              <q-td class="text-center">{{ t(statusMap[props.row.status]) }}</q-td>
+              <q-td class="text-center">{{ statusMap[props.row.status] ? t(statusMap[props.row.status]) : props.row.status }}</q-td>
               <q-td class="text-center">
                 <div class="row q-gutter-xs justify-center">
                   <q-btn
@@ -300,6 +309,14 @@
                           @click="handleEdit(props.row)"
                         >
                           <q-item-section>{{ t('编辑') }}</q-item-section>
+                        </q-item>
+                        <q-item
+                          clickable
+                          v-close-popup
+                          v-if="props.row.label_type === 'self_label' && !props.row.label_pdf"
+                          @click="handleUploadPdf(props.row)"
+                        >
+                          <q-item-section>{{ t('上传面单') }}</q-item-section>
                         </q-item>
                         <q-item
                           clickable
@@ -367,7 +384,7 @@
 
 <script setup>
 import { ref, onMounted, watch } from "vue";
-import { useQuasar } from "quasar";
+import { useQuasar, Loading } from "quasar";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import Pagination from "@/components/Pagination.vue";
@@ -534,6 +551,10 @@ const selected = ref([]);
 // 导入相关
 const importDialogRef = ref(null);
 
+// 在 script setup 部分添加:
+const fileInput = ref(null);
+const currentOrderId = ref(null);
+
 // 获取出库单列表
 const fetchOutboundList = async () => {
   loading.value = true;
@@ -547,7 +568,8 @@ const fetchOutboundList = async () => {
       search_type: filters.value.search_type,
       keywords: filters.value.keywords,
       search_mode: filters.value.search_mode,
-      status: tab.value === "all" ? "" : [tab.value],
+      // status: tab.value === "all" ? "" : [tab.value],
+      order_status: tab.value === "all" ? "" : tab.value,
       source: filters.value.source ? [filters.value.source] : undefined,
       platform: filters.value.platform ? [filters.value.platform] : undefined
     };
@@ -728,6 +750,70 @@ watch(tab, () => {
   pagination.value.page = 1; // 切换标签页时重置为第一页
   fetchOutboundList();
 });
+
+// 处理点击上传按钮
+const handleUploadPdf = (row) => {
+  currentOrderId.value = row.id;
+  // 触发文件选择
+  fileInput.value.click();
+};
+
+// 处理文件选择
+const onFileSelected = async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  // 检查文件类型
+  if (file.type !== 'application/pdf') {
+    $q.notify({
+      type: 'negative',
+      message: t('请选择PDF文件')
+    });
+    return;
+  }
+
+  try {
+    // 显示上传中的loading
+    Loading.show({
+      message: t('正在上传...')
+    });
+
+    // 创建 FormData 对象
+    const formData = new FormData();
+    formData.append('label', file);
+
+    try {
+      const response = await api.orderPdf(currentOrderId.value, formData);
+
+      if (response.success) {
+        $q.notify({
+          type: 'positive',
+          message: t('上传成功')
+        });
+        // 刷新列表
+        fetchOutboundList();
+      }
+    } catch (error) {
+      console.error('上传失败:', error);
+      $q.notify({
+        type: 'negative',
+        message: t('上传失败')
+      });
+    } finally {
+      Loading.hide();
+    }
+  } catch (error) {
+    console.error('文件处理失败:', error);
+    $q.notify({
+      type: 'negative',
+      message: t('文件处理失败，请重试')
+    });
+    Loading.hide();
+  }
+
+  // 清空文件输入框，以便可以重复选择同一个文件
+  event.target.value = '';
+};
 
 // 初始化
 onMounted(() => {

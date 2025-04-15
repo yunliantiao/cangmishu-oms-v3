@@ -220,7 +220,6 @@
                 />
               </div>
             </div> -->
-
             <!-- 箱维度模式 -->
             <div v-if="packingMode === 'box'" class="box-mode">
               <q-table
@@ -619,6 +618,9 @@ const form = ref({
 
 // 监听到仓方式变化
 watch(() => form.value.arrival_method, (newMethod) => {
+  // 如果是编辑模式，不清空数据
+  if (isEdit.value) return;
+  
   // 清空相关数据
   if (newMethod === 'express_parcel') {
     // 切换到快递包裹模式
@@ -956,7 +958,7 @@ const fetchInboundDetail = async () => {
         tracking_number: detail.tracking_number,
         custom_order_number: detail.custom_order_number,
         remark: detail.remark,
-        estimated_arrival_date: detail.estimated_arrival_date?.split('T')[0],
+        estimated_arrival_date: detail.estimated_arrival_date?.split(' ')[0],
         type: "standard_inbound"
       };
 
@@ -973,6 +975,7 @@ const fetchInboundDetail = async () => {
         // 按箱模式
         boxItems.value = detail.details.map(box => ({
           id: box.id,
+          boxNumber: parseInt(box.box_number),
           boxQuantity: box.box_quantity,
           size_length: box.size_length,
           size_width: box.size_width,
@@ -982,9 +985,14 @@ const fetchInboundDetail = async () => {
             id: item.id,
             sku: item.product_spec_sku,
             name: item.product_name,
-            quantity: item.quantity
+            quantity: item.quantity,
+            image: item.product_spec_image
           }))
         }));
+        console.log('----7789');
+        
+        console.log(boxItems.value);
+        
       }
     }
   } catch (error) {

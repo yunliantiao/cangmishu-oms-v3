@@ -94,6 +94,7 @@
             flat
             bordered
             hide-pagination
+            :pagination="tablePagination"
           >
             <template v-slot:header="props">
               <q-tr :props="props">
@@ -198,6 +199,8 @@ import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { date } from 'quasar';
 import api from '@/api/index';
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 
 const route = useRoute();
 const router = useRouter();
@@ -269,16 +272,22 @@ const formatDate = (dateStr) => {
   if (!dateStr) return '--';
   return date.formatDate(dateStr, 'YYYY-MM-DD');
 };
-
+// 表格分页配置
+const tablePagination = ref({
+  sortBy: "",
+  descending: false,
+  page: 1,
+  rowsPerPage: 0, // 设置为0以禁用表格内置分页
+});
 // 获取状态文本
 const getStatusText = (status) => {
   const statusMap = {
-    draft: '草稿',
-    reported: '已预报',
-    shipping: '运输中',
-    warehousing: '入库中',
-    completed: '已完成',
-    cancelled: '已取消'
+    draft: t('草稿'),
+    reported: t('已预报'),
+    in_transit: t('运输中'),
+    pending_inbound: t('待入库'),
+    inbound_processing: t('入库中'),
+    shelved: t('已完成')
   };
   return statusMap[status] || status;
 };
@@ -301,7 +310,7 @@ const getReceiveStatusText = (status) => {
   const statusMap = {
     pending: '待收货',
     partial: '部分收货',
-    completed: '已收货',
+    fully_received: '已收货',
     abnormal: '异常'
   };
   return statusMap[status] || '待收货';

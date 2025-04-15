@@ -263,9 +263,11 @@
                         :label="t('申报价格')"
                         outlined
                         dense
-                        type="number"
-                        min="0"
-                        :rules="[(val) => !!val || t('请输入申报价格')]"
+                        type="text"
+                        :rules="[
+                          (val) => !!val || t('请输入申报价格'),
+                          (val) => /^\d*\.?\d*$/.test(val) || t('请输入有效的数字')
+                        ]"
                       />
                     </div>
                     <div class="col-auto q-ml-md">

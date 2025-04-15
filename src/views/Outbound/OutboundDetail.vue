@@ -191,7 +191,7 @@
             {
               name: 'spec',
               label: t('实际规格'),
-              field: row => `${row.warehouse_size_length || 0}*${row.warehouse_size_width || 0}*${row.warehouse_size_height || 0} cm\n${row.warehouse_weight || 0} g`,
+              field: row => `${row.sku_size_length || 0}*${row.sku_size_width || 0}*${row.sku_size_height || 0} cm\n${row.sku_weight || 0} g`,
               align: 'center',
               style: 'width: 20%'
             },
@@ -244,7 +244,7 @@
 
           <template v-slot:body-cell-spec="props">
             <q-td :props="props" class="text-center" style="white-space: pre-line">
-              {{ `${props.row?.warehouse_size_length || 0}*${props.row?.warehouse_size_width || 0}*${props.row?.warehouse_size_height || 0} cm\n${props.row?.warehouse_weight || 0} g` }}
+              {{ `${props.row?.sku_size_length || 0}*${props.row?.sku_size_width || 0}*${props.row?.sku_size_height || 0} cm\n${props.row?.sku_weight || 0} g` }}
             </q-td>
           </template>
         </q-table>

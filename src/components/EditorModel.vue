@@ -70,17 +70,9 @@ export default {
     this.isMounted = true;
     this.editor = new E(`#${this.editorId}`);
     this.editor.config.onchange = this.putContent;
-    this.editor.config.customUploadVideo = (resultFiles, insertVideoFn) => {
-      this.uploadFile(resultFiles)
-        .then((res) => {
-          insertVideoFn(res);
-        })
-        .catch((err) => {
-          this.$message.error(err);
-        });
-    };
-
-
+    
+    // 禁用视频上传功能
+    this.editor.config.excludeMenus = ['video'];
     
     // 添加自定义上传图片
     this.editor.config.customUploadImg = (resultFiles, insertImgFn) => {

@@ -14,18 +14,44 @@
       <q-card-section style="height: calc(90vh - 150px); overflow: auto;">
         <!-- 搜索区域 -->
         <div class="row q-mb-md">
-          <q-input
-            v-model="skuSearch"
-            outlined
-            dense
-            placeholder="搜索 SKU 或商品名称"
-            style="width: 300px"
-            class="q-mr-md"
-          >
-            <template v-slot:append>
-              <q-btn round dense flat icon="search" @click="handleSkuSearch" />
-            </template>
-          </q-input>
+          <div class="row items-center no-wrap search-group q-ml-md">
+            <q-select
+              outlined
+              dense
+              v-model="filters.search_type"
+              :options="searchTypeOptions"
+              emit-value
+              map-options
+              option-value="value"
+              option-label="label"
+              class="search-type-select"
+            />
+            <q-input
+              outlined
+              dense
+              v-model="filters.keywords"
+              :placeholder="t('批量搜索用逗号隔开')"
+              class="keywords-input"
+              style="min-width: 200px"
+            />
+            <q-select
+              outlined
+              dense
+              v-model="filters.search_mode"
+              :options="searchModeOptions"
+              emit-value
+              map-options
+              option-value="value"
+              option-label="label"
+              class="search-mode-select"
+            />
+            <q-btn
+              color="primary"
+              :label="t('搜索')"
+              class="q-ml-sm"
+              @click="handleSkuSearch"
+            />
+          </div>
         </div>
 
         <!-- SKU 列表 -->
@@ -38,13 +64,10 @@
           :loading="skuLoading"
           flat
           bordered
+          hide-pagination
           :pagination="{
-            rowsPerPage: skuPagination.rowsPerPage,
-            page: skuPagination.page,
-            rowsNumber: skuPagination.total,
-            sortBy: 'sku'
+            rowsPerPage: 0
           }"
-          @request="onSkuTableRequest"
           class="sku-table"
         >
           <!-- 加载动画插槽 -->
@@ -88,17 +111,24 @@
                   </div>
                   <div class="ellipsis">
                     <div>SKU: {{ props.row?.sku || '-' }}</div>
+                  </div>
+                </div>
+              </q-td>
+               <!-- SKU信息 -->
+               <q-td key="info">
+                <div class="row no-wrap items-center">
+                  <div class="ellipsis">
                     <div class="ellipsis">{{ props.row?.product?.name || '-' }}</div>
                     <div>规格: {{ props.row?.name || '-' }}</div>
                   </div>
                 </div>
               </q-td>
-              <q-td key="applySpec" class="text-center" style="white-space: pre-line">
+              <!-- <q-td key="applySpec" class="text-center" style="white-space: pre-line">
                 {{ `${props.row?.size_length || 0}*${props.row?.size_width || 0}*${props.row?.size_height || 0} cm\n${props.row?.weight || 0} g` }}
               </q-td>
               <q-td key="realSpec" class="text-center" style="white-space: pre-line">
                 {{ `${props.row?.warehouse_size_length || 0}*${props.row?.warehouse_size_width || 0}*${props.row?.warehouse_size_height || 0} cm\n${props.row?.warehouse_weight || 0} g` }}
-              </q-td>
+              </q-td> -->
               <q-td key="timeInfo" class="text-center">
                 <div>创建: {{ props.row?.created_at || '-' }}</div>
                 <div>更新: {{ props.row?.updated_at || '-' }}</div>
@@ -112,16 +142,13 @@
               <div class="text-grey-8">
                 已选择 {{ selectedSkus.length }} 条记录
               </div>
-              <div class="row items-center">
-                <q-pagination
-                  v-model="skuPagination.page"
-                  :max="skuPagination.total"
-                  :max-pages="6"
-                  boundary-links
-                  direction-links
-                  color="primary"
-                />
-              </div>
+              <Pagination
+                :total-count="skuPagination.total"
+                v-model:page="skuPagination.page"
+                :max-page="Math.ceil(skuPagination.total / skuPagination.rowsPerPage)"
+                v-model:rows-per-page="skuPagination.rowsPerPage"
+                @page-change="handlePageChange"
+              />
             </div>
           </template>
         </q-table>
@@ -136,9 +163,14 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
+import { ref, reactive, watch } from 'vue';
 import { useQuasar } from 'quasar';
+import { useI18n } from "vue-i18n";
 import api from '@/api/index';
+import Pagination from "@/components/Pagination.vue";
+
+
+const { t } = useI18n();
 
 const $q = useQuasar();
 
@@ -149,7 +181,11 @@ const dialogVisible = ref(false);
 
 // SKU 列表相关
 const skuLoading = ref(false);
-const skuSearch = ref('');
+const filters = reactive({
+  search_type: 'sku',
+  keywords: '',
+  search_mode: 'exact'
+});
 const selectAll = ref(false);
 const skuPagination = reactive({
   page: 1,
@@ -170,26 +206,44 @@ const skuDialogColumns = [
     field: (row) => row?.sku || '',
     style: "width: 25%"
   },
-  { 
-    name: "applySpec", 
-    label: "申报规格", 
-    field: row => `${row.size_length || 0}*${row.size_width || 0}*${row.size_height || 0} cm\n${row.weight || 0} g`, 
-    align: "center",
-    style: "width: 20%"
+  {
+    name: "info",
+    required: true,
+    label: "产品名称",
+    align: "left",
+    style: "width: 25%"
   },
-  { 
-    name: "realSpec", 
-    label: "实际规格", 
-    field: row => `${row.warehouse_size_length || 0}*${row.warehouse_size_width || 0}*${row.warehouse_size_height || 0} cm\n${row.warehouse_weight || 0} g`,
-    align: "center",
-    style: "width: 20%"
-  },
+  // { 
+  //   name: "applySpec", 
+  //   label: "申报规格", 
+  //   field: row => `${row.size_length || 0}*${row.size_width || 0}*${row.size_height || 0} cm\n${row.weight || 0} g`, 
+  //   align: "center",
+  //   style: "width: 20%"
+  // },
+  // { 
+  //   name: "realSpec", 
+  //   label: "实际规格", 
+  //   field: row => `${row.warehouse_size_length || 0}*${row.warehouse_size_width || 0}*${row.warehouse_size_height || 0} cm\n${row.warehouse_weight || 0} g`,
+  //   align: "center",
+  //   style: "width: 20%"
+  // },
   { 
     name: "timeInfo", 
     label: "时间", 
     align: "center",
     style: "width: 25%"
   }
+];
+
+const searchTypeOptions = [
+  { label: t('SKU'), value: 'sku' },
+  { label: t('商品名称'), value: 'name' }
+];
+
+const searchModeOptions = [
+  { label: t('精确搜索'), value: 'exact' },
+  { label: t('模糊搜索'), value: 'like' },
+  { label: t('前缀搜索'), value: 'prefix' }
 ];
 
 // 全选/取消全选
@@ -227,14 +281,23 @@ const updateSelectAllState = () => {
   selectAll.value = allSelected;
 };
 
+// 处理分页变更
+const handlePageChange = ({ page, rowsPerPage }) => {
+  skuPagination.page = page;
+  skuPagination.rowsPerPage = rowsPerPage;
+  fetchSkuList();
+};
+
 // 获取 SKU 列表
 const fetchSkuList = async () => {
   skuLoading.value = true;
   try {
     const params = {
       page: skuPagination.page,
-      page_size: skuPagination.rowsPerPage,
-      search: skuSearch.value || ''
+      per_page: skuPagination.rowsPerPage,
+      search_type: filters.search_type,
+      keywords: filters.keywords,
+      search_mode: filters.search_mode
     };
     
     const response = await api.getSkuList(params);
@@ -265,16 +328,6 @@ const fetchSkuList = async () => {
   } finally {
     skuLoading.value = false;
   }
-};
-
-// 处理 SKU 表格请求（分页、排序等）
-const onSkuTableRequest = (props) => {
-  const { page, rowsPerPage } = props.pagination;
-  
-  skuPagination.page = page;
-  skuPagination.rowsPerPage = rowsPerPage;
-  
-  fetchSkuList();
 };
 
 // 处理 SKU 搜索
@@ -320,6 +373,42 @@ defineExpose({
 </script>
 
 <style lang="scss" scoped>
+.search-group {
+  :deep(.q-field__control) {
+    border: 1px solid rgba(0, 0, 0, 0.12) !important;
+    height: 40px;
+  }
+
+  :deep(.q-field--outlined .q-field__control:before) {
+    border: none;
+  }
+
+  :deep(.q-field--outlined .q-field__control:after) {
+    border: none;
+  }
+
+  .search-type-select {
+    :deep(.q-field__control) {
+      border-radius: 4px 0 0 4px !important;
+      border-right: none !important;
+    }
+  }
+
+  .keywords-input {
+    flex: 1;
+    :deep(.q-field__control) {
+      border-radius: 0;
+      border-right: none !important;
+    }
+  }
+
+  .search-mode-select {
+    :deep(.q-field__control) {
+      border-radius: 0 4px 4px 0 !important;
+    }
+  }
+}
+
 .sku-table {
   width: 100%;
 

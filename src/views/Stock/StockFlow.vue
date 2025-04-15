@@ -223,7 +223,6 @@ const columns = [
     label: t('商品信息'),
     field: 'product',
     align: 'left',
-    style: 'width: 300px'
   },
   {
     name: 'change_qty',

@@ -146,7 +146,7 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from "vue";
+import { defineProps, defineEmits, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useQuasar } from "quasar";
 import { useI18n } from "vue-i18n";
@@ -156,18 +156,6 @@ const router = useRouter();
 const $q = useQuasar();
 const { t } = useI18n();
 
-const props = defineProps({
-  rows: {
-    type: Array,
-    required: true
-  },
-  loading: {
-    type: Boolean,
-    default: false
-  }
-});
-
-// 表格分页配置
 const tablePagination = ref({
   sortBy: "",
   descending: false,
@@ -175,10 +163,22 @@ const tablePagination = ref({
   rowsPerPage: 0, // 设置为0以禁用表格内置分页
 });
 
+const props = defineProps({
+  rows: {
+    type: Array,
+    required: true,
+    default: () => []
+  },
+  loading: {
+    type: Boolean,
+    default: false
+  }
+});
+
 const emit = defineEmits(['refresh']);
 
 // 主表格列定义
-const columns = [
+const columns = ref([
   {
     name: "comboInfo",
     required: true,
@@ -200,10 +200,10 @@ const columns = [
     align: "center",
     style: "width: 15%"
   }
-];
+]);
 
 // 关联SKU表格列定义
-const specColumns = [
+const specColumns = ref([
   {
     name: "skuInfo",
     required: true,
@@ -226,7 +226,7 @@ const specColumns = [
     align: "center",
     style: "width: 20%"
   }
-];
+]);
 
 // 处理编辑
 const handleEdit = (row) => {

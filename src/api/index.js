@@ -41,6 +41,12 @@ export default {
   getStocksLogList: (data) => GET("stocks/logs", data), // 获取库存流水
   stocksExport: (data) => GET("stocks/export", data, { responseType: 'blob' }), // 导出库存
 
+  // 库龄模块
+  getStockAgeList: (data) => GET("stocks-ages", data), // 获取标准库龄列表
+  getStockAgeGroupList: (data) => GET("stocks-ages/group-ages", data), // 获取分段库龄列表
+  getGroupConfigList: (data) => GET("stocks-ages/group-ages/configs", data), // 获取分段列表
+  editGroupConfig: (data) => POST("stocks-ages/group-ages/configs", data), // 修改分段列表
+
   // 出库模块
   createOutbound: (data) => POST("orders", data), // 创建出库单
   importOutbound: (data, config) => $file.post("orders/import", data, config), // 导入出库单
@@ -52,6 +58,8 @@ export default {
   orderIntercept: (id) => POST(`orders/${id}/intercept`), // 申请截单
   orderCancelIntercept: (id) => POST(`orders/${id}/cancel-intercept`), // 取消截单
   orderRevert: (id) => POST(`orders/${id}/revert`), // 订单撤回
+  orderPdf: (id,data,config) => $file.post(`orders/${id}/label`,data, config), // 上传面单
+
 
   //公用模块
   getCountryList: (data) => GET("countries", data), // 获取库存流水

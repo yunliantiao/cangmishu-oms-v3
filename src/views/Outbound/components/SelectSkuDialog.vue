@@ -39,12 +39,10 @@
           bordered
           v-model:selected="selected"
           selection="multiple"
+          hide-pagination
           :pagination="{
-            rowsPerPage: pagination.rowsPerPage,
-            page: pagination.page,
-            rowsNumber: pagination.total
+            rowsPerPage: 0
           }"
-          @request="onRequest"
           class="sku-table"
         >
           <!-- 加载动画插槽 -->
@@ -96,16 +94,13 @@
               <div class="text-grey-8">
                 {{ $t('已选择') }} {{ selected.length }} {{ $t('条记录') }}
               </div>
-              <div class="row items-center">
-                <q-pagination
-                  v-model="pagination.page"
-                  :max="Math.ceil(pagination.total / pagination.rowsPerPage)"
-                  :max-pages="6"
-                  boundary-links
-                  direction-links
-                  color="primary"
-                />
-              </div>
+              <Pagination
+                :total-count="pagination.total"
+                v-model:page="pagination.page"
+                :max-page="Math.ceil(pagination.total / pagination.rowsPerPage)"
+                v-model:rows-per-page="pagination.rowsPerPage"
+                @page-change="handlePageChange"
+              />
             </div>
           </template>
         </q-table>
@@ -124,6 +119,7 @@ import { ref, reactive } from 'vue';
 import { useQuasar } from 'quasar';
 import { useI18n } from "vue-i18n";
 import api from '@/api/index';
+import Pagination from "@/components/Pagination.vue";
 
 const $q = useQuasar();
 const { t } = useI18n();
@@ -215,9 +211,8 @@ const handleSearch = () => {
   fetchStocksList();
 };
 
-// 处理表格请求（分页、排序等）
-const onRequest = (props) => {
-  const { page, rowsPerPage } = props.pagination;
+// 处理分页变更
+const handlePageChange = ({ page, rowsPerPage }) => {
   pagination.page = page;
   pagination.rowsPerPage = rowsPerPage;
   fetchStocksList();

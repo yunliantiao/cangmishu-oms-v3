@@ -16,10 +16,10 @@
           <q-tab name="all" :label="t('全部')" />
           <q-tab name="draft" :label="t('草稿')" />
           <q-tab name="reported" :label="t('已预报')" />
-          <q-tab name="shipping" :label="t('运输中')" />
-          <q-tab name="warehousing" :label="t('入库中')" />
-          <q-tab name="completed" :label="t('已完成')" />
-          <q-tab name="cancelled" :label="t('已取消')" />
+          <q-tab name="in_transit" :label="t('运输中')" />
+          <q-tab name="pending_inbound" :label="t('待入库')" />
+          <q-tab name="inbound_processing" :label="t('入库中')" />
+          <q-tab name="shelved" :label="t('已完成')" />
         </q-tabs>
       </div>
 

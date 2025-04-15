@@ -1,5 +1,8 @@
 <template>
   <div class="product-spu">
+    <!-- 编辑弹窗 -->
+    <edit-sku-dialog ref="editDialog" @success="$emit('refresh')" />
+
     <!-- 表格 -->
     <q-table
       :rows="rows"
@@ -166,15 +169,15 @@
                       color="primary"
                       icon="edit"
                       size="sm"
-                      @click="$emit('edit', slotProps.row)"
+                      @click="handleSkuEdit(slotProps.row)"
                     />
                     <q-btn
                       flat
                       round
-                      color="primary"
-                      icon="content_copy"
+                      color="negative"
+                      icon="delete"
                       size="sm"
-                      @click="$emit('copy', slotProps.row)"
+                      @click="handleSkuDelete(slotProps.row)"
                     />
                   </q-td>
                 </template>
@@ -199,6 +202,7 @@ import { ref, defineProps, defineEmits, defineExpose } from "vue";
 import { useQuasar } from "quasar";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
+import EditSkuDialog from './EditSkuDialog.vue';
 import api from '@/api/index';
 
 const router = useRouter();
@@ -317,9 +321,16 @@ const skuColumns = [
   }
 ];
 
+// 编辑弹窗引用
+const editDialog = ref(null);
+
 // 处理编辑按钮点击
 const handleEdit = (row) => {
   router.push(`/product/addproduct?id=${row.id}`);
+};
+
+const handleSkuEdit = (row) => {
+  editDialog.value.open(row.id);
 };
 
 // 处理删除
@@ -377,6 +388,35 @@ const handleSingleDelete = (row) => {
   }).onOk(async () => {
     try {
       const response = await api.delProduct({
+        ids: [row.id]
+      });
+      
+      if (response.success) {
+        emit("refresh"); // 刷新列表
+      }
+    } catch (error) {
+      console.error(t('删除失败') + ':', error);
+    }
+  });
+};
+
+// 处理SKU删除
+const handleSkuDelete = (row) => {
+  $q.dialog({
+    title: t("确认删除"),
+    message: t("确定要删除该SKU吗？"),
+    cancel: {
+      label: t('取消'),
+      flat: true
+    },
+    ok: {
+      label: t('确认'),
+      color: 'negative'
+    },
+    persistent: true,
+  }).onOk(async () => {
+    try {
+      const response = await api.delSKU({
         ids: [row.id]
       });
       
