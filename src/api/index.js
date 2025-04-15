@@ -31,6 +31,7 @@ export default {
   getArrivalMethods: (data) => GET("arrival-methods", data), // 到仓方式列表
   submitInbound: (id) => POST(`inbound/${id}/submit`), // 提交入库单
   getInboundDetail: (id) => GET(`inbound/${id}`), // 入库单详情
+  getInboundDetailByOrder: (id) => GET(`inbound/${id}/with-boxes`), // 入库单详情
   editInbound: (id,data) => PUT(`inbound/${id}`,data), // 入库单详情
   shipInbound: (id) => POST(`inbound/${id}/ship`), // 入库单发货
   delInbound: (id) => DEL(`inbound/${id}`), // 删除单发货

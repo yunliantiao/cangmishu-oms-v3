@@ -129,12 +129,12 @@
 
         <!-- 按箱模式 -->
         <div v-else class="box-mode">
-          <div v-for="(box, boxIndex) in detail.details" :key="box.id" class="box-item q-mb-lg">
+          <div v-for="(box) in detail.boxes" :key="box.id" class="box-item q-mb-lg">
             <div class="box-header row items-center q-mb-md">
-              <div class="text-subtitle1 text-weight-medium">箱子 #{{ boxIndex + 1 }}</div>
+              <div class="text-subtitle1 text-weight-medium">箱子 {{ box.box_number }}</div>
               <q-space />
               <div class="box-info row items-center q-gutter-x-md">
-                <div>箱数: {{ box.box_quantity }}</div>
+                <!-- <div>箱数: {{ box.box_quantity }}</div> -->
                 <div>尺寸: {{ box.size_length }}×{{ box.size_width }}×{{ box.size_height }}cm</div>
                 <div>重量: {{ box.weight }}kg</div>
               </div>
@@ -250,7 +250,7 @@ const boxItemColumns = [
 // 快递包裹模式下的扁平化商品列表
 const flattenedItems = computed(() => {
   if (detail.value.arrival_method !== 'express_parcel') return [];
-  return detail.value.details.reduce((acc, box) => {
+  return detail.value.boxes.reduce((acc, box) => {
     return acc.concat(box.items);
   }, []);
 });
@@ -258,7 +258,7 @@ const flattenedItems = computed(() => {
 // 获取入库单详情
 const fetchDetail = async () => {
   try {
-    const response = await api.getInboundDetail(route.params.id);
+    const response = await api.getInboundDetailByOrder(route.params.id);
     if (response.success) {
       detail.value = response.data;
     }
@@ -309,7 +309,7 @@ const getStatusColor = (status) => {
 const getReceiveStatusText = (status) => {
   const statusMap = {
     pending: '待收货',
-    partial: '部分收货',
+    partially_received: '部分收货',
     fully_received: '已收货',
     abnormal: '异常'
   };

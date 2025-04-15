@@ -209,6 +209,7 @@
                   <q-menu>
                     <q-list style="min-width: 100px">
                       <q-item
+                        v-if="props.row.arrival_method == 'box'"
                         clickable
                         v-close-popup
                         @click="handlePrintBoxLabel(props.row)"
@@ -222,6 +223,13 @@
                         @click="handleEdit(props.row)"
                       >
                         <q-item-section>{{ t("编辑") }}</q-item-section>
+                      </q-item>
+                      <q-item
+                        clickable
+                        v-close-popup
+                        @click="handleEditTracking(props.row)"
+                      >
+                        <q-item-section>{{ t("编辑运单号") }}</q-item-section>
                       </q-item>
                       <q-item
                         clickable
@@ -346,6 +354,36 @@
             flat
             @click="handlePrintConfirm"
           />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <!-- 编辑运单号弹窗 -->
+    <q-dialog v-model="trackingDialogVisible">
+      <q-card style="min-width: 400px">
+        <q-card-section class="row items-center">
+          <div class="text-h6">{{ t('输入运单号') }}</div>
+          <q-space />
+          <q-btn icon="close" flat round dense v-close-popup />
+        </q-card-section>
+
+        <q-card-section>
+          <q-input
+            v-model="trackingNumber"
+            outlined
+            :label="t('运单号')"
+            :rules="[val => !!val || t('运单号不能为空')]"
+            class="q-mb-md"
+          >
+            <template v-slot:append>
+              <span class="text-red">*</span>
+            </template>
+          </q-input>
+        </q-card-section>
+
+        <q-card-actions align="right" class="q-pa-md">
+          <q-btn :label="t('取消')" color="grey-7" v-close-popup flat />
+          <q-btn :label="t('确定')" color="primary" @click="handleTrackingConfirm" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -493,6 +531,8 @@ const printForm = ref({
   additional_info: [],
 });
 
+
+
 // 监听弹窗关闭
 watch(printDialogVisible, (newVal) => {
   if (!newVal) {
@@ -593,6 +633,15 @@ const handleSubmitInbound = async (row) => {
 
 // 处理发货
 const handleShipInbound = async (row) => {
+  // 检查运单号是否为空
+  if (!row.tracking_number && row.arrival_method == 'express_parcel') {
+    $q.notify({
+      type: 'warning',
+      message: t('当前到仓方式必须填写运单号')
+    });
+    return;
+  }
+
   try {
     const response = await api.shipInbound(row.id);
 
@@ -686,6 +735,58 @@ const handlePrintConfirm = async () => {
     });
   }
 };
+
+// 运单号编辑相关
+const trackingDialogVisible = ref(false);
+const trackingNumber = ref('');
+const currentRow = ref(null);
+// 处理编辑运单号
+const handleEditTracking = (row) => {
+  currentRow.value = row;
+  trackingNumber.value = row.tracking_number || '';
+  trackingDialogVisible.value = true;
+};
+
+// 处理运单号确认
+const handleTrackingConfirm = async () => {
+  if (!trackingNumber.value) {
+    $q.notify({
+      type: 'warning',
+      message: t('请输入运单号')
+    });
+    return;
+  }
+
+  try {
+    const response = await api.updateInboundTracking(currentRow.value.id, {
+      tracking_number: trackingNumber.value
+    });
+
+    if (response.success) {
+      trackingDialogVisible.value = false;
+      $q.notify({
+        type: 'positive',
+        message: t('运单号更新成功')
+      });
+      fetchInboundList(); // 刷新列表
+    }
+  } catch (error) {
+    console.error('更新运单号失败:', error);
+    $q.notify({
+      type: 'negative',
+      message: t('运单号更新失败')
+    });
+  }
+};
+
+// 监听弹窗关闭
+watch(trackingDialogVisible, (newVal) => {
+  if (!newVal) {
+    // 重置数据
+    trackingNumber.value = '';
+    currentRow.value = null;
+  }
+});
 
 // 初始化
 onMounted(() => {

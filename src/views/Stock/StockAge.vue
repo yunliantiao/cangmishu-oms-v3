@@ -69,7 +69,7 @@
           class="q-mr-sm"
           @click="openAgeSettingDialog"
         />
-        <q-btn-dropdown color="primary" :label="t('导出')" icon="file_download">
+        <!-- <q-btn-dropdown color="primary" :label="t('导出')" icon="file_download">
           <q-list>
             <q-item clickable v-close-popup @click="handleExport('selected')">
               <q-item-section>
@@ -82,7 +82,7 @@
               </q-item-section>
             </q-item>
           </q-list>
-        </q-btn-dropdown>
+        </q-btn-dropdown> -->
       </div>
 
       <!-- 数据表格 -->
