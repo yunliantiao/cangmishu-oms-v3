@@ -1,4 +1,4 @@
-# 仓秘书V2 (CangMiShu OMS V2)
+# 仓秘书V3 (CangMiShu OMS V3)
 
 基于 Vue 3 + Vite 开发的仓秘书订单管理系统(OMS)第二版。
 
