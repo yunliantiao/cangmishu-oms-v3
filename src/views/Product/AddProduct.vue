@@ -2,7 +2,7 @@
   <div>
     <q-form @submit="saveProductInfo">
       <div class="text-h5 q-mb-md">
-        {{ route.query.id ? t("编辑产品") : t("添加产品") }}
+        {{ route.query.id ? t('编辑产品') : t('添加产品') }}
       </div>
 
       <div class="compile-product">
@@ -20,11 +20,7 @@
                   <div class="q-mb-md">{{ t('产品图片') }}</div>
 
                   <div class="full-width">
-                    <upload-image
-                      v-model="images"
-                      :main-image="main_image"
-                      @mainImageUpdate="mainImageUpdate"
-                    />
+                    <upload-image v-model="images" :main-image="main_image" @mainImageUpdate="mainImageUpdate" />
                     <div class="text-negative" v-if="images.length == 0">
                       {{ t('请上传产品图片') }}
                     </div>
@@ -58,13 +54,7 @@
             <q-card-section class="q-pa-md">
               <div class="sku-list">
                 <div class="row justify-end items-center q-mb-md">
-                  <q-btn
-                    color="primary"
-                    outline
-                    icon="add"
-                    :label="t('添加规格')"
-                    @click="addSkuRow"
-                  />
+                  <q-btn color="primary" outline icon="add" :label="t('添加规格')" @click="addSkuRow" />
                 </div>
                 <q-form>
                   <q-table
@@ -73,7 +63,6 @@
                     row-key="sku"
                     :pagination="{ rowsPerPage: 0 }"
                     flat
-                    bordered
                     hide-pagination
                   >
                     <template v-slot:body="props">
@@ -90,15 +79,8 @@
                                 <q-icon name="attach_file" />
                               </template>
                             </q-file>
-                            <div
-                              class="image-uploader"
-                              @click="triggerFileInput(props.rowIndex)"
-                            >
-                              <q-img
-                                v-if="props.row.image"
-                                :src="props.row.image"
-                                class="sku-image"
-                              />
+                            <div class="image-uploader" @click="triggerFileInput(props.rowIndex)">
+                              <q-img v-if="props.row.image" :src="props.row.image" class="sku-image" />
                               <div v-else class="upload-placeholder">
                                 <q-icon name="image" size="20px" />
                                 <div class="text-caption">{{ t('上传图片') }}</div>
@@ -222,11 +204,7 @@
                     :rules="[(val) => !!val || t('请输入申报中文名')]"
                   >
                     <template v-slot:append>
-                      {{
-                        product.customs_name_cn
-                          ? product.customs_name_cn.length
-                          : 0
-                      }}
+                      {{ product.customs_name_cn ? product.customs_name_cn.length : 0 }}
                       / 100
                     </template>
                   </q-input>
@@ -244,11 +222,7 @@
                     :rules="[(val) => !!val || t('请输入申报英文名')]"
                   >
                     <template v-slot:append>
-                      {{
-                        product.customs_name_en
-                          ? product.customs_name_en.length
-                          : 0
-                      }}
+                      {{ product.customs_name_en ? product.customs_name_en.length : 0 }}
                       / 100
                     </template>
                   </q-input>
@@ -266,17 +240,19 @@
                         type="text"
                         :rules="[
                           (val) => !!val || t('请输入申报价格'),
-                          (val) => /^\d*\.?\d*$/.test(val) || t('请输入有效的数字')
+                          (val) => /^\d*\.?\d*$/.test(val) || t('请输入有效的数字'),
                         ]"
                       />
                     </div>
                     <div class="col-auto q-ml-md">
                       <q-select
                         v-model="product.customs_currency"
-                        :options="currenciesList.map(item => ({
-                          label: item.name,
-                          value: item.code
-                        }))"
+                        :options="
+                          currenciesList.map((item) => ({
+                            label: item.name,
+                            value: item.code,
+                          }))
+                        "
                         outlined
                         dense
                         options-dense
@@ -295,10 +271,12 @@
                     :label="t('报关属性')"
                     outlined
                     dense
-                    :options="customsTypesList.map(item => ({
-                      label: item.name,
-                      value: item.code
-                    }))"
+                    :options="
+                      customsTypesList.map((item) => ({
+                        label: item.name,
+                        value: item.code,
+                      }))
+                    "
                     emit-value
                     map-options
                     :rules="[(val) => !!val || t('请选择报关属性')]"
@@ -316,8 +294,8 @@
 
             <q-card-section class="q-pa-md">
               <div class="content">
-                <editor-model 
-                  :content="product.description" 
+                <editor-model
+                  :content="product.description"
                   @change="changeDesc"
                   editor-id="product-description-editor"
                 />
@@ -380,23 +358,14 @@
 </template>
 
 <script>
-import {
-  reactive,
-  ref,
-  watch,
-  onMounted,
-  computed,
-  onUnmounted,
-  nextTick,
-} from "vue";
-import { VueDraggableNext } from "vue-draggable-next";
-import { useRouter, useRoute } from "vue-router";
-import { getCurrentInstance } from "vue";
-import UploadImage from "@/components/UploadImage.vue";
-import { useStore } from "vuex";
-import EditorModel from "@/components/EditorModel.vue";
-import api from "@/api/index";
-import { useI18n } from "vue-i18n";
+import api from '@/api/index';
+import EditorModel from '@/components/EditorModel.vue';
+import UploadImage from '@/components/UploadImage.vue';
+import { computed, nextTick, onMounted, reactive, ref } from 'vue';
+import { VueDraggableNext } from 'vue-draggable-next';
+import { useI18n } from 'vue-i18n';
+import { useRoute, useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 
 export default {
   components: {
@@ -412,52 +381,47 @@ export default {
     const { t } = useI18n();
 
     // 定义一个数组，包含所有锚点的ID
-    const anchorIds = [
-      "base-content",
-      "declare-content",
-      "spec-content",
-      "detail-content",
-    ];
+    const anchorIds = ['base-content', 'declare-content', 'spec-content', 'detail-content'];
     const anchorRefs = ref([]);
 
     // 产品数据模型
     const product = reactive({
-      name: "", // 产品名称
+      name: '', // 产品名称
       category_id: 0, //分类id
-      main_image: "", //封面图片
-      purchase_url: "", //采购链接
-      developer_id: "",
-      unit: "", //单位
-      alias: "", //别名
-      addr: "", //发货地
-      customs_name_cn: "", // 中文报关名
-      customs_name_en: "", // 英文报关名
-      customs_price: "", // 报关单价
-      customs_currency: "", // 货币单位
-      customs_type: "", // 报关属性（保存code值）
-      description: "",
+      main_image: '', //封面图片
+      purchase_url: '', //采购链接
+      developer_id: '',
+      unit: '', //单位
+      alias: '', //别名
+      addr: '', //发货地
+      customs_name_cn: '', // 中文报关名
+      customs_name_en: '', // 英文报关名
+      customs_price: '', // 报关单价
+      customs_currency: '', // 货币单位
+      customs_type: '', // 报关属性（保存code值）
+      description: '',
       sku_list: [
         {
-          image: "",
-          sku: "",
-          name: "",
+          image: '',
+          sku: '',
+          name: '',
           size_length: 0,
           size_width: 0,
           size_height: 0,
           weight: 0,
-          percent: 0
-        }
-      ]
+          percent: 0,
+        },
+      ],
     });
 
     // 包装材料类型选项
     const packingMaterialsOptions = [
-      { label: "包装袋", value: 1 },
-      { label: "纸箱", value: 2 },
-      { label: "定制盒子", value: 3 },
-      { label: "贴纸", value: 4 },
-      { label: "卡片", value: 5 },
-      { label: "其他", value: 99 },
+      { label: '包装袋', value: 1 },
+      { label: '纸箱', value: 2 },
+      { label: '定制盒子', value: 3 },
+      { label: '贴纸', value: 4 },
+      { label: '卡片', value: 5 },
+      { label: '其他', value: 99 },
     ];
 
     // 页面初始化
@@ -491,10 +455,10 @@ export default {
 
       if (containerRef.value) {
         // 先移除之前可能存在的监听器
-        containerRef.value.removeEventListener("scroll", handleScroll);
+        containerRef.value.removeEventListener('scroll', handleScroll);
 
         // 添加节流后的滚动事件处理
-        containerRef.value.addEventListener("scroll", handleScroll);
+        containerRef.value.addEventListener('scroll', handleScroll);
 
         // 立即执行一次更新
         updateActiveAnchor();
@@ -535,10 +499,7 @@ export default {
 
         // 获取元素距离容器顶部的偏移
         const rect = element.getBoundingClientRect();
-        const topOffset =
-          rect.top +
-          scrollPosition -
-          containerRef.value.getBoundingClientRect().top;
+        const topOffset = rect.top + scrollPosition - containerRef.value.getBoundingClientRect().top;
 
         // 如果锚点在视口顶部上方一定距离内，则认为是当前锚点
         // 添加一个小偏移量确保更好的用户体验
@@ -553,17 +514,17 @@ export default {
     };
     const watchSwitch = ref(true);
     // 其他变量和引用
-    const productId = ref("");
+    const productId = ref('');
     const categoryList = ref([]);
     const options = ref([]);
     const countryList = ref([]);
-    const goodsId = ref("");
+    const goodsId = ref('');
     const images = ref([]);
-    const main_image = ref({ url: "" });
+    const main_image = ref({ url: '' });
     const showCategory = ref(true);
     const creatorList = ref([]);
     const containerRef = ref(null);
-    const currentAnchor = ref("#base-content");
+    const currentAnchor = ref('#base-content');
 
     // 计算属性：分类选项
     const categoryOptions = computed(() => {
@@ -594,13 +555,13 @@ export default {
       if (columnIndex === 0) {
         // 获取当前行的规格值
         const currentValue = product.sku_list[rowIndex].spec_arr[columnIndex];
-        
+
         // 如果是第一次出现这个值，或者上一行的值与当前不同
         if (rowIndex === 0 || product.sku_list[rowIndex - 1].spec_arr[columnIndex] !== currentValue) {
           // 计算连续的相同值数量
           let count = 1;
           while (
-            rowIndex + count < product.sku_list.length && 
+            rowIndex + count < product.sku_list.length &&
             product.sku_list[rowIndex + count].spec_arr[columnIndex] === currentValue
           ) {
             count++;
@@ -610,16 +571,15 @@ export default {
           // 如果不是第一次出现，该单元格被合并
           return { rowspan: 0, colspan: 0 };
         }
-      } 
+      }
       // 其他列（尺寸等）不合并
       else {
         return { rowspan: 1, colspan: 1 };
       }
     };
 
-
     // 函数：拍平分类选项
-    const flattenCategoryOptions = (categories, prefix = "") => {
+    const flattenCategoryOptions = (categories, prefix = '') => {
       let result = [];
       categories.forEach((cat) => {
         const label = prefix ? `${prefix} / ${cat.label}` : cat.label;
@@ -642,13 +602,12 @@ export default {
         // 计算元素相对于滚动容器的位置
         const containerTop = containerRef.value.getBoundingClientRect().top;
         const elementTop = el.getBoundingClientRect().top;
-        const offsetPosition =
-          elementTop - containerTop + containerRef.value.scrollTop - 80; // 添加一个偏移量
+        const offsetPosition = elementTop - containerTop + containerRef.value.scrollTop - 80; // 添加一个偏移量
 
         // 平滑滚动到该位置
         containerRef.value.scrollTo({
           top: offsetPosition,
-          behavior: "smooth",
+          behavior: 'smooth',
         });
       }
     };
@@ -656,7 +615,7 @@ export default {
     // 主图更新
     const mainImageUpdate = (mainImage) => {
       console.log('789789');
-      
+
       main_image.value = mainImage;
       product.main_image = mainImage.url || '';
     };
@@ -678,7 +637,7 @@ export default {
         customs_name_en: product.customs_name_en,
         customs_price: product.customs_price,
         customs_currency: product.customs_currency,
-        specs: product.sku_list.map(sku => ({
+        specs: product.sku_list.map((sku) => ({
           sku: sku.sku,
           name: sku.name,
           image: sku.image,
@@ -686,16 +645,16 @@ export default {
           size_width: sku.size_width,
           size_height: sku.size_height,
           weight: sku.weight,
-          purchase_price:0,
-          sale_price:0,
-        }))
-      }
+          purchase_price: 0,
+          sale_price: 0,
+        })),
+      };
 
       try {
         let response;
         if (route.query.id) {
           // 编辑模式
-          response = await api.editProduct(route.query.id,params);
+          response = await api.editProduct(route.query.id, params);
         } else {
           // 新增模式
           response = await api.addProduct(params);
@@ -705,10 +664,10 @@ export default {
           router.push('/product');
         }
       } catch (error) {
-        console.error("保存失败:", error);
+        console.error('保存失败:', error);
         $q.notify({
           type: 'negative',
-          message: `${route.query.id ? '编辑' : '新增'}产品失败`
+          message: `${route.query.id ? '编辑' : '新增'}产品失败`,
         });
       }
     };
@@ -721,7 +680,7 @@ export default {
         const response = await api.getProductDetail(route.query.id);
         if (response.success) {
           const data = response.data;
-          
+
           // 更新产品基本信息
           product.name = data.name;
           product.description = data.description;
@@ -738,7 +697,7 @@ export default {
 
           // 更新SKU列表
           if (data.specs && data.specs.length > 0) {
-            product.sku_list = data.specs.map(spec => ({
+            product.sku_list = data.specs.map((spec) => ({
               image: spec.image,
               sku: spec.sku,
               name: spec.name,
@@ -746,15 +705,15 @@ export default {
               size_width: spec.size_width,
               size_height: spec.size_height,
               weight: spec.weight,
-              percent: 100 // 因为是已有图片，所以进度为100%
+              percent: 100, // 因为是已有图片，所以进度为100%
             }));
           }
         }
       } catch (error) {
-        console.error("获取商品详情失败:", error);
+        console.error('获取商品详情失败:', error);
         $q.notify({
           type: 'negative',
-          message: '获取商品详情失败'
+          message: '获取商品详情失败',
         });
       }
     };
@@ -786,7 +745,7 @@ export default {
           customsTypesList.value = response.data;
         }
       } catch (error) {
-        console.error("获取海关类型列表失败:", error);
+        console.error('获取海关类型列表失败:', error);
       }
     };
 
@@ -798,7 +757,7 @@ export default {
           currenciesList.value = response.data;
         }
       } catch (error) {
-        console.error("获取货币列表失败:", error);
+        console.error('获取货币列表失败:', error);
       }
     };
 
@@ -812,20 +771,20 @@ export default {
       { name: 'name', label: t('规格名称'), field: 'name', align: 'center' },
       { name: 'dimensions', label: t('尺寸(cm)'), align: 'center' },
       { name: 'weight', label: t('重量(g)'), field: 'weight', align: 'center' },
-      { name: 'operations', label: t('操作'), field: 'operations', align: 'center' }
+      { name: 'operations', label: t('操作'), field: 'operations', align: 'center' },
     ];
 
     // 添加SKU行
     const addSkuRow = () => {
       product.sku_list.push({
-        image: "",
-        sku: "",
-        name: "",
+        image: '',
+        sku: '',
+        name: '',
         size_length: 0,
         size_width: 0,
         size_height: 0,
         weight: 0,
-        percent: 0
+        percent: 0,
       });
     };
 
@@ -838,7 +797,7 @@ export default {
 
     // 触发文件输入
     const triggerFileInput = (index) => {
-      const fileInput = document.querySelectorAll(".hidden")[index];
+      const fileInput = document.querySelectorAll('.hidden')[index];
       if (fileInput) fileInput.click();
     };
 
@@ -858,7 +817,7 @@ export default {
       let params = new FormData();
       params.append('file', file);
       params.append('type', 'image');
-      
+
       try {
         const response = await api.uploads(params, (e) => {
           // 更新上传进度
@@ -867,7 +826,7 @@ export default {
             product.sku_list[rowIndex].percent = Math.ceil(percent);
           }
         });
-        
+
         if (response.success) {
           // 更新SKU的图片为服务器返回的URL
           if (product.sku_list[rowIndex]) {
@@ -875,18 +834,18 @@ export default {
             product.sku_list[rowIndex].percent = 100;
           }
         } else {
-          console.error("上传失败:", response);
+          console.error('上传失败:', response);
           // 移除临时预览
           if (product.sku_list[rowIndex]) {
-            product.sku_list[rowIndex].image = "";
+            product.sku_list[rowIndex].image = '';
             product.sku_list[rowIndex].percent = 0;
           }
         }
       } catch (error) {
-        console.error("上传错误:", error);
+        console.error('上传错误:', error);
         // 移除临时预览
         if (product.sku_list[rowIndex]) {
-          product.sku_list[rowIndex].image = "";
+          product.sku_list[rowIndex].image = '';
           product.sku_list[rowIndex].percent = 0;
         }
       }
@@ -956,7 +915,7 @@ export default {
   }
 
   .fixed-bottom-bar {
-    margin: 0!important;
+    margin: 0 !important;
     position: fixed;
     bottom: 0;
     left: 240px;
@@ -995,7 +954,7 @@ export default {
         font-weight: 500;
 
         &::before {
-          content: "";
+          content: '';
           position: absolute;
           left: 0;
           top: 8px;
@@ -1065,8 +1024,7 @@ export default {
   }
 
   :deep(.q-field--focused .q-field__control) {
-    box-shadow: 0 0 0 1px var(--q-primary),
-      0 0 0 4px rgba(var(--q-primary-rgb), 0.1);
+    box-shadow: 0 0 0 1px var(--q-primary), 0 0 0 4px rgba(var(--q-primary-rgb), 0.1);
   }
 
   :deep(.q-field__label) {
@@ -1122,7 +1080,7 @@ export default {
         justify-content: center;
         color: #8c8c8c;
       }
-      
+
       .upload-progress {
         position: absolute;
         top: 50%;
@@ -1148,7 +1106,7 @@ export default {
       tbody td {
         padding: 8px 4px;
       }
-      
+
       /* 颜色单元格合并后的样式 */
       tbody td:first-child {
         &[rowspan] {
@@ -1165,4 +1123,4 @@ export default {
     }
   }
 }
-</style> 
+</style>

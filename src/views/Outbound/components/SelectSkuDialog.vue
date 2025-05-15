@@ -1,17 +1,13 @@
 <template>
-  <q-dialog
-    v-model="dialogVisible"
-    persistent
-    full-width
-  >
-    <q-card style="max-width: 900px; width: 90vw;">
+  <q-dialog v-model="dialogVisible" persistent full-width>
+    <q-card style="max-width: 900px; width: 90vw">
       <q-card-section class="row items-center q-pb-none">
         <div class="text-h6">{{ $t('选择商品') }}</div>
         <q-space />
         <q-btn icon="close" flat round dense v-close-popup />
       </q-card-section>
 
-      <q-card-section style="height: calc(90vh - 150px); overflow: auto;">
+      <q-card-section style="height: calc(90vh - 150px); overflow: auto">
         <!-- 搜索栏 -->
         <div class="row q-mb-md">
           <q-input
@@ -36,12 +32,11 @@
           :loading="loading"
           row-key="id"
           flat
-          bordered
           v-model:selected="selected"
           selection="multiple"
           hide-pagination
           :pagination="{
-            rowsPerPage: 0
+            rowsPerPage: 0,
           }"
           class="sku-table"
         >
@@ -67,9 +62,9 @@
               <q-td key="skuInfo">
                 <div class="row no-wrap items-center">
                   <div class="q-mr-sm">
-                    <img 
-                      :src="props.row?.image" 
-                      style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;"
+                    <img
+                      :src="props.row?.image"
+                      style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px"
                     />
                   </div>
                   <div class="ellipsis">
@@ -80,7 +75,11 @@
                 </div>
               </q-td>
               <q-td key="spec" class="text-center" style="white-space: pre-line">
-                {{ `${props.row?.warehouse_size_length || 0}*${props.row?.warehouse_size_width || 0}*${props.row?.warehouse_size_height || 0} cm\n${props.row?.warehouse_weight || 0} g` }}
+                {{
+                  `${props.row?.warehouse_size_length || 0}*${props.row?.warehouse_size_width || 0}*${
+                    props.row?.warehouse_size_height || 0
+                  } cm\n${props.row?.warehouse_weight || 0} g`
+                }}
               </q-td>
               <q-td key="stock" class="text-right">
                 {{ props.row?.available_qty || 0 }}
@@ -91,9 +90,7 @@
           <!-- 底部选中记录数显示 -->
           <template v-slot:bottom>
             <div class="row items-center justify-between full-width q-px-sm">
-              <div class="text-grey-8">
-                {{ $t('已选择') }} {{ selected.length }} {{ $t('条记录') }}
-              </div>
+              <div class="text-grey-8">{{ $t('已选择') }} {{ selected.length }} {{ $t('条记录') }}</div>
               <Pagination
                 :total-count="pagination.total"
                 v-model:page="pagination.page"
@@ -105,7 +102,7 @@
           </template>
         </q-table>
       </q-card-section>
-      
+
       <q-card-actions align="center" class="q-pa-md">
         <q-btn outline color="grey-7" :label="$t('取消')" v-close-popup @click="handleCancel" />
         <q-btn color="primary" :label="$t('确定')" @click="handleConfirm" />
@@ -115,11 +112,11 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
-import { useQuasar } from 'quasar';
-import { useI18n } from "vue-i18n";
 import api from '@/api/index';
-import Pagination from "@/components/Pagination.vue";
+import Pagination from '@/components/Pagination.vue';
+import { useQuasar } from 'quasar';
+import { reactive, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const $q = useQuasar();
 const { t } = useI18n();
@@ -143,33 +140,36 @@ const searchForm = ref({
 const pagination = reactive({
   page: 1,
   rowsPerPage: 10,
-  total: 0
+  total: 0,
 });
 
 // 表格列配置
 const columns = [
   {
-    name: "skuInfo",
+    name: 'skuInfo',
     required: true,
-    label: "SKU信息",
-    align: "left",
+    label: 'SKU信息',
+    align: 'left',
     field: (row) => row?.sku || '',
-    style: "width: 40%"
+    style: 'width: 40%',
   },
-  { 
-    name: "spec", 
-    label: "实际规格", 
-    field: row => `${row.warehouse_size_length || 0}*${row.warehouse_size_width || 0}*${row.warehouse_size_height || 0} cm\n${row.warehouse_weight || 0} g`,
-    align: "center",
-    style: "width: 30%"
+  {
+    name: 'spec',
+    label: '实际规格',
+    field: (row) =>
+      `${row.warehouse_size_length || 0}*${row.warehouse_size_width || 0}*${row.warehouse_size_height || 0} cm\n${
+        row.warehouse_weight || 0
+      } g`,
+    align: 'center',
+    style: 'width: 30%',
   },
-  { 
-    name: "stock", 
-    label: "可用库存", 
+  {
+    name: 'stock',
+    label: '可用库存',
     field: 'available_qty',
-    align: "right",
-    style: "width: 30%"
-  }
+    align: 'right',
+    style: 'width: 30%',
+  },
 ];
 
 // 获取库存列表
@@ -179,26 +179,26 @@ const fetchStocksList = async () => {
     const params = {
       page: pagination.page,
       page_size: pagination.rowsPerPage,
-      keyword: searchForm.value.keyword
+      keyword: searchForm.value.keyword,
     };
-    
+
     const response = await api.getStocksList(params);
     if (response.success) {
       // 过滤掉可用库存为0的商品
-      tableData.value = (response.data.items || []).filter(item => item.available_qty > 0);
+      tableData.value = (response.data.items || []).filter((item) => item.available_qty > 0);
       pagination.total = response.data.meta.total || 0;
     } else {
       console.error('获取库存列表失败:', response.message);
       $q.notify({
         type: 'negative',
-        message: `${t('获取库存列表失败')}: ${response.message}`
+        message: `${t('获取库存列表失败')}: ${response.message}`,
       });
     }
   } catch (error) {
     console.error('获取库存列表出错:', error);
     $q.notify({
       type: 'negative',
-      message: t('网络错误，请稍后重试')
+      message: t('网络错误，请稍后重试'),
     });
   } finally {
     loading.value = false;
@@ -230,11 +230,11 @@ const handleConfirm = () => {
   if (selected.value.length === 0) {
     $q.notify({
       type: 'warning',
-      message: t('请至少选择一个商品')
+      message: t('请至少选择一个商品'),
     });
     return;
   }
-  
+
   emit('selected', selected.value);
   dialogVisible.value = false;
   selected.value = [];
@@ -251,7 +251,7 @@ const open = () => {
 
 // 暴露方法给父组件
 defineExpose({
-  open
+  open,
 });
 </script>
 
@@ -263,8 +263,9 @@ defineExpose({
     table {
       table-layout: fixed;
     }
-    
-    .q-td, .q-th {
+
+    .q-td,
+    .q-th {
       padding: 8px;
       overflow: hidden;
     }
@@ -282,4 +283,4 @@ defineExpose({
     max-width: 400px;
   }
 }
-</style> 
+</style>

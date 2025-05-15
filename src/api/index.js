@@ -2,6 +2,7 @@ import { GET,POST, DEL, $file, PUT } from "./config.js";
 export default {
   resetPass: (data) => POST("auth/register", data), // 注册
   login: (data) => POST("auth/login", data), // 登录
+  tokenLogin: (data) => POST("auth/verify-temp-oms-token", data), // 验证临时token
   logout: (data) => DEL("auth/logout", data), // 退出
   uploads: (data, config) => $file.post("uploads", data, config), // 上传文件
   importSpu: (data, config) => $file.post("products/import", data, config), // 导入SPU

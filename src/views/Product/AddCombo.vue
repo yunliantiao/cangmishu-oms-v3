@@ -2,7 +2,7 @@
   <div>
     <q-form @submit="saveComboInfo">
       <div class="text-h5 q-mb-md">
-        {{ route.query.id ? t("编辑组合产品") : t("添加组合产品") }}
+        {{ route.query.id ? t('编辑组合产品') : t('添加组合产品') }}
       </div>
 
       <div class="compile-combo">
@@ -19,11 +19,7 @@
                 <div class="col-12">
                   <div class="q-mb-md">{{ t('产品图片') }}</div>
                   <div class="full-width">
-                    <upload-image
-                      v-model="images"
-                      :main-image="main_image"
-                      @mainImageUpdate="mainImageUpdate"
-                    />
+                    <upload-image v-model="images" :main-image="main_image" @mainImageUpdate="mainImageUpdate" />
                     <div class="text-negative" v-if="!combo.image">
                       {{ t('请上传产品图片') }}
                     </div>
@@ -74,28 +70,18 @@
 
             <q-card-section>
               <div class="row justify-end q-mb-md">
-                <q-btn
-                  color="primary"
-                  :label="t('选择商品')"
-                  @click="openSkuDialog"
-                />
+                <q-btn color="primary" :label="t('选择商品')" @click="openSkuDialog" />
               </div>
 
-              <q-table
-                :rows="combo.specs"
-                :columns="comboColumns"
-                row-key="sku"
-                flat
-                bordered
-              >
+              <q-table :rows="combo.specs" :columns="comboColumns" row-key="sku" flat>
                 <template v-slot:body="props">
                   <q-tr :props="props">
                     <q-td key="skuInfo" :props="props">
                       <div class="row no-wrap items-center">
                         <div class="q-mr-sm">
-                          <img 
-                            :src="props.row.image" 
-                            style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;"
+                          <img
+                            :src="props.row.image"
+                            style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px"
                           />
                         </div>
                         <div class="ellipsis">
@@ -115,18 +101,12 @@
                           min="1"
                           class="quantity-input"
                           style="width: 80px"
-                          @update:model-value="val => handleQuantityChange(val, props.row)"
+                          @update:model-value="(val) => handleQuantityChange(val, props.row)"
                         />
                       </div>
                     </q-td>
                     <q-td key="operations" :props="props" class="text-center">
-                      <q-btn
-                        flat
-                        round
-                        color="negative"
-                        icon="delete"
-                        @click="removeSpec(props.rowIndex)"
-                      />
+                      <q-btn flat round color="negative" icon="delete" @click="removeSpec(props.rowIndex)" />
                     </q-td>
                   </q-tr>
                 </template>
@@ -139,12 +119,7 @@
         <div class="fixed-bottom-bar">
           <div class="row justify-center q-pa-md">
             <q-btn outline :label="t('取消')" color="grey-7" @click="$router.back()" />
-            <q-btn
-              color="primary"
-              :label="t('保存')"
-              type="submit"
-              class="q-mx-sm"
-            />
+            <q-btn color="primary" :label="t('保存')" type="submit" class="q-mx-sm" />
           </div>
         </div>
 
@@ -154,22 +129,18 @@
     </q-form>
 
     <!-- SKU选择弹窗 -->
-    <sku-select-dialog
-      ref="skuDialogRef"
-      @selected="handleSkuSelected"
-      @cancel="handleSkuCancel"
-    />
+    <sku-select-dialog ref="skuDialogRef" @selected="handleSkuSelected" @cancel="handleSkuCancel" />
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
-import { useQuasar } from 'quasar';
-import { useI18n } from 'vue-i18n';
-import UploadImage from "@/components/UploadImage.vue";
-import SkuSelectDialog from "@/components/SkuSelectDialog/SkuSelectDialog.vue";
 import api from '@/api/index';
+import SkuSelectDialog from '@/components/SkuSelectDialog/SkuSelectDialog.vue';
+import UploadImage from '@/components/UploadImage.vue';
+import { useQuasar } from 'quasar';
+import { onMounted, reactive, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRoute, useRouter } from 'vue-router';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -182,7 +153,7 @@ const combo = reactive({
   code: '',
   image: '',
   specs: [],
-  sale_price: 0
+  sale_price: 0,
 });
 
 // 图片上传相关
@@ -200,27 +171,27 @@ const getComboDetail = async (id) => {
       combo.code = data.code;
       combo.image = data.image;
       combo.sale_price = data.sale_price;
-      
+
       // 回显图片
       if (data.image) {
         main_image.value = { url: data.image };
         images.value = [{ url: data.image }];
       }
-      
+
       // 回显规格信息
-      combo.specs = data.specs.map(spec => ({
+      combo.specs = data.specs.map((spec) => ({
         sku: spec.sku,
         quantity: spec.quantity,
         image: spec.spec.image,
         product_name: spec.spec.product.name,
-        spec_name: spec.spec.name
+        spec_name: spec.spec.name,
       }));
     }
   } catch (error) {
     console.error('获取详情失败:', error);
     $q.notify({
       type: 'negative',
-      message: t('获取详情失败')
+      message: t('获取详情失败'),
     });
   }
 };
@@ -249,8 +220,8 @@ const comboColumns = [
     required: true,
     label: t('商品信息'),
     align: 'left',
-    field: row => row.sku,
-    style: 'width: 60%'
+    field: (row) => row.sku,
+    style: 'width: 60%',
   },
   {
     name: 'quantity',
@@ -258,14 +229,14 @@ const comboColumns = [
     label: t('数量'),
     align: 'center',
     field: 'quantity',
-    style: 'width: 20%'
+    style: 'width: 20%',
   },
   {
     name: 'operations',
     label: t('操作'),
     align: 'center',
-    style: 'width: 20%'
-  }
+    style: 'width: 20%',
+  },
 ];
 
 // 打开SKU选择弹窗
@@ -275,9 +246,9 @@ const openSkuDialog = () => {
 
 // 处理SKU选择
 const handleSkuSelected = (selectedSkus) => {
-  selectedSkus.forEach(sku => {
+  selectedSkus.forEach((sku) => {
     // 检查是否已存在
-    const exists = combo.specs.some(spec => spec.sku === sku.sku);
+    const exists = combo.specs.some((spec) => spec.sku === sku.sku);
     if (!exists) {
       combo.specs.push({
         sku: sku.sku,
@@ -285,7 +256,7 @@ const handleSkuSelected = (selectedSkus) => {
         // 用于显示的额外信息
         image: sku.image,
         product_name: sku.product?.name,
-        spec_name: sku.name
+        spec_name: sku.name,
       });
     }
   });
@@ -318,10 +289,10 @@ const saveComboInfo = async () => {
       code: combo.code,
       image: combo.image,
       sale_price: combo.sale_price,
-      specs: combo.specs.map(spec => ({
+      specs: combo.specs.map((spec) => ({
         sku: spec.sku,
-        quantity: spec.quantity
-      }))
+        quantity: spec.quantity,
+      })),
     };
 
     // 判断是新增还是编辑
@@ -334,11 +305,11 @@ const saveComboInfo = async () => {
       // 新增模式
       response = await api.addCombo(params);
     }
-    
+
     if (response.success) {
       $q.notify({
         type: 'positive',
-        message: t('保存成功')
+        message: t('保存成功'),
       });
       router.push('/product');
     }
@@ -346,7 +317,7 @@ const saveComboInfo = async () => {
     console.error('保存失败:', error);
     $q.notify({
       type: 'negative',
-      message: t('保存失败')
+      message: t('保存失败'),
     });
   }
 };
@@ -383,7 +354,7 @@ const saveComboInfo = async () => {
   }
 
   .fixed-bottom-bar {
-    margin: 0!important;
+    margin: 0 !important;
     position: fixed;
     bottom: 0;
     left: 240px;
@@ -438,8 +409,7 @@ const saveComboInfo = async () => {
   }
 
   :deep(.q-field--focused .q-field__control) {
-    box-shadow: 0 0 0 1px var(--q-primary),
-      0 0 0 4px rgba(var(--q-primary-rgb), 0.1);
+    box-shadow: 0 0 0 1px var(--q-primary), 0 0 0 4px rgba(var(--q-primary-rgb), 0.1);
   }
 
   :deep(.q-field__label) {
@@ -465,7 +435,7 @@ const saveComboInfo = async () => {
 
   .required-field {
     &::after {
-      content: "*";
+      content: '*';
       color: #ff0000;
       margin-left: 4px;
     }
@@ -484,10 +454,10 @@ const saveComboInfo = async () => {
     :deep(.q-field__native) {
       text-align: center;
     }
-    
+
     :deep(.q-field__control) {
       height: 32px;
     }
   }
 }
-</style> 
+</style>

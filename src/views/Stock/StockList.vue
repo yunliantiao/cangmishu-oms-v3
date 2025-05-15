@@ -41,8 +41,6 @@
           :rows="tableData"
           :columns="columns"
           row-key="id"
-          flat
-          bordered
           :rows-per-page-options="[10, 20, 50]"
           v-model:pagination="tablePagination"
           hide-pagination

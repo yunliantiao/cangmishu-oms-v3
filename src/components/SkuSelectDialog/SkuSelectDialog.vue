@@ -1,17 +1,13 @@
 <template>
-  <q-dialog
-    v-model="dialogVisible"
-    persistent
-    full-width
-  >
-    <q-card style="max-width: 900px; width: 90vw;">
+  <q-dialog v-model="dialogVisible" persistent full-width>
+    <q-card style="max-width: 900px; width: 90vw">
       <q-card-section class="row items-center q-pb-none">
         <div class="text-h6">选择商品</div>
         <q-space />
         <q-btn icon="close" flat round dense v-close-popup />
       </q-card-section>
 
-      <q-card-section style="height: calc(90vh - 150px); overflow: auto;">
+      <q-card-section style="height: calc(90vh - 150px); overflow: auto">
         <!-- 搜索区域 -->
         <div class="row q-mb-md">
           <div class="row items-center no-wrap search-group q-ml-md">
@@ -45,12 +41,7 @@
               option-label="label"
               class="search-mode-select"
             />
-            <q-btn
-              color="primary"
-              :label="t('搜索')"
-              class="q-ml-sm"
-              @click="handleSkuSearch"
-            />
+            <q-btn color="primary" :label="t('搜索')" class="q-ml-sm" @click="handleSkuSearch" />
           </div>
         </div>
 
@@ -63,10 +54,9 @@
           selection="multiple"
           :loading="skuLoading"
           flat
-          bordered
           hide-pagination
           :pagination="{
-            rowsPerPage: 0
+            rowsPerPage: 0,
           }"
           class="sku-table"
         >
@@ -104,9 +94,9 @@
               <q-td key="skuInfo">
                 <div class="row no-wrap items-center">
                   <div class="q-mr-sm">
-                    <img 
-                      :src="props.row?.image" 
-                      style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;"
+                    <img
+                      :src="props.row?.image"
+                      style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px"
                     />
                   </div>
                   <div class="ellipsis">
@@ -114,8 +104,8 @@
                   </div>
                 </div>
               </q-td>
-               <!-- SKU信息 -->
-               <q-td key="info">
+              <!-- SKU信息 -->
+              <q-td key="info">
                 <div class="row no-wrap items-center">
                   <div class="ellipsis">
                     <div class="ellipsis">{{ props.row?.product?.name || '-' }}</div>
@@ -139,9 +129,7 @@
           <!-- 底部选中记录数显示 -->
           <template v-slot:bottom>
             <div class="row items-center justify-between full-width q-px-sm">
-              <div class="text-grey-8">
-                已选择 {{ selectedSkus.length }} 条记录
-              </div>
+              <div class="text-grey-8">已选择 {{ selectedSkus.length }} 条记录</div>
               <Pagination
                 :total-count="skuPagination.total"
                 v-model:page="skuPagination.page"
@@ -153,9 +141,9 @@
           </template>
         </q-table>
       </q-card-section>
-      
+
       <q-card-actions align="center" class="q-pa-md">
-        <q-btn outline color="grey-7"  label="取消" v-close-popup @click="handleCancel" />
+        <q-btn outline color="grey-7" label="取消" v-close-popup @click="handleCancel" />
         <q-btn color="primary" label="确定" @click="handleConfirm" />
       </q-card-actions>
     </q-card>
@@ -163,12 +151,11 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch } from 'vue';
-import { useQuasar } from 'quasar';
-import { useI18n } from "vue-i18n";
 import api from '@/api/index';
-import Pagination from "@/components/Pagination.vue";
-
+import Pagination from '@/components/Pagination.vue';
+import { useQuasar } from 'quasar';
+import { reactive, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
 
@@ -184,14 +171,14 @@ const skuLoading = ref(false);
 const filters = reactive({
   search_type: 'sku',
   keywords: '',
-  search_mode: 'exact'
+  search_mode: 'exact',
 });
 const selectAll = ref(false);
 const skuPagination = reactive({
   page: 1,
   rowsPerPage: 10,
   total: 0,
-  totalPages: 1
+  totalPages: 1,
 });
 const skuList = ref([]);
 const selectedSkus = ref([]);
@@ -199,66 +186,66 @@ const selectedSkus = ref([]);
 // SKU 列表弹窗列定义
 const skuDialogColumns = [
   {
-    name: "skuInfo",
+    name: 'skuInfo',
     required: true,
-    label: "SKU信息",
-    align: "left",
+    label: 'SKU信息',
+    align: 'left',
     field: (row) => row?.sku || '',
-    style: "width: 25%"
+    style: 'width: 25%',
   },
   {
-    name: "info",
+    name: 'info',
     required: true,
-    label: "产品名称",
-    align: "left",
-    style: "width: 25%"
+    label: '产品名称',
+    align: 'left',
+    style: 'width: 25%',
   },
-  // { 
-  //   name: "applySpec", 
-  //   label: "申报规格", 
-  //   field: row => `${row.size_length || 0}*${row.size_width || 0}*${row.size_height || 0} cm\n${row.weight || 0} g`, 
+  // {
+  //   name: "applySpec",
+  //   label: "申报规格",
+  //   field: row => `${row.size_length || 0}*${row.size_width || 0}*${row.size_height || 0} cm\n${row.weight || 0} g`,
   //   align: "center",
   //   style: "width: 20%"
   // },
-  // { 
-  //   name: "realSpec", 
-  //   label: "实际规格", 
+  // {
+  //   name: "realSpec",
+  //   label: "实际规格",
   //   field: row => `${row.warehouse_size_length || 0}*${row.warehouse_size_width || 0}*${row.warehouse_size_height || 0} cm\n${row.warehouse_weight || 0} g`,
   //   align: "center",
   //   style: "width: 20%"
   // },
-  { 
-    name: "timeInfo", 
-    label: "时间", 
-    align: "center",
-    style: "width: 25%"
-  }
+  {
+    name: 'timeInfo',
+    label: '时间',
+    align: 'center',
+    style: 'width: 25%',
+  },
 ];
 
 const searchTypeOptions = [
   { label: t('SKU'), value: 'sku' },
-  { label: t('商品名称'), value: 'name' }
+  { label: t('商品名称'), value: 'name' },
 ];
 
 const searchModeOptions = [
   { label: t('精确搜索'), value: 'exact' },
   { label: t('模糊搜索'), value: 'like' },
-  { label: t('前缀搜索'), value: 'prefix' }
+  { label: t('前缀搜索'), value: 'prefix' },
 ];
 
 // 全选/取消全选
 const selectAllItems = (val) => {
   if (val) {
     // 全选当前页所有项
-    skuList.value.forEach(sku => {
-      if (!selectedSkus.value.some(s => s.id === sku.id)) {
+    skuList.value.forEach((sku) => {
+      if (!selectedSkus.value.some((s) => s.id === sku.id)) {
         selectedSkus.value.push(sku);
       }
     });
   } else {
     // 从选中列表中移除当前页所有项
-    skuList.value.forEach(sku => {
-      const index = selectedSkus.value.findIndex(s => s.id === sku.id);
+    skuList.value.forEach((sku) => {
+      const index = selectedSkus.value.findIndex((s) => s.id === sku.id);
       if (index !== -1) {
         selectedSkus.value.splice(index, 1);
       }
@@ -272,12 +259,10 @@ const updateSelectAllState = () => {
     selectAll.value = false;
     return;
   }
-  
+
   // 检查当前页中的所有项是否都被选中
-  const allSelected = skuList.value.every(sku => 
-    selectedSkus.value.some(s => s.id === sku.id)
-  );
-  
+  const allSelected = skuList.value.every((sku) => selectedSkus.value.some((s) => s.id === sku.id));
+
   selectAll.value = allSelected;
 };
 
@@ -297,33 +282,33 @@ const fetchSkuList = async () => {
       per_page: skuPagination.rowsPerPage,
       search_type: filters.search_type,
       keywords: filters.keywords,
-      search_mode: filters.search_mode
+      search_mode: filters.search_mode,
     };
-    
+
     const response = await api.getSkuList(params);
-    
+
     if (response.success) {
       skuList.value = response.data.items || [];
-      
+
       // 设置分页信息
       if (response.data.meta) {
         skuPagination.total = response.data.meta.total || 0;
       }
-      
+
       // 更新全选状态
       updateSelectAllState();
     } else {
       console.error('获取 SKU 列表失败:', response.message);
       $q.notify({
         type: 'negative',
-        message: `获取 SKU 列表失败: ${response.message}`
+        message: `获取 SKU 列表失败: ${response.message}`,
       });
     }
   } catch (error) {
     console.error('获取 SKU 列表出错:', error);
     $q.notify({
       type: 'negative',
-      message: '网络错误，请稍后重试'
+      message: '网络错误，请稍后重试',
     });
   } finally {
     skuLoading.value = false;
@@ -356,11 +341,11 @@ const handleConfirm = () => {
   if (selectedSkus.value.length === 0) {
     $q.notify({
       type: 'warning',
-      message: '请至少选择一个 SKU'
+      message: '请至少选择一个 SKU',
     });
     return;
   }
-  
+
   emit('selected', selectedSkus.value);
   dialogVisible.value = false;
   selectedSkus.value = [];
@@ -368,7 +353,7 @@ const handleConfirm = () => {
 
 // 暴露方法给父组件
 defineExpose({
-  open
+  open,
 });
 </script>
 
@@ -416,8 +401,9 @@ defineExpose({
     table {
       table-layout: fixed;
     }
-    
-    .q-td, .q-th {
+
+    .q-td,
+    .q-th {
       padding: 8px;
       overflow: hidden;
     }
@@ -435,4 +421,4 @@ defineExpose({
     max-width: 400px;
   }
 }
-</style> 
+</style>

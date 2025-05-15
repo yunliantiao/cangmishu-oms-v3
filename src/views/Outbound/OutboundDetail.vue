@@ -77,12 +77,7 @@
             <div class="form-item">
               <div class="form-item-label">{{ t('面单文件') }}</div>
               <div class="form-item-value">
-                <q-btn
-                  color="primary"
-                  :label="t('下载面单')"
-                  icon="download"
-                  @click="handleDownloadLabel"
-                />
+                <q-btn color="primary" :label="t('下载面单')" icon="download" @click="handleDownloadLabel" />
               </div>
             </div>
           </div>
@@ -178,22 +173,24 @@
 
         <q-table
           flat
-          bordered
           :rows="detail.packages?.[0]?.items || []"
           :columns="[
             {
               name: 'skuInfo',
               label: t('商品信息'),
-              field: row => row.sku,
+              field: (row) => row.sku,
               align: 'left',
-              style: 'width: 40%'
+              style: 'width: 40%',
             },
             {
               name: 'spec',
               label: t('实际规格'),
-              field: row => `${row.sku_size_length || 0}*${row.sku_size_width || 0}*${row.sku_size_height || 0} cm\n${row.sku_weight || 0} g`,
+              field: (row) =>
+                `${row.sku_size_length || 0}*${row.sku_size_width || 0}*${row.sku_size_height || 0} cm\n${
+                  row.sku_weight || 0
+                } g`,
               align: 'center',
-              style: 'width: 20%'
+              style: 'width: 20%',
             },
             {
               name: 'quantity',
@@ -206,7 +203,7 @@
               label: t('单价'),
               field: 'unit_price',
               align: 'right',
-            }
+            },
           ]"
           hide-pagination
         >
@@ -228,9 +225,9 @@
             <q-td :props="props">
               <div class="row no-wrap items-center">
                 <div class="q-mr-sm">
-                  <img 
-                    :src="props.row?.sku_image" 
-                    style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;"
+                  <img
+                    :src="props.row?.sku_image"
+                    style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px"
                   />
                 </div>
                 <div class="ellipsis">
@@ -244,7 +241,11 @@
 
           <template v-slot:body-cell-spec="props">
             <q-td :props="props" class="text-center" style="white-space: pre-line">
-              {{ `${props.row?.sku_size_length || 0}*${props.row?.sku_size_width || 0}*${props.row?.sku_size_height || 0} cm\n${props.row?.sku_weight || 0} g` }}
+              {{
+                `${props.row?.sku_size_length || 0}*${props.row?.sku_size_width || 0}*${
+                  props.row?.sku_size_height || 0
+                } cm\n${props.row?.sku_weight || 0} g`
+              }}
             </q-td>
           </template>
         </q-table>
@@ -264,11 +265,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import { useRouter, useRoute } from "vue-router";
-import { useI18n } from "vue-i18n";
-import { useQuasar } from "quasar";
-import api from "@/api/index";
+import api from '@/api/index';
+import { useQuasar } from 'quasar';
+import { onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRoute, useRouter } from 'vue-router';
 
 const router = useRouter();
 const route = useRoute();
@@ -283,7 +284,7 @@ const getPlatformText = (platform) => {
   const platformMap = {
     dsfulfill: t('DSFulfill'),
     other: t('其他'),
-    customer: t('客户')
+    customer: t('客户'),
   };
   return platformMap[platform] || platform;
 };
@@ -292,7 +293,7 @@ const getPlatformText = (platform) => {
 const getLabelTypeText = (type) => {
   const typeMap = {
     warehouse_label: t('发货仓库面单'),
-    self_label: t('自有面单')
+    self_label: t('自有面单'),
   };
   return typeMap[type] || type;
 };
@@ -304,7 +305,7 @@ const fetchDetail = async () => {
     if (!id) {
       $q.notify({
         type: 'negative',
-        message: t('参数错误')
+        message: t('参数错误'),
       });
       return;
     }
@@ -314,10 +315,10 @@ const fetchDetail = async () => {
       detail.value = response.data;
     }
   } catch (error) {
-    console.error("获取出库单详情失败:", error);
+    console.error('获取出库单详情失败:', error);
     $q.notify({
       type: 'negative',
-      message: t('获取详情失败')
+      message: t('获取详情失败'),
     });
   }
 };
@@ -359,7 +360,7 @@ onMounted(() => {
   }
 
   .fixed-bottom-bar {
-    margin: 0!important;
+    margin: 0 !important;
     position: fixed;
     bottom: 0;
     left: 240px;
@@ -385,7 +386,7 @@ onMounted(() => {
       padding: 8px 16px;
       vertical-align: middle;
     }
-    
+
     th {
       padding: 8px 16px;
       background: #f5f5f5;
@@ -400,4 +401,4 @@ onMounted(() => {
     }
   }
 }
-</style> 
+</style>
