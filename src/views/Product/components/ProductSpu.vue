@@ -12,6 +12,8 @@
       selection="multiple"
       hide-pagination
       flat
+      :pagination="tablePagination"
+      bordered
       :loading="loading"
     >
       <!-- 加载动画插槽 -->
@@ -31,7 +33,14 @@
       <template v-slot:header="props">
         <q-tr :props="props">
           <q-th style="width: 48px; padding: 0 4px">
-            <q-btn size="sm" color="grey-7" flat dense disable icon="keyboard_arrow_right" />
+            <q-btn
+              size="sm"
+              color="grey-7"
+              flat
+              dense
+              disable
+              icon="keyboard_arrow_right"
+            />
           </q-th>
           <q-th auto-width style="padding: 0 8px">
             <q-checkbox color="primary" v-model="props.selected" />
@@ -59,12 +68,12 @@
             <q-checkbox color="primary" v-model="props.selected" />
           </q-td>
           <!-- SPU信息 -->
-          <q-td key="spuInfo" :style="columns.find((col) => col.name === 'spuInfo').style">
+          <q-td key="spuInfo" :style="columns.find(col => col.name === 'spuInfo').style">
             <div class="row no-wrap items-center">
               <div class="q-mr-sm">
-                <img
-                  :src="props.row?.main_image"
-                  style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px"
+                <img 
+                  :src="props.row?.main_image" 
+                  style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;"
                 />
               </div>
               <div class="ellipsis">
@@ -73,34 +82,45 @@
               </div>
             </div>
           </q-td>
-          <q-td key="category" class="text-center" :style="columns.find((col) => col.name === 'category').style">
+          <q-td key="category" class="text-center" :style="columns.find(col => col.name === 'category').style">
             {{ props.row?.category || '-' }}
           </q-td>
-          <q-td key="creator" class="text-center" :style="columns.find((col) => col.name === 'creator').style">
-            {{ props.row?.creator || '-' }}
+          <q-td key="creator" class="text-center" :style="columns.find(col => col.name === 'creator').style">
+            {{ props.row?.created_by?.name || '-' }}
           </q-td>
-          <q-td key="createTime" class="text-center" :style="columns.find((col) => col.name === 'createTime').style">
+          <q-td key="createTime" class="text-center" :style="columns.find(col => col.name === 'createTime').style">
             {{ props.row?.updated_at || '-' }}
           </q-td>
-          <q-td key="operations" class="text-center" :style="columns.find((col) => col.name === 'operations').style">
-            <q-btn flat round color="primary" icon="edit" size="sm" @click="handleEdit(props.row)">
-              <q-tooltip>{{ t('编辑') }}</q-tooltip>
-            </q-btn>
-            <q-btn flat round color="negative" icon="delete" size="sm" @click="handleSingleDelete(props.row)">
-              <q-tooltip>{{ t('删除') }}</q-tooltip>
-            </q-btn>
+          <q-td key="operations" class="text-center" :style="columns.find(col => col.name === 'operations').style">
+            <q-btn
+              flat
+              round
+              color="primary"
+              icon="edit"
+              size="sm"
+              @click="handleEdit(props.row)"
+            />
+            <q-btn
+              flat
+              round
+              color="negative"
+              icon="delete"
+              size="sm"
+              @click="handleSingleDelete(props.row)"
+            />
           </q-td>
         </q-tr>
 
         <!-- 展开后的SKU表格 -->
         <q-tr v-show="props.expand" :props="props">
-          <q-td colspan="100%" style="padding: 20px !important">
-            <div>
+          <q-td colspan="100%">
+            <div class="q-pa-md">
               <q-table
                 :rows="props.row.specs || []"
                 :columns="skuColumns"
                 row-key="id"
                 flat
+                bordered
                 :pagination="tablePagination"
                 hide-pagination
                 class="sku-table"
@@ -109,19 +129,14 @@
                   <q-td :props="slotProps">
                     <div class="row no-wrap items-center">
                       <div class="q-mr-sm">
-                        <img
-                          :src="slotProps.row?.image"
-                          style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px"
+                        <img 
+                          :src="slotProps.row?.image" 
+                          style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;"
                         />
                       </div>
-                      <div class="flex-c-start-start gap-6">
-                        <div class="text-primary hover-copy" @click="$copy(slotProps.row.sku)">
-                          SKU: {{ slotProps.row?.sku || '-' }}
-                        </div>
-                        <div class="">
-                          {{ t('名称') }}:
-                          {{ slotProps.row?.product?.name || '-' }}
-                        </div>
+                      <div class="ellipsis">
+                        <div>{{ t('SKU') }}: {{ slotProps.row?.sku || '-' }}</div>
+                        <div class="ellipsis">{{ t('名称') }}: {{ slotProps.row?.product?.name || '-' }}</div>
                         <div>{{ t('规格') }}: {{ slotProps.row?.name || '-' }}</div>
                       </div>
                     </div>
@@ -130,21 +145,13 @@
 
                 <template v-slot:body-cell-applySpec="slotProps">
                   <q-td :props="slotProps" style="white-space: pre-line; text-align: center">
-                    {{
-                      `${slotProps.row.size_length || 0}*${slotProps.row.size_width || 0}*${
-                        slotProps.row.size_height || 0
-                      } cm\n${slotProps.row.weight || 0} g`
-                    }}
+                    {{ `${slotProps.row.size_length || 0}*${slotProps.row.size_width || 0}*${slotProps.row.size_height || 0} cm\n${slotProps.row.weight || 0} g` }}
                   </q-td>
                 </template>
 
                 <template v-slot:body-cell-realSpec="slotProps">
                   <q-td :props="slotProps" style="white-space: pre-line; text-align: center">
-                    {{
-                      `${slotProps.row.warehouse_size_length || 0}*${slotProps.row.warehouse_size_width || 0}*${
-                        slotProps.row.warehouse_size_height || 0
-                      } cm\n${slotProps.row.warehouse_weight || 0} g`
-                    }}
+                    {{ `${slotProps.row.warehouse_size_length || 0}*${slotProps.row.warehouse_size_width || 0}*${slotProps.row.warehouse_size_height || 0} cm\n${slotProps.row.warehouse_weight || 0} g` }}
                   </q-td>
                 </template>
 
@@ -157,13 +164,22 @@
 
                 <template v-slot:body-cell-operations="slotProps">
                   <q-td :props="slotProps" style="text-align: center">
-                    <q-btn flat round color="primary" icon="edit" size="sm" @click="handleSkuEdit(slotProps.row)">
-                      <q-tooltip>{{ t('编辑') }}</q-tooltip>
-                    </q-btn>
-
-                    <q-btn flat round color="negative" icon="delete" size="sm" @click="handleSkuDelete(slotProps.row)">
-                      <q-tooltip>{{ t('删除') }}</q-tooltip>
-                    </q-btn>
+                    <q-btn
+                      flat
+                      round
+                      color="primary"
+                      icon="edit"
+                      size="sm"
+                      @click="handleSkuEdit(slotProps.row)"
+                    />
+                    <q-btn
+                      flat
+                      round
+                      color="negative"
+                      icon="delete"
+                      size="sm"
+                      @click="handleSkuDelete(slotProps.row)"
+                    />
                   </q-td>
                 </template>
               </q-table>
@@ -174,19 +190,21 @@
 
       <!-- 底部选中记录数显示 -->
       <template v-slot:bottom v-if="selected.length > 0">
-        <div class="q-pa-sm text-grey-8 text-center">{{ t('已选择') }} {{ selected.length }} {{ t('条记录') }}</div>
+        <div class="q-pa-sm text-grey-8 text-center">
+          {{ t('已选择') }} {{ selected.length }} {{ t('条记录') }}
+        </div>
       </template>
     </q-table>
   </div>
 </template>
 
 <script setup>
-import api from '@/api/index';
-import { useQuasar } from 'quasar';
-import { defineEmits, defineExpose, defineProps, ref } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
+import { ref, defineProps, defineEmits, defineExpose } from "vue";
+import { useQuasar } from "quasar";
+import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import EditSkuDialog from './EditSkuDialog.vue';
+import api from '@/api/index';
 
 const router = useRouter();
 const $q = useQuasar();
@@ -195,21 +213,30 @@ const { t } = useI18n();
 const props = defineProps({
   rows: {
     type: Array,
-    required: true,
+    required: true
   },
   loading: {
     type: Boolean,
-    default: false,
-  },
+    default: false
+  }
 });
 
-const emit = defineEmits(['add', 'edit', 'copy', 'delete', 'print', 'import', 'page-change', 'void']);
+const emit = defineEmits([
+  "add",
+  "edit",
+  "copy",
+  "delete",
+  "print",
+  "import",
+  "page-change",
+  "void"
+]);
 
 // 表格数据
 const selected = ref([]);
 // 表格分页配置
 const tablePagination = ref({
-  sortBy: '',
+  sortBy: "",
   descending: false,
   page: 1,
   rowsPerPage: 0, // 设置为0以禁用表格内置分页
@@ -217,85 +244,82 @@ const tablePagination = ref({
 // SPU表格列定义
 const columns = [
   {
-    name: 'spuInfo',
+    name: "spuInfo",
     required: true,
-    label: t('SPU信息'),
-    align: 'left',
+    label: t("SPU信息"),
+    align: "left",
     field: (row) => row.name,
-    style: 'width: 25%',
+    style: "width: 25%"
   },
   {
-    name: 'category',
-    label: t('分类'),
-    field: 'category',
-    align: 'center',
-    style: 'width: 20%',
+    name: "category",
+    label: t("分类"),
+    field: "category",
+    align: "center",
+    style: "width: 20%"
   },
   {
-    name: 'creator',
-    label: t('创建人员'),
-    field: 'creator',
-    align: 'center',
-    style: 'width: 20%',
+    name: "creator",
+    label: t("创建人员"),
+    field: "created_by",
+    align: "center",
+    style: "width: 20%"
   },
   {
-    name: 'createTime',
-    label: t('创建时间'),
-    field: 'updated_at',
-    align: 'center',
-    style: 'width: 20%',
+    name: "createTime",
+    label: t("创建时间"),
+    field: "updated_at",
+    align: "center",
+    style: "width: 20%"
   },
   {
-    name: 'operations',
-    label: t('操作'),
-    align: 'center',
-    style: 'width: 15%',
-  },
+    name: "operations",
+    label: t("操作"),
+    align: "center",
+    style: "width: 15%"
+  }
 ];
 
 // SKU表格列定义
 const skuColumns = [
   {
-    name: 'skuInfo',
+    name: "skuInfo",
     required: true,
-    label: t('SKU信息'),
-    align: 'left',
+    label: t("SKU信息"),
+    align: "left",
     field: (row) => row?.sku || '',
-    style: 'width: 35%',
+    style: "width: 35%"
   },
-  {
-    name: 'applySpec',
-    label: t('申报规格'),
-    field: (row) => `${row.size_length || 0}*${row.size_width || 0}*${row.size_height || 0} cm\n${row.weight || 0} g`,
-    align: 'center',
-    style: 'width: 20%',
+  { 
+    name: "applySpec", 
+    label: t("申报规格"), 
+    field: row => `${row.size_length || 0}*${row.size_width || 0}*${row.size_height || 0} cm\n${row.weight || 0} g`, 
+    align: "center",
+    style: "width: 20%"
   },
-  {
-    name: 'realSpec',
-    label: t('实际规格'),
-    field: (row) =>
-      `${row.warehouse_size_length || 0}*${row.warehouse_size_width || 0}*${row.warehouse_size_height || 0} cm\n${
-        row.warehouse_weight || 0
-      } g`,
-    align: 'center',
-    style: 'width: 20%',
+  { 
+    name: "realSpec", 
+    label: t("实际规格"), 
+    field: row => `${row.warehouse_size_length || 0}*${row.warehouse_size_width || 0}*${row.warehouse_size_height || 0} cm\n${row.warehouse_weight || 0} g`,
+    align: "center",
+    style: "width: 20%"
   },
-  {
-    name: 'timeInfo',
-    label: t('时间'),
-    align: 'center',
+  { 
+    name: "timeInfo", 
+    label: t("时间"), 
+    align: "center",
     format: () => ({
-      created: '2025-03-31 02:42',
-      updated: '2025-03-31 18:27',
+      created: "2025-03-31 02:42",
+      updated: "2025-03-31 18:27"
     }),
-    style: 'width: 15%',
+    style: "width: 15%"
   },
-  {
-    name: 'operations',
-    label: t('操作'),
-    align: 'center',
-    style: 'width: 10%',
-  },
+  { 
+    name: "operations", 
+    label: t("操作"), 
+    align: "center",
+    style: "width: 10%"
+  }
 ];
 
 // 编辑弹窗引用
@@ -314,33 +338,33 @@ const handleSkuEdit = (row) => {
 const handleDelete = async () => {
   if (selected.value.length === 0) {
     $q.notify({
-      message: t('请选择要删除的商品'),
-      color: 'warning',
+      message: t("请选择要删除的商品"),
+      color: "warning",
     });
     return;
   }
-
+  
   $q.dialog({
-    title: t('确认删除'),
-    message: t('确定要删除选中的') + ` ${selected.value.length} ` + t('个商品吗？'),
+    title: t("确认删除"),
+    message: t("确定要删除选中的") + ` ${selected.value.length} ` + t("个商品吗？"),
     cancel: {
       label: t('取消'),
-      flat: true,
+      flat: true
     },
     ok: {
       label: t('确认'),
-      color: 'negative',
+      color: 'negative'
     },
     persistent: true,
   }).onOk(async () => {
     try {
       const response = await api.delProduct({
-        ids: selected.value.map((item) => item.id),
+        ids: selected.value.map(item => item.id)
       });
-
+      
       if (response.success) {
         selected.value = []; // 清空选中
-        emit('refresh'); // 刷新列表
+        emit("refresh"); // 刷新列表
       }
     } catch (error) {
       console.error(t('删除失败') + ':', error);
@@ -351,25 +375,25 @@ const handleDelete = async () => {
 // 处理单个删除
 const handleSingleDelete = (row) => {
   $q.dialog({
-    title: t('确认删除'),
-    message: t('确定要删除该商品吗？'),
+    title: t("确认删除"),
+    message: t("确定要删除该商品吗？"),
     cancel: {
       label: t('取消'),
-      flat: true,
+      flat: true
     },
     ok: {
       label: t('确认'),
-      color: 'negative',
+      color: 'negative'
     },
     persistent: true,
   }).onOk(async () => {
     try {
       const response = await api.delProduct({
-        ids: [row.id],
+        ids: [row.id]
       });
-
+      
       if (response.success) {
-        emit('refresh'); // 刷新列表
+        emit("refresh"); // 刷新列表
       }
     } catch (error) {
       console.error(t('删除失败') + ':', error);
@@ -380,25 +404,25 @@ const handleSingleDelete = (row) => {
 // 处理SKU删除
 const handleSkuDelete = (row) => {
   $q.dialog({
-    title: t('确认删除'),
-    message: t('确定要删除该SKU吗？'),
+    title: t("确认删除"),
+    message: t("确定要删除该SKU吗？"),
     cancel: {
       label: t('取消'),
-      flat: true,
+      flat: true
     },
     ok: {
       label: t('确认'),
-      color: 'negative',
+      color: 'negative'
     },
     persistent: true,
   }).onOk(async () => {
     try {
       const response = await api.delSKU({
-        ids: [row.id],
+        ids: [row.id]
       });
-
+      
       if (response.success) {
-        emit('refresh'); // 刷新列表
+        emit("refresh"); // 刷新列表
       }
     } catch (error) {
       console.error(t('删除失败') + ':', error);
@@ -410,12 +434,44 @@ const handleSkuDelete = (row) => {
 defineExpose({
   selected,
   handleDelete,
-  handleEdit,
+  handleEdit
 });
 </script>
 
 <style lang="scss" scoped>
 .product-spu {
   width: 100%;
+
+  :deep(.q-table) {
+    table {
+      table-layout: fixed;
+    }
+    
+    .q-td, .q-th {
+      padding: 8px;
+      overflow: hidden;
+    }
+
+    .q-table__top {
+      padding: 0;
+    }
+
+    thead tr th {
+      position: relative;
+      background: #f5f5f5;
+    }
+  }
+
+  .sku-table {
+    width: 100%;
+    margin: 0;
+  }
+
+  .ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 400px;
+  }
 }
-</style>
+</style> 

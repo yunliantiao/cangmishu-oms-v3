@@ -329,7 +329,7 @@ const getReceiveStatusColor = (status) => {
 
 // 返回列表页
 const goBack = () => {
-  router.push('/storage/warehousewarrant');
+  router.push('/inbound/warehousewarrant');
 };
 
 // 初始化

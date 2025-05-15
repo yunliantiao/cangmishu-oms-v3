@@ -75,6 +75,12 @@ function interceptorsResponse(config) {
     nprogress.done()
     store.commit('LOADING', false)
   }
+
+  // 如果是二进制响应，直接返回
+  if (config.config.responseType === 'blob') {
+    return config.data
+  }
+
   if (config.data && !config.data.success) {
     if (config.data.code === 1001) {
       store.commit('DESTROY_TOKEN')
@@ -93,13 +99,8 @@ function interceptorsResponse(config) {
       message: config.data.message,
       color: 'positive',
     })
-  } else if (config.config.responseType === 'blob') {
-    let str = config.headers['content-disposition']
-      .match(/=(.*)$/)[1]
-      .split('; ')[0]
-      .split('.')[0]
-    config.data.filename = str
-  }  
+  }
+  
   if (!config.data.success && config.config.method !== 'get') {
     Notify.create({
       message: config.data.message,
@@ -128,13 +129,28 @@ function interceptorsResponseError(error) {
     msg = response?.data?.message || 'Service Error'
   } else if (response?.data?.data?.message) {
     msg = response.data.data.message
+  } else if (response?.data?.data && Object.keys(response.data.data).length > 0) {
+    // 处理验证错误信息
+    const errorMessages = []
+    Object.entries(response.data.data).forEach(([field, messages]) => {
+      if (Array.isArray(messages)) {
+        messages.forEach(msg => errorMessages.push(msg))
+      } else {
+        errorMessages.push(messages)
+      }
+    })
+    msg = errorMessages.join('\n')
   } else {
     msg = 'RequestFailed'
   }
+  
   if (msg) {
     Notify.create({
       message: msg,
       color: 'negative',
+      position: 'top',
+      classes: 'notify-error',
+      timeout: 5000
     })
   }
   return Promise.reject(response?.data || error)

@@ -301,6 +301,8 @@ const handlePrint = () => {
     });
     return;
   }
+  console.log(t('选中的商品') + ':', selected.value);
+  
   printDialogVisible.value = true;
 };
 

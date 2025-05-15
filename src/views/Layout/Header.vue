@@ -11,9 +11,9 @@
       />
 
       <q-btn flat no-caps no-wrap class="q-ml-xs" v-if="$q.screen.gt.xs">
-        <q-avatar>
+        <!-- <q-avatar>
           <img src="https://cdn.quasar.dev/img/avatar.png" />
-        </q-avatar>
+        </q-avatar> -->
         <q-toolbar-title shrink class="text-weight-bold">
           {{ warehouse.name }}
         </q-toolbar-title>

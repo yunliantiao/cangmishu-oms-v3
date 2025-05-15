@@ -51,7 +51,13 @@
               </template>
             </q-input>
 
-            <q-btn :label="t('登录')" type="submit" color="primary" class="full-width login-btn" :loading="loading" />
+            <q-btn
+              :label="t('登录')"
+              type="submit"
+              color="primary"
+              class="full-width login-btn"
+              :loading="loading"
+            />
           </q-form>
           <div v-show="loginType == 2" style="margin: auto">
             <Register v-model="loginType" />
@@ -59,21 +65,21 @@
         </div>
       </div>
     </div>
-    <!-- <div class="footer-text">Copyright © 2025 深圳通晓网络科技有限公司</div> -->
+    <div class="footer-text">Copyright © 2025 深圳通晓网络科技有限公司</div>
   </div>
 </template>
 
 <script>
-import api from '@/api';
-import { useQuasar } from 'quasar';
-import { onMounted, ref } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useRoute, useRouter } from 'vue-router';
-import { useStore } from 'vuex';
-import Register from './User/Register.vue';
+import { ref, onMounted } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import { useStore } from "vuex";
+import { useQuasar } from "quasar";
+import { useI18n } from "vue-i18n";
+import api from "@/api";
+import Register from "./User/Register.vue";
 
 export default {
-  name: 'LoginPage',
+  name: "LoginPage",
   components: {
     Register,
   },
@@ -88,10 +94,24 @@ export default {
     const { t } = useI18n();
 
     const ruleForm = ref({
-      email: '',
-      password: '',
-      captcha: '',
+      email: "",
+      password: "",
+      captcha: "",
     });
+
+    // 处理登录成功后的操作
+    const handleLoginSuccess = (response) => {
+      // 保存token到localStorage和store
+      localStorage.setItem('updateToken', response.data.token);
+      store.commit('UPDATE_TOKEN', response.data.token);
+      
+      // 保存用户信息到localStorage和store
+      localStorage.setItem('userInfo', JSON.stringify(response.data.user));
+      store.commit('SET_USER_INFO', response.data.user);
+
+      // 登录成功后跳转到首页
+      router.push("/");
+    };
 
     const onSubmit = async () => {
       loading.value = true;
@@ -99,31 +119,22 @@ export default {
         // 调用登录接口
         const response = await api.login({
           email: ruleForm.value.email,
-          password: ruleForm.value.password,
+          password: ruleForm.value.password
         });
-
+        
         if (response.success) {
-          // 保存token到localStorage和store
-          localStorage.setItem('updateToken', response.data.token);
-          store.commit('UPDATE_TOKEN', response.data.token);
-
-          // 保存用户信息到localStorage和store
-          localStorage.setItem('userInfo', JSON.stringify(response.data.user));
-          store.commit('SET_USER_INFO', response.data.user);
-
-          // 登录成功后跳转到首页
-          router.push('/');
+          handleLoginSuccess(response);
         } else {
-          throw new Error(response.message || '登录失败');
+          throw new Error(response.message || "登录失败");
         }
       } catch (error) {
-        console.error('登录失败:', error);
+        console.error("登录失败:", error);
 
         // 显示错误提示
         $q.notify({
-          type: 'negative',
-          message: '登录失败: ' + (error.message || '用户名或密码错误'),
-          position: 'top',
+          type: "negative",
+          message: "登录失败: " + (error.message || "用户名或密码错误"),
+          position: "top",
           timeout: 2000,
         });
       } finally {
@@ -131,43 +142,55 @@ export default {
       }
     };
 
+    // 验证临时token
+    const verifyTempToken = async (token) => {
+      try {
+        loading.value = true;
+        const response = await api.verifyTempOmsToken({
+          token: token
+        });
+
+        if (response.success) {
+          handleLoginSuccess(response);
+        } else {
+          throw new Error(response.message || "验证失败");
+        }
+      } catch (error) {
+        console.error("Token验证失败:", error);
+        $q.notify({
+          type: "negative",
+          message: "Token验证失败: " + (error.message || "验证失败"),
+          position: "top",
+          timeout: 2000,
+        });
+      } finally {
+        loading.value = false;
+      }
+    };
+
+    // 组件挂载时检查URL参数
+    onMounted(() => {
+      const token = route.query.token;
+      if (token) {
+        verifyTempToken(token);
+      }
+    });
+
     const refreshCaptcha = () => {
       // 这里添加刷新验证码的逻辑
-      console.log('刷新验证码');
+      console.log("刷新验证码");
       $q.notify({
-        type: 'info',
-        message: '验证码已刷新',
-        position: 'top',
+        type: "info",
+        message: "验证码已刷新",
+        position: "top",
         timeout: 1000,
       });
     };
 
-    // 用token校验后登录
-    const getTokenLogin = async () => {
-      const token = route.query.token;
-      const response = await api.tokenLogin({
-        token,
-      });
-      if (response.success) {
-        // 保存token到localStorage和store
-        localStorage.setItem('updateToken', response.data.token);
-        store.commit('UPDATE_TOKEN', response.data.token);
-
-        // 保存用户信息到localStorage和store
-        localStorage.setItem('userInfo', JSON.stringify(response.data.user));
-        store.commit('SET_USER_INFO', response.data.user);
-
-        // 登录成功后跳转到首页
-        router.push('/');
-      }
-    };
-
     const goToResetPassword = () => {
-      router.push('/reset-password');
+      router.push("/reset-password");
     };
-    onMounted(() => {
-      getTokenLogin();
-    });
+
     return {
       isPwd,
       loading,
@@ -216,7 +239,7 @@ export default {
   flex-direction: column;
   position: relative;
   overflow: hidden;
-
+  
   // 添加背景图片和遮罩
   &::before {
     content: '';
@@ -254,7 +277,7 @@ export default {
     letter-spacing: 2px;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
   }
-
+  
   .sub-text {
     font-size: 18px;
     margin-top: 8px;
@@ -271,11 +294,11 @@ export default {
   justify-content: center;
   position: relative;
   z-index: 3;
-
+  
   .slogan {
     text-align: center;
     margin-bottom: 40px;
-
+    
     .slogan-item {
       font-size: 42px;
       font-weight: bold;
@@ -285,16 +308,10 @@ export default {
       transform: translateX(-20px);
       opacity: 0;
       animation: slideIn 0.5s ease forwards;
-
-      &:nth-child(1) {
-        animation-delay: 0.2s;
-      }
-      &:nth-child(2) {
-        animation-delay: 0.4s;
-      }
-      &:nth-child(3) {
-        animation-delay: 0.6s;
-      }
+      
+      &:nth-child(1) { animation-delay: 0.2s; }
+      &:nth-child(2) { animation-delay: 0.4s; }
+      &:nth-child(3) { animation-delay: 0.6s; }
     }
   }
 
@@ -305,7 +322,7 @@ export default {
     opacity: 0;
     animation: fadeIn 0.8s ease forwards;
     animation-delay: 1s;
-
+    
     div {
       margin: 8px 0;
       letter-spacing: 1px;
@@ -401,4 +418,4 @@ export default {
     padding: 20px;
   }
 }
-</style>
+</style> 

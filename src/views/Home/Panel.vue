@@ -3,23 +3,6 @@
     <div class="row q-gutter-x-md">
       <!-- 左侧主要内容区域 -->
       <div class="col">
-        <!-- 顶部选择器 -->
-        <div class="row items-center q-mb-md">
-          <q-card class="warehouse-select-card full-width">
-            <q-card-section class="q-pa-sm">
-              <q-select
-                v-model="selectedWarehouse"
-                :options="warehouseOptions"
-                outlined
-                dense
-                class="warehouse-select"
-                style="width: 200px"
-                bg-color="white"
-              />
-            </q-card-section>
-          </q-card>
-        </div>
-
         <!-- 统计卡片 -->
         <div class="row q-col-gutter-md q-mb-lg">
           <div class="col-12">
@@ -167,7 +150,13 @@
             <div class="account-section">
               <div class="row items-center justify-between q-mb-sm">
                 <div class="text-subtitle1">{{ $t('可用余额') }} (USD)</div>
-                <q-btn :label="$t('立即充值')" color="primary" flat dense />
+                <q-btn 
+                  :label="$t('立即充值')" 
+                  color="primary" 
+                  flat 
+                  dense 
+                  @click="router.push('/user/recharge')"
+                />
               </div>
               <div class="text-h6 q-mb-xs">0</div>
               <div class="text-caption text-grey">
@@ -212,6 +201,7 @@
 <script>
 import { ref, onMounted } from 'vue';
 import * as echarts from 'echarts';
+import { useRouter } from 'vue-router';
 
 export default {
   name: 'PanelPage',
@@ -221,6 +211,7 @@ export default {
     const warehouseOptions = ['USC'];
     const dateRange = ref('');
     const chartRef = ref(null);
+    const router = useRouter();
 
     // 初始化图表
     onMounted(() => {
@@ -257,7 +248,8 @@ export default {
       selectedWarehouse,
       warehouseOptions,
       dateRange,
-      chartRef
+      chartRef,
+      router
     };
   }
 };
