@@ -1,8 +1,8 @@
 <template>
   <div class="stock-list">
     <!-- 筛选模块 -->
-    <div class="search-bar row q-col-gutter-sm">
-      <div>
+    <div class="search-bar">
+      <div class="row q-col-gutter-sm">
         <!-- 关键词搜索模块 -->
         <KeywordSearch
           v-model:search_mode="filters.search_mode"
@@ -10,9 +10,9 @@
           v-model:search_value="filters.keywords"
           :searchTypeList="searchTypeOptions"
         ></KeywordSearch>
-      </div>
-      <div>
-        <q-btn color="primary" class="filter-btn" :label="t('搜索')" @click="handleSearch" />
+        <div>
+          <q-btn color="primary" class="filter-btn" :label="t('搜索')" @click="handleSearch" />
+        </div>
       </div>
     </div>
 
@@ -60,33 +60,41 @@
             <q-checkbox color="primary" v-model="props.selected" />
           </template>
 
-          <template v-slot:body-selection="props">
-            <q-checkbox color="primary" v-model="props.selected" />
-          </template>
-
-          <!-- 自定义SKU单元格 -->
-          <template v-slot:body-cell-sku="props">
-            <q-td :props="props">
-              <div class="row items-start">
-                <img
-                  :src="
-                    props.row.image || 'https://testoms.cangmishu.com/api/uploads/52331320-d813-40d8-a6db-3cf28f4938b1'
-                  "
-                  class="q-mr-md"
-                  style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px"
-                />
-                <div class="flex-c-start-start gap-6" style="white-space: normal">
-                  <div class="text-primary hover-copy" @click="$copy(props.row.sku)">
-                    SKU: {{ props.row?.sku || '-' }}
+          <template v-slot:body="props">
+            <q-tr :props="props">
+              <q-td auto-width>
+                <q-checkbox color="primary" v-model="props.selected" />
+              </q-td>
+              <q-td key="sku" :props="props">
+                <div class="row items-start">
+                  <img
+                    :src="
+                      props.row.image ||
+                      'https://testoms.cangmishu.com/api/uploads/52331320-d813-40d8-a6db-3cf28f4938b1'
+                    "
+                    class="q-mr-md"
+                    style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px"
+                  />
+                  <div class="flex-c-start-start gap-6" style="white-space: normal">
+                    <div class="text-primary hover-copy" @click="$copy(props.row.sku)">
+                      SKU: {{ props.row?.sku || '-' }}
+                    </div>
+                    <div class="text-overflow-1 text-grey-7">
+                      {{ t('名称') }}：{{ props.row?.product?.name || '-' }}
+                      <q-tooltip>{{ props.row?.product?.name }}</q-tooltip>
+                    </div>
+                    <div class="text-grey-7">{{ t('规格') }}: {{ props.row?.name || '-' }}</div>
                   </div>
-                  <div class="text-overflow-1 text-grey-7">
-                    {{ t('名称') }}：{{ props.row?.product?.name || '-' }}
-                    <q-tooltip>{{ props.row?.product?.name }}</q-tooltip>
-                  </div>
-                  <div class="text-grey-7">{{ t('规格') }}: {{ props.row?.name || '-' }}</div>
                 </div>
-              </div>
-            </q-td>
+              </q-td>
+              <q-td align="right">{{ props.row.in_transit_qty }}</q-td>
+              <q-td align="right">{{ props.row.pending_receipt_qty }}</q-td>
+              <q-td align="right">{{ props.row.pending_shelf_qty }}</q-td>
+              <q-td align="right">{{ props.row.locked_qty }}</q-td>
+              <q-td align="right">{{ props.row.available_qty }}</q-td>
+              <q-td align="right">{{ props.row.defective_qty }}</q-td>
+              <q-td align="right">{{ props.row.total_qty }}</q-td>
+            </q-tr>
           </template>
 
           <!-- 表格底部合计行 -->
@@ -352,103 +360,6 @@ onMounted(() => {
     .q-checkbox__inner--truthy {
       color: var(--q-primary);
     }
-  }
-
-  .product-search {
-    background-color: white;
-    padding: 16px;
-    border-radius: 8px;
-    margin-bottom: 16px;
-
-    .time-group,
-    .search-group {
-      :deep(.q-field__control) {
-        border: 1px solid rgba(0, 0, 0, 0.12) !important;
-        height: 40px;
-      }
-
-      :deep(.q-field--outlined .q-field__control:before) {
-        border: none;
-      }
-
-      :deep(.q-field--outlined .q-field__control:after) {
-        border: none;
-      }
-    }
-
-    .date-range {
-      .row {
-        margin: 0;
-      }
-
-      .date-input {
-        :deep(.q-field__control) {
-          border-radius: 0 !important;
-        }
-      }
-
-      .start-date {
-        :deep(.q-field__control) {
-          border-right: none !important;
-          border-radius: 4px 0 0 4px !important;
-        }
-      }
-
-      .end-date {
-        :deep(.q-field__control) {
-          border-left: none !important;
-          border-radius: 0 4px 4px 0 !important;
-        }
-      }
-
-      .date-separator {
-        padding: 0 4px;
-        display: flex;
-        align-items: center;
-        background: #fff;
-        border-top: 1px solid rgba(0, 0, 0, 0.12);
-        border-bottom: 1px solid rgba(0, 0, 0, 0.12);
-      }
-    }
-
-    .search-group {
-      .search-type-select {
-        min-width: fit-content;
-        :deep(.q-field__control) {
-          border-radius: 4px 0 0 4px !important;
-          border-right: none !important;
-        }
-      }
-
-      .keywords-input {
-        flex: 1;
-        :deep(.q-field__control) {
-          border-radius: 0 !important;
-          border-right: none !important;
-        }
-      }
-
-      .search-mode-select {
-        min-width: fit-content;
-        :deep(.q-field__control) {
-          border-radius: 0 4px 4px 0 !important;
-        }
-      }
-    }
-  }
-
-  .stock-container {
-    background-color: white;
-    padding: 16px;
-    border-radius: 8px;
-  }
-
-  .q-table th {
-    font-weight: 500;
-  }
-
-  .q-table tbody td {
-    height: 56px;
   }
 }
 </style>

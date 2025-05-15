@@ -22,8 +22,8 @@
     </div>
 
     <!-- 搜索过滤区域 -->
-    <div class="search-bar row q-col-gutter-sm">
-      <div>
+    <div class="search-bar">
+      <div class="row q-col-gutter-sm">
         <!-- 时间筛选+类型 -->
         <DatePickerNew
           v-model:date_type="filters.date_type"
@@ -31,8 +31,6 @@
           v-model:end_date="filters.end_date"
           :dateList="dateTypeOptions"
         ></DatePickerNew>
-      </div>
-      <div>
         <!-- 关键词搜索模块 -->
         <KeywordSearch
           v-model:search_mode="filters.search_mode"
@@ -40,10 +38,9 @@
           v-model:search_value="filters.keywords"
           :searchTypeList="searchTypeOptions"
         ></KeywordSearch>
-      </div>
-
-      <div>
-        <q-btn color="primary" class="filter-btn" :label="t('搜索')" @click="handleSearch" />
+        <div>
+          <q-btn color="primary" class="filter-btn" :label="t('搜索')" @click="handleSearch" />
+        </div>
       </div>
     </div>
 
