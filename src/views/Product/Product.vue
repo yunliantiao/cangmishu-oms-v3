@@ -3,32 +3,34 @@
     <!-- 添加导入弹窗组件 -->
     <import-dialog ref="importDialogRef" :type="importType" @success="handleImportSuccess" />
 
-    <!-- 搜索过滤区域 -->
-    <div class="row q-col-gutter-sm items-center">
-      <!-- 时间筛选+类型 -->
-      <DatePickerNew
-        v-model:date_type="filters.date_type"
-        v-model:start_date="filters.start_date"
-        v-model:end_date="filters.end_date"
-        :dateList="dateTypeOptions"
-      ></DatePickerNew>
+    <div class="search-bar">
+      <!-- 搜索过滤区域 -->
+      <div class="row q-col-gutter-sm items-center">
+        <!-- 时间筛选+类型 -->
+        <DatePickerNew
+          v-model:date_type="filters.date_type"
+          v-model:start_date="filters.start_date"
+          v-model:end_date="filters.end_date"
+          :dateList="dateTypeOptions"
+        ></DatePickerNew>
 
-      <!-- 关键词搜索模块 -->
-      <KeywordSearch
-        v-model:search_mode="filters.search_mode"
-        v-model:search_type="filters.search_type"
-        v-model:search_value="filters.keywords"
-        :searchTypeList="searchTypeOptions"
-      ></KeywordSearch>
+        <!-- 关键词搜索模块 -->
+        <KeywordSearch
+          v-model:search_mode="filters.search_mode"
+          v-model:search_type="filters.search_type"
+          v-model:search_value="filters.keywords"
+          :searchTypeList="searchTypeOptions"
+        ></KeywordSearch>
 
-      <div class="q-ml-md">
-        <q-btn color="primary" :label="t('搜索')" @click="handleSearch" />
+        <div class="q-ml-md">
+          <q-btn color="primary" :label="t('搜索')" @click="handleSearch" />
+        </div>
       </div>
     </div>
 
     <!-- 选项卡 -->
-    <div class="product-container">
-      <div class="q-mb-md">
+    <div class="main-table">
+      <div class="tabs-section q-mb-md">
         <q-tabs
           v-model="tab"
           dense
@@ -50,7 +52,7 @@
       </div> -->
         <q-btn
           v-if="tab === 'sku'"
-          outline
+          flat
           :label="t('打印标签')"
           color="primary"
           class="q-mr-sm"
@@ -59,7 +61,7 @@
         />
         <q-btn
           v-if="tab !== 'combo'"
-          outline
+          flat
           :label="t('批量删除')"
           color="negative"
           class="q-mr-sm"
@@ -67,10 +69,8 @@
           @click="handleDelete"
         />
 
-        <div class="col"></div>
-
-        <q-btn @click="handleAddProduct" :label="t('添加')" color="primary" class="q-mr-sm" icon="add" />
-        <q-btn-dropdown color="primary" :label="t('导入')" icon="file_download">
+        <q-btn @click="handleAddProduct" :label="t('添加')" color="primary" class="q-mr-sm" flat icon="add" />
+        <q-btn-dropdown color="primary" :label="t('导入')" icon="file_download" flat>
           <q-list>
             <q-item clickable v-close-popup @click="handleImport('spu')">
               <q-item-section>
@@ -133,8 +133,8 @@
 
 <script setup>
 import api from '@/api/index';
-import DatePickerNew from '@/components/DatePickerNew/Index.vue';
 import ImportDialog from '@/components/ImportDialog.vue';
+import DatePickerNew from '@/components/DatePickerNew/Index.vue';
 import KeywordSearch from '@/components/KeywordSearch/Index.vue';
 import Pagination from '@/components/Pagination.vue';
 import { useQuasar } from 'quasar';
@@ -355,11 +355,26 @@ const combinationSkuRef = ref(null);
 
 <style lang="scss" scoped>
 .product {
-  .product-container {
-    background-color: white;
-    padding: 16px;
-    border-radius: 8px;
-    margin-top: 16px;
+  // 2.tab切换
+  .tabs-section {
+    display: flex;
+    justify-content: flex-start;
+    border-bottom: 1px solid #e6e6e6;
+    .q-tabs {
+      &__content {
+        height: 40px;
+      }
+      &__tab {
+        font-weight: 500;
+        letter-spacing: 0.5px;
+      }
+      .q-tab {
+        padding: 0;
+        &:not(:last-child) {
+          margin-right: 50px;
+        }
+      }
+    }
   }
 }
 </style>

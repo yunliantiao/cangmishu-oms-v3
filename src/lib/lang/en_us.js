@@ -416,4 +416,7 @@ export default {
   '修改': 'Modify',
   '仓库权限': 'Warehouse Permissions',
   '已开通仓库': 'Activated Warehouses',
+  '复制成功': 'Copy successful',
+  '开始日期': 'Start Date',
+  '结束日期': 'End Date',
 } 

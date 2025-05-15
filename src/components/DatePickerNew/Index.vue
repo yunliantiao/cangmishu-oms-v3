@@ -31,10 +31,6 @@
 <script setup>
 import { reactive, watch, computed } from 'vue';
 
-import { useI18n } from 'vue-i18n';
-
-const { t } = useI18n({ useScope: 'global' });
-
 const date_type = defineModel('date_type', {
   type: String,
   default: 'created_at',

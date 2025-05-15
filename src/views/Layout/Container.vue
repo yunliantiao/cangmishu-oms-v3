@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="hHh lpR fFf" class="bg-grey-1">
+  <q-layout view="hHh lpR fFf" class="bg-grey-2">
     <!-- 使用Header组件 -->
     <HeaderComponent 
       :leftDrawerOpen="leftDrawerOpen"
@@ -21,11 +21,11 @@
 </template>
 
 <script>
-import { onMounted, onBeforeUnmount, computed } from 'vue'
 import { useQuasar } from 'quasar'
+import { computed, onBeforeUnmount, onMounted } from 'vue'
 import { useStore } from 'vuex'
-import HeaderComponent from './Header.vue'
 import AsidesComponent from './Asides.vue'
+import HeaderComponent from './Header.vue'
 
 export default {
   name: 'ContainerLayout',

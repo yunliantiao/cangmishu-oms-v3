@@ -2,13 +2,9 @@
   <div class="product-sku">
     <!-- 编辑弹窗 -->
     <edit-sku-dialog ref="editDialog" @success="$emit('refresh')" />
-    
+
     <!-- 打印标签弹窗 -->
-    <print-label-dialog
-      v-model="printDialogVisible"
-      :sku-list="selected"
-      @success="handlePrintSuccess"
-    />
+    <print-label-dialog v-model="printDialogVisible" :sku-list="selected" @success="handlePrintSuccess" />
 
     <!-- 表格 -->
     <q-table
@@ -20,7 +16,6 @@
       selection="multiple"
       hide-pagination
       flat
-      bordered
       :loading="loading"
     >
       <!-- 加载动画插槽 -->
@@ -57,45 +52,50 @@
           <q-td key="skuInfo">
             <div class="row no-wrap items-center">
               <div class="q-mr-sm">
-                <img 
-                  :src="props.row?.image || 'https://testoms.cangmishu.com/api/uploads/52331320-d813-40d8-a6db-3cf28f4938b1'" 
-                  style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;"
+                <img
+                  :src="
+                    props.row?.image || 'https://testoms.cangmishu.com/api/uploads/52331320-d813-40d8-a6db-3cf28f4938b1'
+                  "
+                  style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px"
                 />
               </div>
-              <div class="ellipsis">
-                <div>SKU: {{ props.row?.sku || '-' }}</div>
-                <div class="ellipsis">{{ props.row?.product?.name || '-' }}</div>
+              <div class="flex-c-start-start gap-6" style="white-space: normal; width: 300px">
+                <div class="text-primary hover-copy" @click="$copy(props.row.sku)">
+                  SKU: {{ props.row?.sku || '-' }}
+                </div>
+                <div class="text-overflow-1">
+                  {{ props.row?.product?.name || '-' }}
+                  <q-tooltip>{{ props.row?.product?.name }}</q-tooltip>
+                </div>
                 <div>{{ t('规格') }}: {{ props.row?.name || '-' }}</div>
               </div>
             </div>
           </q-td>
           <q-td key="applySpec" class="text-center" style="white-space: pre-line">
-            {{ `${props.row?.size_length || 0}*${props.row?.size_width || 0}*${props.row?.size_height || 0} cm\n${props.row?.weight || 0} g` }}
+            {{
+              `${props.row?.size_length || 0}*${props.row?.size_width || 0}*${props.row?.size_height || 0} cm\n${
+                props.row?.weight || 0
+              } g`
+            }}
           </q-td>
           <q-td key="realSpec" class="text-center" style="white-space: pre-line">
-            {{ `${props.row?.warehouse_size_length || 0}*${props.row?.warehouse_size_width || 0}*${props.row?.warehouse_size_height || 0} cm\n${props.row?.warehouse_weight || 0} g` }}
+            {{
+              `${props.row?.warehouse_size_length || 0}*${props.row?.warehouse_size_width || 0}*${
+                props.row?.warehouse_size_height || 0
+              } cm\n${props.row?.warehouse_weight || 0} g`
+            }}
           </q-td>
           <q-td key="timeInfo" class="text-center">
             <div>{{ t('创建') }}: {{ props.row?.created_at || '-' }}</div>
             <div>{{ t('更新') }}: {{ props.row?.updated_at || '-' }}</div>
           </q-td>
           <q-td key="operations" class="text-center">
-            <q-btn
-              flat
-              round
-              color="primary"
-              icon="edit"
-              size="sm"
-              @click="handleEdit(props.row)"
-            />
-            <q-btn
-              flat
-              round
-              color="negative"
-              icon="delete"
-              size="sm"
-              @click="handleSingleDelete(props.row)"
-            />
+            <q-btn flat round color="primary" icon="edit" size="sm" @click="handleEdit(props.row)">
+              <q-tooltip>{{ t('编辑') }}</q-tooltip>
+            </q-btn>
+            <q-btn flat round color="negative" icon="delete" size="sm" @click="handleSingleDelete(props.row)">
+              <q-tooltip>{{ t('删除') }}</q-tooltip>
+            </q-btn>
           </q-td>
         </q-tr>
       </template>
@@ -111,12 +111,12 @@
 </template>
 
 <script setup>
-import { ref, defineProps, defineEmits, defineExpose } from "vue";
-import { useQuasar } from "quasar";
-import { useI18n } from "vue-i18n";
+import api from '@/api/index';
+import { useQuasar } from 'quasar';
+import { defineEmits, defineExpose, defineProps, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import EditSkuDialog from './EditSkuDialog.vue';
 import PrintLabelDialog from './PrintLabelDialog.vue';
-import api from '@/api/index';
 
 const { t } = useI18n();
 const $q = useQuasar();
@@ -136,66 +136,60 @@ const props = defineProps({
   },
   loading: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 });
 
 // 表格分页配置
 const tablePagination = ref({
-  sortBy: "",
+  sortBy: '',
   descending: false,
   page: 1,
   rowsPerPage: 0, // 设置为0以禁用表格内置分页
 });
 
-const emit = defineEmits([
-  "add",
-  "edit",
-  "copy",
-  "delete",
-  "print",
-  "import",
-  "page-change",
-  "void"
-]);
+const emit = defineEmits(['add', 'edit', 'copy', 'delete', 'print', 'import', 'page-change', 'void']);
 
 // 表格数据
 const selected = ref([]);
 const columns = [
   {
-    name: "skuInfo",
+    name: 'skuInfo',
     required: true,
-    label: t("SKU信息"),
-    align: "left",
+    label: t('SKU信息'),
+    align: 'left',
     field: (row) => row?.sku || '',
-    style: "width: 25%"
+    style: 'width: 25%',
   },
-  { 
-    name: "applySpec", 
-    label: t("申请规格"), 
-    field: row => `${row.size_length || 0}*${row.size_width || 0}*${row.size_height || 0} cm\n${row.weight || 0} g`, 
-    align: "center",
-    style: "width: 20%"
+  {
+    name: 'applySpec',
+    label: t('申请规格'),
+    field: (row) => `${row.size_length || 0}*${row.size_width || 0}*${row.size_height || 0} cm\n${row.weight || 0} g`,
+    align: 'center',
+    style: 'width: 20%',
   },
-  { 
-    name: "realSpec", 
-    label: t("实际规格"), 
-    field: row => `${row.warehouse_size_length || 0}*${row.warehouse_size_width || 0}*${row.warehouse_size_height || 0} cm\n${row.warehouse_weight || 0} g`,
-    align: "center",
-    style: "width: 20%"
+  {
+    name: 'realSpec',
+    label: t('实际规格'),
+    field: (row) =>
+      `${row.warehouse_size_length || 0}*${row.warehouse_size_width || 0}*${row.warehouse_size_height || 0} cm\n${
+        row.warehouse_weight || 0
+      } g`,
+    align: 'center',
+    style: 'width: 20%',
   },
-  { 
-    name: "timeInfo", 
-    label: t("时间"), 
-    align: "center",
-    style: "width: 25%"
+  {
+    name: 'timeInfo',
+    label: t('时间'),
+    align: 'center',
+    style: 'width: 25%',
   },
-  { 
-    name: "operations", 
-    label: t("操作"), 
-    align: "center",
-    style: "width: 10%"
-  }
+  {
+    name: 'operations',
+    label: t('操作'),
+    align: 'center',
+    style: 'width: 10%',
+  },
 ];
 
 // 编辑弹窗引用
@@ -213,33 +207,33 @@ const handleEdit = (row) => {
 const handleDelete = async () => {
   if (selected.value.length === 0) {
     $q.notify({
-      message: t("请选择要删除的商品"),
-      color: "warning",
+      message: t('请选择要删除的商品'),
+      color: 'warning',
     });
     return;
   }
-  
+
   $q.dialog({
-    title: t("确认删除"),
-    message: t("确定要删除选中的") + ` ${selected.value.length} ` + t("个商品吗？"),
+    title: t('确认删除'),
+    message: t('确定要删除选中的') + ` ${selected.value.length} ` + t('个商品吗？'),
     cancel: {
       label: t('取消'),
-      flat: true
+      flat: true,
     },
     ok: {
       label: t('确认'),
-      color: 'negative'
+      color: 'negative',
     },
     persistent: true,
   }).onOk(async () => {
     try {
       const response = await api.delSKU({
-        ids: selected.value.map(item => item.id)
+        ids: selected.value.map((item) => item.id),
       });
-      
+
       if (response.success) {
         selected.value = []; // 清空选中
-        emit("refresh"); // 刷新列表
+        emit('refresh'); // 刷新列表
       }
     } catch (error) {
       console.error(t('删除失败') + ':', error);
@@ -250,25 +244,25 @@ const handleDelete = async () => {
 // 处理单个删除
 const handleSingleDelete = (row) => {
   $q.dialog({
-    title: t("确认删除"),
-    message: t("确定要删除该商品吗？"),
+    title: t('确认删除'),
+    message: t('确定要删除该商品吗？'),
     cancel: {
       label: t('取消'),
-      flat: true
+      flat: true,
     },
     ok: {
       label: t('确认'),
-      color: 'negative'
+      color: 'negative',
     },
     persistent: true,
   }).onOk(async () => {
     try {
       const response = await api.delSKU({
-        ids: [row.id]
+        ids: [row.id],
       });
-      
+
       if (response.success) {
-        emit("refresh"); // 刷新列表
+        emit('refresh'); // 刷新列表
       }
     } catch (error) {
       console.error(t('删除失败') + ':', error);
@@ -280,21 +274,21 @@ const handleSingleDelete = (row) => {
 const handleVoid = () => {
   if (selected.value.length === 0) {
     $q.notify({
-      message: t("请选择要作废的商品"),
-      color: "warning",
+      message: t('请选择要作废的商品'),
+      color: 'warning',
     });
     return;
   }
-  
+
   console.log(t('选中的商品') + ':', selected.value);
-  
+
   $q.dialog({
-    title: t("确认作废"),
-    message: t("确定要作废选中的") + ` ${selected.value.length} ` + t("个商品吗？"),
+    title: t('确认作废'),
+    message: t('确定要作废选中的') + ` ${selected.value.length} ` + t('个商品吗？'),
     cancel: true,
     persistent: true,
   }).onOk(() => {
-    emit("void", selected.value);
+    emit('void', selected.value);
   });
 };
 
@@ -303,7 +297,7 @@ const handlePrint = () => {
   if (selected.value.length === 0) {
     $q.notify({
       message: t('请选择要打印的商品'),
-      color: "warning",
+      color: 'warning',
     });
     return;
   }
@@ -320,40 +314,13 @@ defineExpose({
   selected,
   handleDelete,
   handleEdit,
-  handlePrint
+  handlePrint,
 });
 </script>
 
 <style lang="scss" scoped>
 .product-sku {
   width: 100%;
-
-  :deep(.q-table) {
-    table {
-      table-layout: fixed;
-    }
-    
-    .q-td, .q-th {
-      padding: 8px;
-      overflow: hidden;
-    }
-
-    .q-table__top {
-      padding: 0;
-    }
-
-    thead tr th {
-      position: relative;
-      background: #f5f5f5;
-    }
-  }
-
-  .ellipsis {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 400px;
-  }
 }
 
 .preview-box {
@@ -362,11 +329,11 @@ defineExpose({
     border-radius: 4px;
     height: 200px;
     background: #f5f5f5;
-    
+
     &.roll {
       // 卷纸预览样式
     }
-    
+
     &.flat {
       // 平面纸预览样式
     }
@@ -376,4 +343,4 @@ defineExpose({
 .text-red {
   color: #ff0000;
 }
-</style> 
+</style>

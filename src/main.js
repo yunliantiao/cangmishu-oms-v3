@@ -4,6 +4,8 @@ import router from './router'
 import store from './store'
 import App from './App.vue'
 import { createI18n } from 'vue-i18n'
+import './assets/global.scss'
+import Message from './utils/message'
 
 // Import Quasar
 import { Quasar, Notify, Dialog } from 'quasar'
@@ -27,6 +29,7 @@ const i18n = createI18n({
     en_us
   }
 })
+const { t } = i18n.global
 
 const app = createApp(App)
 store.dispatch('initApp')
@@ -50,3 +53,9 @@ app.use(Quasar, {
 }).use(router).use(store).use(i18n)
 
 app.mount('#app')
+
+app.config.globalProperties.$copy = async (text) => {
+  await navigator.clipboard.writeText(text)
+  Message.successMessage(t('复制成功'))
+}
+app.config.globalProperties.t = t

@@ -1,13 +1,6 @@
 <template>
   <div class="combo-sku">
-    <q-table
-      :rows="rows"
-      :columns="columns"
-      row-key="id"
-      flat
-      bordered
-      :loading="loading"
-    >
+    <q-table :rows="rows" :columns="columns" row-key="id" flat :loading="loading">
       <!-- 加载动画插槽 -->
       <template v-slot:loading>
         <q-inner-loading showing color="primary">
@@ -25,14 +18,7 @@
       <template v-slot:header="props">
         <q-tr :props="props">
           <q-th style="width: 48px; padding: 0 4px">
-            <q-btn
-              size="sm"
-              color="grey-7"
-              flat
-              dense
-              disable
-              icon="keyboard_arrow_right"
-            />
+            <q-btn size="sm" color="grey-7" flat dense disable icon="keyboard_arrow_right" />
           </q-th>
           <q-th v-for="col in props.cols" :key="col.name" :props="props" :style="col.style">
             {{ col.label }}
@@ -54,13 +40,10 @@
             />
           </q-td>
           <!-- 组合SKU信息 -->
-          <q-td key="comboInfo" :style="columns.find(col => col.name === 'comboInfo').style">
+          <q-td key="comboInfo" :style="columns.find((col) => col.name === 'comboInfo').style">
             <div class="row no-wrap items-center">
               <div class="q-mr-sm">
-                <img 
-                  :src="props.row.image" 
-                  style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;"
-                />
+                <img :src="props.row.image" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px" />
               </div>
               <div class="ellipsis">
                 <div>{{ t('SKU') }}: {{ props.row.code }}</div>
@@ -69,27 +52,13 @@
               </div>
             </div>
           </q-td>
-          <q-td key="timeInfo" class="text-center" :style="columns.find(col => col.name === 'timeInfo').style">
+          <q-td key="timeInfo" class="text-center" :style="columns.find((col) => col.name === 'timeInfo').style">
             <div>{{ t('创建') }}: {{ props.row.created_at }}</div>
             <div>{{ t('更新') }}: {{ props.row.updated_at }}</div>
           </q-td>
-          <q-td key="operations" class="text-center" :style="columns.find(col => col.name === 'operations').style">
-            <q-btn
-              flat
-              round
-              color="primary"
-              icon="edit"
-              size="sm"
-              @click="handleEdit(props.row)"
-            />
-            <q-btn
-              flat
-              round
-              color="negative"
-              icon="delete"
-              size="sm"
-              @click="handleDelete(props.row)"
-            />
+          <q-td key="operations" class="text-center" :style="columns.find((col) => col.name === 'operations').style">
+            <q-btn flat round color="primary" icon="edit" size="sm" @click="handleEdit(props.row)" />
+            <q-btn flat round color="negative" icon="delete" size="sm" @click="handleDelete(props.row)" />
           </q-td>
         </q-tr>
 
@@ -111,15 +80,20 @@
                   <q-td :props="slotProps">
                     <div class="row no-wrap items-center">
                       <div class="q-mr-sm">
-                        <img 
-                          :src="slotProps.row.spec?.image" 
-                          style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;"
+                        <img
+                          :src="slotProps.row.spec?.image"
+                          style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px"
                         />
                       </div>
-                      <div class="ellipsis">
-                        <div>{{ t('SKU') }}: {{ slotProps.row.spec?.sku }}</div>
-                        <div class="ellipsis">{{ t('名称') }}: {{ slotProps.row.spec?.product?.name }}</div>
-                        <div>{{ t('规格') }}: {{ slotProps.row.spec?.name }}</div>
+                      <div class="flex-c-start-start gap-6" style="white-space: normal; width: 300px">
+                        <div class="text-primary hover-copy" @click="$copy(slotProps.row.spec?.sku)">
+                          {{ t('SKU') }}: {{ slotProps.row?.spec?.sku || '-' }}
+                        </div>
+                        <div class="text-overflow-1">
+                          {{ t('名称') }}: {{ slotProps.row?.product?.name || '-' }}
+                          <q-tooltip>{{ slotProps.row?.spec?.product?.name }}</q-tooltip>
+                        </div>
+                        <div>{{ t('规格') }}: {{ slotProps.row?.spec?.name || '-' }}</div>
                       </div>
                     </div>
                   </q-td>
@@ -127,7 +101,11 @@
 
                 <template v-slot:body-cell-spec="slotProps">
                   <q-td :props="slotProps" style="white-space: pre-line; text-align: center">
-                    {{ `${slotProps.row.spec?.size_length || 0}*${slotProps.row.spec?.size_width || 0}*${slotProps.row.spec?.size_height || 0} cm` }}
+                    {{
+                      `${slotProps.row.spec?.size_length || 0}*${slotProps.row.spec?.size_width || 0}*${
+                        slotProps.row.spec?.size_height || 0
+                      } cm`
+                    }}
                   </q-td>
                 </template>
 
@@ -146,18 +124,18 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits, ref } from "vue";
-import { useRouter } from "vue-router";
-import { useQuasar } from "quasar";
-import { useI18n } from "vue-i18n";
 import api from '@/api/index';
+import { useQuasar } from 'quasar';
+import { defineEmits, defineProps, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const $q = useQuasar();
 const { t } = useI18n();
 
 const tablePagination = ref({
-  sortBy: "",
+  sortBy: '',
   descending: false,
   page: 1,
   rowsPerPage: 0, // 设置为0以禁用表格内置分页
@@ -167,12 +145,12 @@ const props = defineProps({
   rows: {
     type: Array,
     required: true,
-    default: () => []
+    default: () => [],
   },
   loading: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 });
 
 const emit = defineEmits(['refresh']);
@@ -180,52 +158,52 @@ const emit = defineEmits(['refresh']);
 // 主表格列定义
 const columns = ref([
   {
-    name: "comboInfo",
+    name: 'comboInfo',
     required: true,
-    label: t("组合SKU信息"),
-    align: "left",
-    field: row => row.code,
-    style: "width: 60%"
+    label: t('组合SKU信息'),
+    align: 'left',
+    field: (row) => row.code,
+    style: 'width: 60%',
   },
   {
-    name: "timeInfo",
-    label: t("时间"),
-    field: "created_at",
-    align: "center",
-    style: "width: 25%"
+    name: 'timeInfo',
+    label: t('时间'),
+    field: 'created_at',
+    align: 'center',
+    style: 'width: 25%',
   },
   {
-    name: "operations",
-    label: t("操作"),
-    align: "center",
-    style: "width: 15%"
-  }
+    name: 'operations',
+    label: t('操作'),
+    align: 'center',
+    style: 'width: 15%',
+  },
 ]);
 
 // 关联SKU表格列定义
 const specColumns = ref([
   {
-    name: "skuInfo",
+    name: 'skuInfo',
     required: true,
-    label: t("SKU信息"),
-    align: "left",
-    field: row => row.spec?.sku,
-    style: "width: 60%"
+    label: t('SKU信息'),
+    align: 'left',
+    field: (row) => row.spec?.sku,
+    style: 'width: 60%',
   },
   {
-    name: "spec",
-    label: t("规格"),
-    field: row => `${row.spec?.size_length || 0}*${row.spec?.size_width || 0}*${row.spec?.size_height || 0}`,
-    align: "center",
-    style: "width: 20%"
+    name: 'spec',
+    label: t('规格'),
+    field: (row) => `${row.spec?.size_length || 0}*${row.spec?.size_width || 0}*${row.spec?.size_height || 0}`,
+    align: 'center',
+    style: 'width: 20%',
   },
   {
-    name: "quantity",
-    label: t("数量"),
-    field: "quantity",
-    align: "center",
-    style: "width: 20%"
-  }
+    name: 'quantity',
+    label: t('数量'),
+    field: 'quantity',
+    align: 'center',
+    style: 'width: 20%',
+  },
 ]);
 
 // 处理编辑
@@ -236,15 +214,15 @@ const handleEdit = (row) => {
 // 处理删除
 const handleDelete = (row) => {
   $q.dialog({
-    title: t("确认删除"),
-    message: t("确定要删除该组合商品吗？"),
+    title: t('确认删除'),
+    message: t('确定要删除该组合商品吗？'),
     cancel: {
       label: t('取消'),
-      flat: true
+      flat: true,
     },
     ok: {
       label: t('确认'),
-      color: 'negative'
+      color: 'negative',
     },
     persistent: true,
   }).onOk(async () => {
@@ -253,15 +231,15 @@ const handleDelete = (row) => {
       if (response.success) {
         $q.notify({
           type: 'positive',
-          message: t('删除成功')
+          message: t('删除成功'),
         });
-        emit("refresh"); // 触发刷新事件
+        emit('refresh'); // 触发刷新事件
       }
     } catch (error) {
       console.error(t('删除失败') + ':', error);
       $q.notify({
         type: 'negative',
-        message: t('删除失败')
+        message: t('删除失败'),
       });
     }
   });
@@ -272,32 +250,9 @@ const handleDelete = (row) => {
 .combo-sku {
   width: 100%;
 
-  :deep(.q-table) {
-    table {
-      table-layout: fixed;
-    }
-    
-    .q-td, .q-th {
-      padding: 8px;
-      overflow: hidden;
-    }
-
-    thead tr th {
-      position: relative;
-      background: #f5f5f5;
-    }
-  }
-
   .spec-table {
     width: 100%;
     margin: 0;
-  }
-
-  .ellipsis {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 400px;
   }
 }
 </style>
