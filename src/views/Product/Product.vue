@@ -23,7 +23,7 @@
         ></KeywordSearch>
 
         <div class="q-ml-md">
-          <q-btn color="primary" :label="t('搜索')" @click="handleSearch" />
+          <q-btn color="primary" class="filter-btn" :label="t('搜索')" @click="handleSearch" />
         </div>
       </div>
     </div>
@@ -133,8 +133,8 @@
 
 <script setup>
 import api from '@/api/index';
-import ImportDialog from '@/components/ImportDialog.vue';
 import DatePickerNew from '@/components/DatePickerNew/Index.vue';
+import ImportDialog from '@/components/ImportDialog.vue';
 import KeywordSearch from '@/components/KeywordSearch/Index.vue';
 import Pagination from '@/components/Pagination.vue';
 import { useQuasar } from 'quasar';
