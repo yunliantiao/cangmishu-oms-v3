@@ -4,6 +4,11 @@ export default {
   login: (data) => POST("auth/login", data), // 登录
   logout: (data) => DEL("auth/logout", data), // 退出
   uploads: (data, config) => $file.post("uploads", data, config), // 上传文件
+  resetPassword: (data) => PUT("auth/password/reset", data), // 修改密码
+  verifyTempOmsToken: (data) => POST("auth/verify-temp-oms-token", data), // 验证临时oms token
+
+
+  // 产品模块
   importSpu: (data, config) => $file.post("products/import", data, config), // 导入SPU
   importCombo: (data, config) => $file.post("bundle-products/import", data, config), // 导入组合商品
   customsTypesList: () => GET("customs-types"), // 获取海关类型
@@ -17,13 +22,12 @@ export default {
   delSKU: (data) => DEL(`skus`,data), // SKU详情
   getProductList: (data) => GET("products", data), // 获取产品列表
   getSkuList: (data) => GET("skus", data), // 获取产品列表
-  productsLabels: (data) => POST("products/labels/generate", data, { responseType: 'blob' }), // 生成打印标签
+  productsLabels: (data) => POST("products/labels/generate", data,), // 生成打印标签
   addCombo: (data) => POST("bundle-products", data), // 添加组合产品
   getComboList: (data) => GET("bundle-products", data), // 组合产品列表
   delCombo: (id) => DEL(`bundle-products/${id}`), // 删除组合产品
   getComboDetail: (id) => GET(`bundle-products/${id}`), // 组合产品详情
   editCombo: (id,data) => PUT(`bundle-products/${id}`,data), // 编辑组合产品
-
 
   //入库模块
   createInbound: (data) => POST("inbound", data), // 创建入库单
@@ -36,11 +40,16 @@ export default {
   shipInbound: (id) => POST(`inbound/${id}/ship`), // 入库单发货
   delInbound: (id) => DEL(`inbound/${id}`), // 删除单发货
   inboundBoxLabel: (id,data) => POST(`inbound/${id}/boxes/label`,data, { responseType: 'blob' }), // 打印箱唛
+  inboundResetTracking: (id,data) => POST(`inbound/${id}/tracking`,data), // 更新运单号
+  getInboundSkus: (id,data) => GET(`inbound/${id}/skus`,data), // 查看入库单sku详情
+  getInboundBoxes: (id,data) => GET(`inbound/${id}/boxes`,data), // 查看入库单箱详情
+  getInboundLabel: (id) => GET(`inbound/${id}/label`), // 打印入库单
 
   // 库存模块
   getStocksList: (data) => GET("stocks", data), // 获取库存列表
   getStocksLogList: (data) => GET("stocks/logs", data), // 获取库存流水
-  stocksExport: (data) => GET("stocks/export", data, { responseType: 'blob' }), // 导出库存
+  stocksExport: (data) => POST("stocks/export", data, { responseType: 'blob' }), // 导出库存清单
+  stocksLogsExport: (data) => POST("stocks/logs/export", data, { responseType: 'blob' }), // 导出库存清单
 
   // 库龄模块
   getStockAgeList: (data) => GET("stocks-ages", data), // 获取标准库龄列表
@@ -61,6 +70,9 @@ export default {
   orderRevert: (id) => POST(`orders/${id}/revert`), // 订单撤回
   orderPdf: (id,data,config) => $file.post(`orders/${id}/label`,data, config), // 上传面单
 
+  // 用户模块
+  userRecharge: (data) => POST("recharge-records", data), // 充值
+  paymentMethods: (data) => GET("payment-methods", data), // 充值方式列表
 
   //公用模块
   getCountryList: (data) => GET("countries", data), // 获取库存流水

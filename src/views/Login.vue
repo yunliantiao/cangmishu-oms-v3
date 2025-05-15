@@ -70,8 +70,8 @@
 </template>
 
 <script>
-import { ref } from "vue";
-import { useRouter } from "vue-router";
+import { ref, onMounted } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import { useStore } from "vuex";
 import { useQuasar } from "quasar";
 import { useI18n } from "vue-i18n";
@@ -85,6 +85,7 @@ export default {
   },
   setup() {
     const router = useRouter();
+    const route = useRoute();
     const store = useStore();
     const isPwd = ref(true);
     const loading = ref(false);
@@ -98,6 +99,20 @@ export default {
       captcha: "",
     });
 
+    // 处理登录成功后的操作
+    const handleLoginSuccess = (response) => {
+      // 保存token到localStorage和store
+      localStorage.setItem('updateToken', response.data.token);
+      store.commit('UPDATE_TOKEN', response.data.token);
+      
+      // 保存用户信息到localStorage和store
+      localStorage.setItem('userInfo', JSON.stringify(response.data.user));
+      store.commit('SET_USER_INFO', response.data.user);
+
+      // 登录成功后跳转到首页
+      router.push("/");
+    };
+
     const onSubmit = async () => {
       loading.value = true;
       try {
@@ -108,16 +123,7 @@ export default {
         });
         
         if (response.success) {
-          // 保存token到localStorage和store
-          localStorage.setItem('updateToken', response.data.token);
-          store.commit('UPDATE_TOKEN', response.data.token);
-          
-          // 保存用户信息到localStorage和store
-          localStorage.setItem('userInfo', JSON.stringify(response.data.user));
-          store.commit('SET_USER_INFO', response.data.user);
-
-          // 登录成功后跳转到首页
-          router.push("/");
+          handleLoginSuccess(response);
         } else {
           throw new Error(response.message || "登录失败");
         }
@@ -135,6 +141,40 @@ export default {
         loading.value = false;
       }
     };
+
+    // 验证临时token
+    const verifyTempToken = async (token) => {
+      try {
+        loading.value = true;
+        const response = await api.verifyTempOmsToken({
+          token: token
+        });
+
+        if (response.success) {
+          handleLoginSuccess(response);
+        } else {
+          throw new Error(response.message || "验证失败");
+        }
+      } catch (error) {
+        console.error("Token验证失败:", error);
+        $q.notify({
+          type: "negative",
+          message: "Token验证失败: " + (error.message || "验证失败"),
+          position: "top",
+          timeout: 2000,
+        });
+      } finally {
+        loading.value = false;
+      }
+    };
+
+    // 组件挂载时检查URL参数
+    onMounted(() => {
+      const token = route.query.token;
+      if (token) {
+        verifyTempToken(token);
+      }
+    });
 
     const refreshCaptcha = () => {
       // 这里添加刷新验证码的逻辑

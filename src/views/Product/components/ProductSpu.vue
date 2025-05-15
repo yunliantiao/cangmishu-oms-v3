@@ -12,6 +12,7 @@
       selection="multiple"
       hide-pagination
       flat
+      :pagination="tablePagination"
       bordered
       :loading="loading"
     >
@@ -85,7 +86,7 @@
             {{ props.row?.category || '-' }}
           </q-td>
           <q-td key="creator" class="text-center" :style="columns.find(col => col.name === 'creator').style">
-            {{ props.row?.creator || '-' }}
+            {{ props.row?.created_by?.name || '-' }}
           </q-td>
           <q-td key="createTime" class="text-center" :style="columns.find(col => col.name === 'createTime').style">
             {{ props.row?.updated_at || '-' }}
@@ -260,7 +261,7 @@ const columns = [
   {
     name: "creator",
     label: t("创建人员"),
-    field: "creator",
+    field: "created_by",
     align: "center",
     style: "width: 20%"
   },

@@ -170,7 +170,7 @@ const filters = ref({
 // 搜索类型选项
 const searchTypeOptions = [
   { label: "SKU", value: "sku" },
-  { label: t("商品名称"), value: "product_name" },
+  { label: t("商品名称"), value: "name" },
 ];
 
 // 搜索模式选项
@@ -342,27 +342,41 @@ const handleExport = async (type) => {
 
     // 调用导出API
     const response = await api.stocksExport(params);
+    
+    // 获取文件名
+    const filename = `库存清单_${new Date().toLocaleDateString()}.xlsx`;
+    
+    // 创建 Blob 对象
+    const blob = new Blob([response], { 
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+    });
+    
+    // 创建下载链接
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    
+    // 触发下载
+    document.body.appendChild(link);
+    link.click();
+    
+    // 清理
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
 
-    if (response.success) {
-      // 如果返回的是文件URL，则创建下载链接
-      const link = document.createElement("a");
-      link.href = response.data.url;
-      link.download = `库存清单_${new Date().toLocaleDateString()}.xlsx`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
+    $q.notify({
+      type: "positive",
+      message: t("导出成功"),
+    });
+  } catch (error) {
+    // 只在真正的错误情况下显示错误提示
+    if (!error.response || error.response.status !== 200) {
       $q.notify({
-        type: "positive",
-        message: t("导出成功"),
+        type: "negative",
+        message: t("导出失败"),
       });
     }
-  } catch (error) {
-    console.error("导出失败:", error);
-    $q.notify({
-      type: "negative",
-      message: t("导出失败"),
-    });
   }
 };
 

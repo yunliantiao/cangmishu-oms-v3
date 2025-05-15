@@ -24,9 +24,9 @@
         >
           <q-tab name="all" :label="t('全部')" />
           <q-tab name="draft" :label="t('草稿')" />
-          <q-tab name="pending_shipment" :label="t('待出库')" />
-          <q-tab name="exception" :label="t('异常')" />
+          <q-tab name="pending_shipment" :label="t('待发货')" />
           <q-tab name="shipped" :label="t('已发货')" />
+          <q-tab name="exception" :label="t('异常')" />
           <q-tab name="cancelled" :label="t('已取消')" />
         </q-tabs>
       </div>
@@ -82,11 +82,13 @@
                 :label="t('开始时间')"
                 clearable
                 class="date-input start-date"
-                @click="() => {}"
+                @click="$refs.startDatePopup.show()"
+                readonly
               >
                 <template v-slot:append>
                   <q-icon name="event" class="cursor-pointer">
                     <q-popup-proxy
+                      ref="startDatePopup"
                       cover
                       transition-show="scale"
                       transition-hide="scale"
@@ -104,11 +106,13 @@
                 :label="t('结束时间')"
                 clearable
                 class="date-input end-date"
-                @click="() => {}"
+                @click="$refs.endDatePopup.show()"
+                readonly
               >
                 <template v-slot:append>
                   <q-icon name="event" class="cursor-pointer">
                     <q-popup-proxy
+                      ref="endDatePopup"
                       cover
                       transition-show="scale"
                       transition-hide="scale"
@@ -164,7 +168,6 @@
     <!-- 操作按钮和表格容器 -->
     <div class="outbound-container">
       <div class="row justify-end q-mb-md">
-        
         <q-btn
           color="primary"
           :label="t('新建')"
@@ -248,7 +251,7 @@
                 <div class="row items-center justify-between" style="padding: 8px">
                   <div class="order-basic-info">
                     <span class="q-mr-md">{{ t('订单号') }}：{{ props.row.order_number }}</span>
-                    <span class="q-mr-md">{{ t('包裹号') }}：{{ props.row.packages?.[0]?.package_number || '--' }}</span>
+                    <span class="q-mr-md">{{ t('包裹号') }}：{{ props.row.system_order_number || '--' }}</span>
                   </div>
                   <div>{{ sourceMap[props.row.source] || props.row.source }}</div>
                 </div>
@@ -450,9 +453,9 @@ const platformOptions = [
 // 在 script 部分添加状态映射
 const statusMap = {
   draft: '草稿',
-  pending_shipment: '待出库',
-  exception: '异常',
+  pending_shipment: '待发货',
   shipped: '已发货',
+  exception: '异常',
   cancelled: '已取消'
 };
 

@@ -242,7 +242,7 @@ const searchTypeOptions = [
 
 const searchModeOptions = [
   { label: t('精确搜索'), value: 'exact' },
-  { label: t('模糊搜索'), value: 'like' },
+  { label: t('模糊搜索'), value: 'fuzzy' },
   { label: t('前缀搜索'), value: 'prefix' }
 ];
 

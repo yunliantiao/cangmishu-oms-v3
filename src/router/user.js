@@ -25,6 +25,17 @@ export default [
                     name: '账号信息',
                 },
             },
+            {
+                path: 'recharge',
+                name: 'Recharge',
+                component: () => import('@/views/User/Recharge.vue'),
+                id: 3002,
+                meta: {
+                    level: 3,
+                    group: '用户',
+                    name: '充值',
+                },
+            }
         ]
     }
 ] 

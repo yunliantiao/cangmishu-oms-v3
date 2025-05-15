@@ -301,32 +301,55 @@ const standardColumns = [
 ];
 
 // 分段库龄的列定义
-const groupColumns = [
-  {
-    name: 'product',
-    label: t('商品信息'),
-    field: 'product',
-    align: 'left',
-    style: 'width: 500px'
-  },
-  {
-    name: 'size',
-    label: t('商品尺寸'),
-    field: row => `${row.product_spec_size_length} x ${row.product_spec_size_width} x ${row.product_spec_size_height}cm`,
-    align: 'left',
-  },
-  {
+const groupColumns = computed(() => {
+  // 基础列
+  const baseColumns = [
+    {
+      name: 'product',
+      label: t('商品信息'),
+      field: 'product',
+      align: 'left',
+      style: 'width: 500px'
+    },
+    {
+      name: 'size',
+      label: t('商品尺寸'),
+      field: row => `${row.product_spec_size_length} x ${row.product_spec_size_width} x ${row.product_spec_size_height}cm`,
+      align: 'left',
+    }
+  ];
+
+  // 如果有数据，添加动态库龄区间列
+  if (tableData.value.length > 0) {
+    const firstItem = tableData.value[0];
+    firstItem.group_ages.forEach((group, index) => {
+      const label = group.max_days === 999 
+        ? `${group.min_days}${t('天')}${t('以上')}`
+        : `${group.min_days}~${group.max_days}${t('天')}`;
+      
+      baseColumns.push({
+        name: `age_group_${index}`,
+        label,
+        field: row => row.group_ages[index]?.total_qty || 0,
+        align: 'center',
+      });
+    });
+  }
+
+  // 添加更新时间列
+  baseColumns.push({
     name: 'updated_at',
     label: t('更新时间'),
     field: 'updated_at',
     align: 'left',
-  }
-  // 这里后续根据接口返回的字段添加其他列
-];
+  });
+
+  return baseColumns;
+});
 
 // 根据当前标签页计算使用的列
 const columns = computed(() => {
-  return tab.value === 'standard' ? standardColumns : groupColumns;
+  return tab.value === 'standard' ? standardColumns : groupColumns.value;
 });
 
 // 表格数据

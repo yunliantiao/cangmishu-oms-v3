@@ -213,15 +213,15 @@ const handleUpload = async () => {
     
     if (props.type === 'spu') {
       formData.append('file', selectedFile.value);
-      formData.append('data', JSON.stringify({
-        type: 'import_product'
-      }));
+      // formData.append('data', JSON.stringify({
+      //   type: 'import_product'
+      // }));
       await api.importSpu(formData);
     } else if (props.type === 'orders') {
       formData.append('file', selectedFile.value);
-      formData.append('data', JSON.stringify({
-        type: 'import_order'
-      }));
+      // formData.append('data', JSON.stringify({
+      //   type: 'import_order'
+      // }));
       await api.importOutbound(formData);
     } else if (props.type === 'combo') {
       formData.append('file', selectedFile.value);

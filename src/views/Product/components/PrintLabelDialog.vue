@@ -225,6 +225,7 @@
             <div class="col-8">
               <div class="row items-center bg-grey-2 q-pa-sm">
                 <div class="col">{{ t('商品信息') }}</div>
+                <div v-if="isInbound" class="col-2 text-center q-mr-md">{{ t('申报数量') }} <span class="text-red">*</span></div>
                 <div class="col-2 text-right">{{ t('打印数量') }} <span class="text-red">*</span></div>
                 <div class="col-2 text-center">{{ t('操作') }}</div>
               </div>
@@ -233,15 +234,19 @@
                 <div class="col">
                   <div class="row items-center">
                     <q-img
+                      v-if="!isInbound"
                       :src="item.image"
                       style="width: 40px; height: 40px; object-fit: cover"
                       class="rounded-borders q-mr-sm"
                     />
                     <div>
-                      <div>{{ item.sku }}</div>
-                      <div class="text-grey-7">{{ item.name }}</div>
+                      <div>{{ isInbound ? item.product_spec_sku : item.sku }}</div>
+                      <div class="text-grey-7">{{ isInbound ? item.product_spec_name : item.name }}</div>
                     </div>
                   </div>
+                </div>
+                <div class="col-2 text-center q-mr-md" v-if="isInbound">
+                  {{ item.quantity }}
                 </div>
                 <div class="col-2">
                   <q-input
@@ -306,6 +311,10 @@ const props = defineProps({
   skuList: {
     type: Array,
     default: () => []
+  },
+  isInbound: {
+    type: Boolean,
+    default: false
   }
 });
 
@@ -334,12 +343,23 @@ watch(() => dialogVisible.value, (val) => {
   emit('update:modelValue', val);
   if (val) {
     // 初始化打印规格
-    form.value.specs = props.skuList.map(item => ({
-      sku: item.sku,
-      name: item.name,
-      product_name: item.product?.name || '',
-      qty: 1
-    }));
+    form.value.specs = props.skuList.map(item => {
+      if (props.isInbound) {
+        return {
+          sku: item.product_spec_sku,
+          name: item.product_spec_name,
+          product_name: item.product_name || '',
+          qty: item.quantity || 1 // 使用入库单中的数量
+        };
+      } else {
+        return {
+          sku: item.sku,
+          name: item.name,
+          product_name: item.product?.name || '',
+          qty: 1
+        };
+      }
+    });
   }
 });
 
@@ -375,28 +395,16 @@ const handleSubmit = async () => {
     }
     
     const response = await api.productsLabels(submitData);
-    
-    // 直接处理二进制响应
-    const url = window.URL.createObjectURL(new Blob([response], { type: 'application/pdf' }));
-    
-    // 打开新窗口预览PDF
-    window.open(url, '_blank');
-    
-    // 自动下载
-    const link = document.createElement('a');
-    link.href = url;
-    const fileName = `sku_labels_${new Date().getTime()}.pdf`;
-    link.setAttribute('download', fileName);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    // 清理URL对象
-    setTimeout(() => {
-      window.URL.revokeObjectURL(url);
-    }, 100);
-    
-    dialogVisible.value = false;
+    console.log(response);
+    if (response.success && response.data) {
+      // 直接使用返回的URL
+      window.open(response.data.data);
+    } else {
+      $q.notify({
+        type: 'negative',
+        message: t('打印标签失败')
+      });
+    }
     emit('success');
   } catch (error) {
     console.error('打印标签失败:', error);

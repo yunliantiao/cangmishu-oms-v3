@@ -34,10 +34,12 @@
               readonly
               class="date-input start-date"
               style="border: none"
+              @click="$refs.startDatePopup.show()"
             >
               <template v-slot:append>
                 <q-icon name="event" class="cursor-pointer">
                   <q-popup-proxy
+                    ref="startDatePopup"
                     cover
                     transition-show="scale"
                     transition-hide="scale"
@@ -56,10 +58,12 @@
               readonly
               class="date-input end-date"
               style="border: none"
+              @click="$refs.endDatePopup.show()"
             >
               <template v-slot:append>
                 <q-icon name="event" class="cursor-pointer">
                   <q-popup-proxy
+                    ref="endDatePopup"
                     cover
                     transition-show="scale"
                     transition-hide="scale"
@@ -225,7 +229,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useQuasar } from "quasar";
 import ProductSku from "./components/ProductSku.vue";
@@ -249,7 +253,7 @@ const filters = ref({
   date_type: 'created_at',
   start_date: '',
   end_date: '',
-  search_type: 'name',
+  search_type: 'sku',
   keywords: '',
   search_mode: 'exact'
 });
@@ -261,15 +265,30 @@ const dateTypeOptions = [
 ];
 
 // 搜索类型选项
-const searchTypeOptions = [
-  { label: t('名字搜索'), value: 'name' },
-  { label: t('SKU搜索'), value: 'sku' }
-];
+const searchTypeOptions = computed(() => {
+  if (tab.value === 'combo') {
+    return [
+      { label: t('组合商品 SKU'), value: 'bundle_code' },
+      { label: t('子商品 SKU'), value: 'sku' },
+      { label: t('组合商品名称'), value: 'bundle_name' }
+    ];
+  }
+  if (tab.value === 'spu') {
+    return [
+    { label: t('名字搜索'), value: 'name' },
+    { label: t('SKU搜索'), value: 'sku' }
+    ];
+  }
+  return [
+    { label: t('名字搜索'), value: 'product_name' },
+    { label: t('SKU搜索'), value: 'sku' }
+  ];
+});
 
 // 搜索模式选项
 const searchModeOptions = [
   { label: t('精确搜索'), value: 'exact' },
-  { label: t('模糊搜索'), value: 'like' },
+  { label: t('模糊搜索'), value: 'fuzzy' },
   { label: t('前缀搜索'), value: 'prefix' }
 ];
 
@@ -351,8 +370,18 @@ const fetchData = async () => {
 };
 
 // 监听标签页变化
-watch(tab, () => {
+watch(tab, (newTab) => {
   pagination.value.page = 1; // 切换标签页时重置为第一页
+  
+  // 切换搜索类型的默认值
+  if (newTab === 'combo') {
+    filters.value.search_type = 'bundle_code';
+  }else if (newTab === 'spu') {
+    filters.value.search_type = 'name';
+  } else {
+    filters.value.search_type = 'product_name';
+  }
+  
   fetchData();
 });
 

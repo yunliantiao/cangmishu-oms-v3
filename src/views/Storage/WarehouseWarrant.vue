@@ -48,12 +48,14 @@
                 v-model="filters.start_date"
                 :label="t('开始时间')"
                 clearable
+                readonly
                 class="date-input start-date"
-                @click="() => {}"
+                @click="$refs.startDatePopup.show()"
               >
                 <template v-slot:append>
                   <q-icon name="event" class="cursor-pointer">
                     <q-popup-proxy
+                      ref="startDatePopup"
                       cover
                       transition-show="scale"
                       transition-hide="scale"
@@ -71,11 +73,13 @@
                 :label="t('结束时间')"
                 clearable
                 class="date-input end-date"
-                @click="() => {}"
+                readonly
+                @click="$refs.endDatePopup.show()"
               >
                 <template v-slot:append>
                   <q-icon name="event" class="cursor-pointer">
                     <q-popup-proxy
+                      ref="endDatePopup"
                       cover
                       transition-show="scale"
                       transition-hide="scale"
@@ -187,7 +191,106 @@
           <!-- 自定义箱数 -->
           <template v-slot:body-cell-boxCount="props">
             <q-td :props="props">
-              {{ props.row.total_box_qty || "--" }}
+              <div 
+                class="cursor-pointer relative-position"
+                @mouseenter="props.row.total_box_qty && handleBoxDetails(props.row.id, true)"
+                @mouseleave="props.row.total_box_qty && handleBoxDetails(props.row.id, false)"
+              >
+                {{ props.row.total_box_qty || "--" }}
+                <q-menu
+                  v-if="props.row.total_box_qty"
+                  :modelValue="activeBoxId === props.row.id"
+                  anchor="bottom middle"
+                  self="top middle"
+                  :offset="[0, 10]"
+                  class="box-details-menu"
+                  @mouseenter="handleBoxDetails(props.row.id, true)"
+                  @mouseleave="handleBoxDetails(props.row.id, false)"
+                >
+                  <div class="box-details">
+                    <div class="box-details-content q-pa-none">
+                      <div class="row items-center box-details-title q-px-md q-py-sm bg-grey-2">
+                        <div style="width: 120px">箱号</div>
+                        <div style="width: 100px">SKU</div>
+                        <div style="width: 60px">数量</div>
+                      </div>
+                      <q-separator />
+                      <div v-if="boxDetailsLoading" class="q-pa-md flex flex-center">
+                        <q-spinner color="primary" size="40px" />
+                      </div>
+                      <template v-else>
+                        <template v-for="(box, boxIndex) in boxDetailsList" :key="box.id">
+                          <!-- 箱子信息 -->
+                          <template v-for="(item, itemIndex) in box.items" :key="item.id">
+                            <div class="row items-center q-px-md q-py-sm hover-highlight">
+                              <!-- 只在每个箱子的第一个item显示箱号 -->
+                              <div style="width: 120px">
+                                <template v-if="itemIndex === 0">{{ box.box_number }}</template>
+                              </div>
+                              <div style="width: 100px">{{ item.product_spec_sku }}</div>
+                              <div style="width: 60px">{{ item.quantity }}</div>
+                            </div>
+                          </template>
+                          <!-- 只在每个箱子后添加分割线，除非是最后一个箱子 -->
+                          <q-separator v-if="boxIndex !== boxDetailsList.length - 1" />
+                        </template>
+                      </template>
+                    </div>
+                  </div>
+                </q-menu>
+              </div>
+            </q-td>
+          </template>
+
+          <!-- sku详情 -->
+          <template v-slot:body-cell-skus="props">
+            <q-td :props="props">
+              <div 
+                class="cursor-pointer relative-position"
+                @mouseenter="handleSkuDetails(props.row.id, true)"
+                @mouseleave="handleSkuDetails(props.row.id, false)"
+              >
+                {{ props.row.total_sku_type_qty == 1 ? t('单个') : t('多个')}} ({{ props.row.total_sku_type_qty }})
+                <q-menu
+                  :modelValue="activeSkuId === props.row.id"
+                  anchor="bottom middle"
+                  self="top middle"
+                  :offset="[0, 10]"
+                  class="box-details-menu"
+                  @mouseenter="handleSkuDetails(props.row.id, true)"
+                  @mouseleave="handleSkuDetails(props.row.id, false)"
+                >
+                  <div class="box-details">
+                    <div class="box-details-content q-pa-none">
+                      <div class="row items-center box-details-title q-px-md q-py-sm bg-grey-2">
+                        <div style="width: 100px">SKU</div>
+                        <div style="width: 100px">申报数量</div>
+                        <div style="width: 100px">收货数量</div>
+                        <!-- <div style="width: 120px">上架良品</div>
+                        <div style="width: 120px">上架不良品</div> -->
+                      </div>
+                      <q-separator />
+                      <div v-if="skuDetailsLoading" class="q-pa-md flex flex-center">
+                        <q-spinner color="primary" size="40px" />
+                      </div>
+                      <template v-else>
+                        <div 
+                          v-for="(item, index) in skuDetailsList" 
+                          :key="index"
+                          class="row items-center q-px-md q-py-sm hover-highlight"
+                        >
+                          <div style="width: 100px">{{ item.product_spec_sku }}</div>
+                          <div style="width: 100px">{{ item.quantity }}</div>
+                          <div style="width: 100px">{{ item.received_quantity }}</div>
+                          <!-- <div style="width: 120px">{{ item.shelf_quantity || '--' }}</div>
+                          <div style="width: 120px">{{ item.defective_quantity || '--' }}</div> -->
+                          <q-separator v-if="index !== skuDetailsList.length - 1" />
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+                </q-menu>
+              </div>
             </q-td>
           </template>
 
@@ -209,14 +312,6 @@
                   <q-menu>
                     <q-list style="min-width: 100px">
                       <q-item
-                        v-if="props.row.arrival_method == 'box'"
-                        clickable
-                        v-close-popup
-                        @click="handlePrintBoxLabel(props.row)"
-                      >
-                        <q-item-section>{{ t("打印箱唛") }}</q-item-section>
-                      </q-item>
-                      <q-item
                         clickable
                         v-close-popup
                         v-if="props.row.status === 'draft'"
@@ -227,7 +322,7 @@
                       <q-item
                         clickable
                         v-close-popup
-                        @click="handleEditTracking(props.row)"
+                        @click="openTrackingDialog(props.row)"
                       >
                         <q-item-section>{{ t("编辑运单号") }}</q-item-section>
                       </q-item>
@@ -246,6 +341,29 @@
                         @click="handleShipInbound(props.row)"
                       >
                         <q-item-section>{{ t("发货") }}</q-item-section>
+                      </q-item>
+                      <q-item
+                        clickable
+                        v-close-popup
+                        @click="handlePrintInbound(props.row)"
+                      >
+                        <q-item-section>{{ t("打印入库单") }}</q-item-section>
+                      </q-item>
+                      <q-item
+                        v-if="props.row.arrival_method == 'express_parcel'"
+                        clickable
+                        v-close-popup
+                        @click="handlePrintLabel(props.row)"
+                      >
+                        <q-item-section>{{ t("打印标签") }}</q-item-section>
+                      </q-item>
+                      <q-item
+                        v-if="props.row.arrival_method == 'box'"
+                        clickable
+                        v-close-popup
+                        @click="handlePrintBoxLabel(props.row)"
+                      >
+                        <q-item-section>{{ t("打印箱唛") }}</q-item-section>
                       </q-item>
                       <q-item
                         clickable
@@ -295,8 +413,11 @@
                   type="number"
                   class="q-mx-sm"
                   style="width: 60px"
+                  :max="maxBoxQty"
+                  min="1"
                   dense
                   outlined
+                  @blur="validateBoxNumber(printForm.start_box, 'start')"
                 />
                 <span>~</span>
                 <q-input
@@ -304,8 +425,11 @@
                   type="number"
                   class="q-mx-sm"
                   style="width: 60px"
+                  :max="maxBoxQty"
+                  min="1"
                   dense
                   outlined
+                  @blur="validateBoxNumber(printForm.end_box, 'end')"
                 />
                 <span>箱</span>
               </div>
@@ -359,10 +483,10 @@
     </q-dialog>
 
     <!-- 编辑运单号弹窗 -->
-    <q-dialog v-model="trackingDialogVisible">
-      <q-card style="min-width: 400px">
+    <q-dialog v-model="trackingDialog" persistent>
+      <q-card style="min-width: 350px">
         <q-card-section class="row items-center">
-          <div class="text-h6">{{ t('输入运单号') }}</div>
+          <div class="text-h6">{{ t('编辑运单号') }}</div>
           <q-space />
           <q-btn icon="close" flat round dense v-close-popup />
         </q-card-section>
@@ -387,6 +511,14 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+
+    <!-- 打印标签弹窗 -->
+    <PrintLabelDialog
+      v-model="printLabelDialogVisible"
+      :sku-list="printSkuList"
+      :is-inbound="true"
+      @success="handlePrintSuccess"
+    />
   </div>
 </template>
 
@@ -397,6 +529,7 @@ import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import Pagination from "@/components/Pagination.vue";
 import api from "@/api/index";
+import PrintLabelDialog from '@/views/Product/components/PrintLabelDialog.vue';
 
 const $q = useQuasar();
 const router = useRouter();
@@ -475,6 +608,12 @@ const columns = [
     align: "center",
   },
   {
+    name: "skus",
+    label: t("SKU*Qty"),
+    field: "skus",
+    align: "center",
+  },
+  {
     name: "status",
     label: t("状态"),
     field: "status",
@@ -531,7 +670,21 @@ const printForm = ref({
   additional_info: [],
 });
 
-
+// 在 script setup 中添加
+const trackingDialog = ref(false);
+const trackingNumber = ref('');
+const currentEditId = ref(null);
+const isFromShipButton = ref(false); // 添加标记
+const activeBoxId = ref(null);
+const hideBoxTimer = ref(null);
+const activeSkuId = ref(null);
+const hideSkuTimer = ref(null);
+const skuDetailsLoading = ref(false);
+const skuDetailsList = ref([]);
+const boxDetailsLoading = ref(false);
+const boxDetailsList = ref([]);
+const printLabelDialogVisible = ref(false);
+const printSkuList = ref([]);
 
 // 监听弹窗关闭
 watch(printDialogVisible, (newVal) => {
@@ -554,20 +707,6 @@ watch(tab, () => {
   fetchInboundList();
 });
 
-// 箱子大小选项
-const boxSizeOptions = [
-  { label: t("小"), value: "small" },
-  { label: t("中"), value: "medium" },
-  { label: t("大"), value: "large" },
-];
-
-// 附加信息选项
-const additionalInfoOptions = [
-  { label: t("客户全名"), value: "customer_fullname" },
-  { label: t("中国制造"), value: "made_in_china" },
-  { label: t("产品名称"), value: "product_name" },
-  { label: t("其他"), value: "other" },
-];
 
 // 获取入库单列表
 const fetchInboundList = async () => {
@@ -607,7 +746,7 @@ const handleSearch = () => {
 
 // 处理新建
 const handleCreate = () => {
-  router.push("/storage/createwarehouse");
+  router.push("/inbound/createwarehouse");
 };
 
 // 处理分页变更
@@ -639,6 +778,7 @@ const handleShipInbound = async (row) => {
       type: 'warning',
       message: t('当前到仓方式必须填写运单号')
     });
+    openTrackingDialog(row, true); // 传入标记
     return;
   }
 
@@ -656,13 +796,13 @@ const handleShipInbound = async (row) => {
 
 // 处理查看详情
 const handleView = (row) => {
-  router.push(`/storage/warehousewarrant/${row.id}`);
+  router.push(`/inbound/warehousewarrant/${row.id}`);
 };
 
 // 处理编辑
 const handleEdit = (row) => {
   router.push({
-    path: "/storage/createwarehouse",
+    path: "/inbound/createwarehouse",
     query: { id: row.id },
   });
 };
@@ -695,9 +835,30 @@ const handleDelete = (row) => {
   });
 };
 
+// 处理打印标签
+const handlePrintLabel = async (row) => {
+  try {
+    const { data } = await api.getInboundSkus(row.id);
+    printSkuList.value = data;
+    printLabelDialogVisible.value = true;
+  } catch (error) {
+    console.error('获取SKU列表失败:', error);
+  }
+};
+
+const handlePrintSuccess = () => {
+  printLabelDialogVisible.value = false;
+  printSkuList.value = [];
+};
+
+const maxBoxQty = ref(1);
 // 处理打印箱唛
 const handlePrintBoxLabel = (row) => {
   currentInboundId.value = row.id;
+  // 设置默认的打印范围
+  printForm.value.start_box = 1;
+  printForm.value.end_box = row.total_box_qty || 1;
+  maxBoxQty.value = row.total_box_qty || 1;
   printDialogVisible.value = true;
 };
 
@@ -736,57 +897,168 @@ const handlePrintConfirm = async () => {
   }
 };
 
-// 运单号编辑相关
-const trackingDialogVisible = ref(false);
-const trackingNumber = ref('');
-const currentRow = ref(null);
-// 处理编辑运单号
-const handleEditTracking = (row) => {
-  currentRow.value = row;
+// 打开运单号编辑对话框
+const openTrackingDialog = (row, fromShip = false) => {
+  currentEditId.value = row.id;
   trackingNumber.value = row.tracking_number || '';
-  trackingDialogVisible.value = true;
+  isFromShipButton.value = fromShip; // 设置标记
+  trackingDialog.value = true;
 };
 
 // 处理运单号确认
 const handleTrackingConfirm = async () => {
-  if (!trackingNumber.value) {
-    $q.notify({
-      type: 'warning',
-      message: t('请输入运单号')
-    });
-    return;
-  }
-
   try {
-    const response = await api.updateInboundTracking(currentRow.value.id, {
+    if (!trackingNumber.value) {
+      $q.notify({
+        type: 'warning',
+        message: t('运单号不能为空')
+      });
+      return;
+    }
+
+    await api.inboundResetTracking(currentEditId.value, {
       tracking_number: trackingNumber.value
     });
-
-    if (response.success) {
-      trackingDialogVisible.value = false;
-      $q.notify({
-        type: 'positive',
-        message: t('运单号更新成功')
-      });
-      fetchInboundList(); // 刷新列表
+    // 关闭对话框
+    trackingDialog.value = false;
+    
+    
+    // 如果是从发货按钮点击的，编辑完成后自动发货
+    if (isFromShipButton.value) {
+      handleShipInbound({ id: currentEditId.value });
+    }else {
+      // 刷新数据
+    fetchInboundList();
     }
   } catch (error) {
-    console.error('更新运单号失败:', error);
     $q.notify({
       type: 'negative',
-      message: t('运单号更新失败')
+      message: t('修改失败')
     });
   }
 };
 
-// 监听弹窗关闭
-watch(trackingDialogVisible, (newVal) => {
-  if (!newVal) {
-    // 重置数据
-    trackingNumber.value = '';
-    currentRow.value = null;
+// 获取箱子详情
+const fetchBoxDetails = async (id) => {
+  boxDetailsLoading.value = true;
+  boxDetailsList.value = [];
+  try {
+    const response = await api.getInboundBoxes(id, {});
+    if (response.success) {
+      boxDetailsList.value = response.data;
+    }
+  } catch (error) {
+    console.error('获取箱子详情失败:', error);
+  } finally {
+    boxDetailsLoading.value = false;
   }
-});
+};
+
+// 修改处理箱子详情的显示/隐藏
+const handleBoxDetails = async (id, show) => {
+  if (!id) return; // 添加 id 检查
+  
+  if (show) {
+    if (hideBoxTimer.value) {
+      clearTimeout(hideBoxTimer.value);
+      hideBoxTimer.value = null;
+    }
+    activeBoxId.value = id;
+    // 获取数据
+    await fetchBoxDetails(id);
+  } else {
+    hideBoxTimer.value = setTimeout(() => {
+      if (activeBoxId.value === id) {
+        activeBoxId.value = null;
+        // 清空数据
+        boxDetailsList.value = [];
+      }
+    }, 100);
+  }
+};
+
+// 获取SKU详情
+const fetchSkuDetails = async (id) => {
+  skuDetailsLoading.value = true;
+  skuDetailsList.value = [];
+  try {
+    const response = await api.getInboundSkus(id,{});
+    if (response.success) {
+      skuDetailsList.value = response.data;
+    }
+  } catch (error) {
+    console.error('获取SKU详情失败:', error);
+  } finally {
+    skuDetailsLoading.value = false;
+  }
+};
+
+// 修改处理SKU详情的显示/隐藏
+const handleSkuDetails = async (id, show) => {
+  if (show) {
+    if (hideSkuTimer.value) {
+      clearTimeout(hideSkuTimer.value);
+      hideSkuTimer.value = null;
+    }
+    activeSkuId.value = id;
+    // 获取数据
+    await fetchSkuDetails(id);
+  } else {
+    hideSkuTimer.value = setTimeout(() => {
+      if (activeSkuId.value === id) {
+        activeSkuId.value = null;
+        // 清空数据
+        skuDetailsList.value = [];
+      }
+    }, 100);
+  }
+};
+
+// 在 script setup 中修改处理函数
+const handlePrintInbound = async (row) => {
+  try {
+    const response = await api.getInboundLabel(row.id);
+    if (response.success && response.data) {
+      // 直接使用返回的URL
+      window.open(response.data.data);
+    } else {
+      $q.notify({
+        type: 'negative',
+        message: t('获取入库单PDF失败')
+      });
+    }
+  } catch (error) {
+    console.error('打印入库单失败:', error);
+    $q.notify({
+      type: 'negative',
+      message: t('打印入库单失败')
+    });
+  }
+};
+
+// 在 script setup 中添加验证函数
+const validateBoxNumber = (value, type) => {
+  let num = parseInt(value);
+  if (isNaN(num) || num < 1) {
+    num = 1;
+  } else if (num > maxBoxQty.value) {
+    num = maxBoxQty.value;
+  }
+  
+  if (type === 'start') {
+    printForm.value.start_box = num;
+    // 确保结束箱号不小于开始箱号
+    if (parseInt(printForm.value.end_box) < num) {
+      printForm.value.end_box = num;
+    }
+  } else {
+    printForm.value.end_box = num;
+    // 确保开始箱号不大于结束箱号
+    if (parseInt(printForm.value.start_box) > num) {
+      printForm.value.start_box = num;
+    }
+  }
+};
 
 // 初始化
 onMounted(() => {
@@ -911,5 +1183,38 @@ onMounted(() => {
   content: '*';
   color: red;
   margin-left: 4px;
+}
+
+.box-details {
+  min-width: 320px;  // 调整最小宽度
+  background: white;
+  border-radius: 4px;
+
+  &-header {
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  &-content {
+    font-size: 13px;
+  }
+
+  &-title {
+    color: rgba(0, 0, 0, 0.85);
+    font-weight: 500;
+  }
+
+  .hover-highlight {
+    transition: background-color 0.3s;
+    &:hover {
+      background-color: #f5f5f5;
+    }
+  }
+}
+
+:deep(.box-details-menu) {
+  background: white;
+  box-shadow: 0 1px 5px rgb(0 0 0 / 20%);
+  border-radius: 4px;
 }
 </style>

@@ -28,7 +28,6 @@
             </template>
           </q-input>
         </div>
-
         <!-- 表格 -->
         <q-table
           :rows="tableData"

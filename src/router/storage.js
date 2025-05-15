@@ -4,9 +4,9 @@ const CreateWarehouse = () => import(`../views/Storage/CreateWarehouse.vue`)
 
 export default [
     {
-        path: 'storage',
-        name: 'Storage',
-        redirect: '/storage/warehousewarrant',
+        path: 'inbound',
+        name: 'Inbound',
+        redirect: '/inbound/warehousewarrant',
         component: Container,
         icon: 'text_snippet',
         meta: {

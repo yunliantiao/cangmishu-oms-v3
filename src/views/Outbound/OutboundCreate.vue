@@ -77,7 +77,7 @@
             <div class="col-12 col-md-4">
               <div class="form-item">
                 <div class="form-item-label">
-                  {{ t('订单金额') }}
+                  {{ t('订单金额') }} <span class="text-negative">*</span>
                 </div>
                 <div class="row q-col-gutter-sm">
                   <div class="col-8">
@@ -87,6 +87,7 @@
                       dense
                       type="number"
                       :placeholder="t('请输入')"
+                      :rules="[(val) => !!val || t('请输入订单金额')]"
                     />
                   </div>
                   <div class="col-4">
@@ -98,7 +99,7 @@
                       emit-value
                       map-options
                       :label="t('币种')"
-                      :hint="!form.currency ? t('请选择币种') : ''"
+                      :rules="[(val) => !!val || t('请选择币种')]"
                     />
                   </div>
                 </div>
@@ -557,6 +558,7 @@ const form = ref({
   reference_number: "",
   order_amount: null,
   currency: "CNY",
+  source: "oms_create",
   remark: "",
   items: [],
   recipient: {
@@ -732,44 +734,147 @@ const fetchOutboundDetail = async () => {
   }
 };
 
-// 修改现有的保存方法
-const handleSave = async () => {
-  try {
-    submitting.value = true;
-    // 根据面单类型处理请求数据
-    const requestData = {
-      ...form.value
-    };
-
-    if (form.value.label_type !== 'self_label') {
-      requestData.label_pdf = undefined;
-    }
-
-    const data = isEdit.value 
-      ? await api.editOutbound(outboundId.value, requestData)
-      : await api.createOutbound(requestData);
-      
-    if (data.success) {
-      $q.notify({
-        type: 'positive',
-        message: t(isEdit.value ? '编辑成功' : '创建成功')
-      });
-      router.push("/outbound/list");
-    }
-  } catch (error) {
-    console.error(isEdit.value ? '编辑失败:' : '创建失败:', error);
-    $q.notify({
-      type: 'negative',
-      message: t(isEdit.value ? '编辑失败' : '创建失败')
-    });
-  } finally {
-    submitting.value = false;
-  }
-};
-
 // 修改表单提交方法(保存并提交)
 const submitForm = async () => {
   try {
+    // 验证基本信息
+    if (!form.value.order_number) {
+      $q.notify({
+        type: 'negative',
+        message: t('请输入订单号')
+      });
+      return;
+    }
+
+    if (!form.value.platform) {
+      $q.notify({
+        type: 'negative',
+        message: t('请选择平台')
+      });
+      return;
+    }
+
+    if (!form.value.label_type) {
+      $q.notify({
+        type: 'negative',
+        message: t('请选择面单类型')
+      });
+      return;
+    }
+
+    if (!form.value.order_amount) {
+      $q.notify({
+        type: 'negative',
+        message: t('请输入订单金额')
+      });
+      return;
+    }
+
+    if (!form.value.currency) {
+      $q.notify({
+        type: 'negative',
+        message: t('请选择币种')
+      });
+      return;
+    }
+
+    // 如果是自有面单,验证运单号和面单PDF
+    if (form.value.label_type === 'self_label') {
+      if (!form.value.tracking_number) {
+        $q.notify({
+          type: 'negative',
+          message: t('请输入运单号')
+        });
+        return;
+      }
+
+      if (!form.value.label_pdf) {
+        $q.notify({
+          type: 'negative',
+          message: t('请上传面单')
+        });
+        return;
+      }
+    }
+
+    // 验证收件人信息
+    const recipient = form.value.recipient;
+    if (!recipient.first_name) {
+      $q.notify({
+        type: 'negative',
+        message: t('请输入收件人')
+      });
+      return;
+    }
+
+    if (!recipient.phone) {
+      $q.notify({
+        type: 'negative',
+        message: t('请输入手机号')
+      });
+      return;
+    }
+
+    if (!recipient.postcode) {
+      $q.notify({
+        type: 'negative',
+        message: t('请输入邮政编码')
+      });
+      return;
+    }
+
+    if (!recipient.country_code) {
+      $q.notify({
+        type: 'negative',
+        message: t('请选择国家/地区')
+      });
+      return;
+    }
+
+    if (!recipient.province) {
+      $q.notify({
+        type: 'negative',
+        message: t('请输入省/州')
+      });
+      return;
+    }
+
+    if (!recipient.city) {
+      $q.notify({
+        type: 'negative',
+        message: t('请输入市/府')
+      });
+      return;
+    }
+
+    if (!recipient.address1) {
+      $q.notify({
+        type: 'negative',
+        message: t('请输入地址1')
+      });
+      return;
+    }
+
+    // 验证商品信息
+    if (!form.value.items || form.value.items.length === 0) {
+      $q.notify({
+        type: 'negative',
+        message: t('请添加商品')
+      });
+      return;
+    }
+
+    // 验证每个商品的数量
+    for (const item of form.value.items) {
+      if (!item.quantity || item.quantity <= 0) {
+        $q.notify({
+          type: 'negative',
+          message: t('商品 {sku} 的数量必须大于0', { sku: item.sku })
+        });
+        return;
+      }
+    }
+
     submitting.value = true;
     // 根据面单类型处理请求数据
     const requestData = {
@@ -801,6 +906,179 @@ const submitForm = async () => {
     $q.notify({
       type: 'negative',
       message: t('操作失败')
+    });
+  } finally {
+    submitting.value = false;
+  }
+};
+
+// 修改保存方法,添加相同的验证逻辑
+const handleSave = async () => {
+  try {
+    // 验证基本信息
+    if (!form.value.order_number) {
+      $q.notify({
+        type: 'negative',
+        message: t('请输入订单号')
+      });
+      return;
+    }
+
+    if (!form.value.platform) {
+      $q.notify({
+        type: 'negative',
+        message: t('请选择平台')
+      });
+      return;
+    }
+
+    if (!form.value.label_type) {
+      $q.notify({
+        type: 'negative',
+        message: t('请选择面单类型')
+      });
+      return;
+    }
+
+    if (!form.value.order_amount) {
+      $q.notify({
+        type: 'negative',
+        message: t('请输入订单金额')
+      });
+      return;
+    }
+
+    if (!form.value.currency) {
+      $q.notify({
+        type: 'negative',
+        message: t('请选择币种')
+      });
+      return;
+    }
+
+    // 如果是自有面单,验证运单号和面单PDF
+    if (form.value.label_type === 'self_label') {
+      if (!form.value.tracking_number) {
+        $q.notify({
+          type: 'negative',
+          message: t('请输入运单号')
+        });
+        return;
+      }
+
+      if (!form.value.label_pdf) {
+        $q.notify({
+          type: 'negative',
+          message: t('请上传面单')
+        });
+        return;
+      }
+    }
+
+    // 验证收件人信息
+    const recipient = form.value.recipient;
+    if (!recipient.first_name) {
+      $q.notify({
+        type: 'negative',
+        message: t('请输入收件人')
+      });
+      return;
+    }
+
+    if (!recipient.phone) {
+      $q.notify({
+        type: 'negative',
+        message: t('请输入手机号')
+      });
+      return;
+    }
+
+    if (!recipient.postcode) {
+      $q.notify({
+        type: 'negative',
+        message: t('请输入邮政编码')
+      });
+      return;
+    }
+
+    if (!recipient.country_code) {
+      $q.notify({
+        type: 'negative',
+        message: t('请选择国家/地区')
+      });
+      return;
+    }
+
+    if (!recipient.province) {
+      $q.notify({
+        type: 'negative',
+        message: t('请输入省/州')
+      });
+      return;
+    }
+
+    if (!recipient.city) {
+      $q.notify({
+        type: 'negative',
+        message: t('请输入市/府')
+      });
+      return;
+    }
+
+    if (!recipient.address1) {
+      $q.notify({
+        type: 'negative',
+        message: t('请输入地址1')
+      });
+      return;
+    }
+
+    // 验证商品信息
+    if (!form.value.items || form.value.items.length === 0) {
+      $q.notify({
+        type: 'negative',
+        message: t('请添加商品')
+      });
+      return;
+    }
+
+    // 验证每个商品的数量
+    for (const item of form.value.items) {
+      if (!item.quantity || item.quantity <= 0) {
+        $q.notify({
+          type: 'negative',
+          message: t('商品 {sku} 的数量必须大于0', { sku: item.sku })
+        });
+        return;
+      }
+    }
+
+    submitting.value = true;
+    // 根据面单类型处理请求数据
+    const requestData = {
+      ...form.value
+    };
+
+    if (form.value.label_type !== 'self_label') {
+      requestData.label_pdf = undefined;
+    }
+
+    const data = isEdit.value 
+      ? await api.editOutbound(outboundId.value, requestData)
+      : await api.createOutbound(requestData);
+      
+    if (data.success) {
+      $q.notify({
+        type: 'positive',
+        message: t(isEdit.value ? '编辑成功' : '创建成功')
+      });
+      router.push("/outbound/list");
+    }
+  } catch (error) {
+    console.error(isEdit.value ? '编辑失败:' : '创建失败:', error);
+    $q.notify({
+      type: 'negative',
+      message: t(isEdit.value ? '编辑失败' : '创建失败')
     });
   } finally {
     submitting.value = false;
