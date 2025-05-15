@@ -1,66 +1,40 @@
 <template>
   <div class="stock-list">
+    <!-- 状态选项卡 -->
+    <div class="tabs-section q-mb-md">
+      <q-tabs
+        v-model="tab"
+        dense
+        class="text-grey"
+        active-color="primary"
+        indicator-color="primary"
+        align="left"
+        narrow-indicator
+      >
+        <q-tab name="standard" :label="t('标准库龄')" />
+        <q-tab name="segment" :label="t('分段库龄')" />
+      </q-tabs>
+    </div>
+
     <!-- 筛选模块 -->
-    <div class="product-search bg-white">
-      <!-- 状态选项卡 -->
-      <div class="q-mb-md">
-        <q-tabs
-          v-model="tab"
-          dense
-          class="text-grey"
-          active-color="primary"
-          indicator-color="primary"
-          align="left"
-          narrow-indicator
-        >
-          <q-tab name="standard" :label="t('标准库龄')" />
-          <q-tab name="segment" :label="t('分段库龄')" />
-        </q-tabs>
-      </div>
-
+    <div class="search-bar">
       <!-- 搜索过滤区域 -->
-      <div class="row items-center">
+      <div class="row q-col-gutter-sm">
         <!-- 关键词搜索模块 -->
-        <div class="row items-center no-wrap search-group">
-          <q-select
-            outlined
-            dense
-            v-model="filters.search_type"
-            :options="searchTypeOptions"
-            emit-value
-            map-options
-            option-value="value"
-            option-label="label"
-            class="search-type-select"
-          />
-          <q-input
-            outlined
-            dense
-            v-model="filters.keywords"
-            :placeholder="t('批量搜索用逗号隔开')"
-            class="keywords-input"
-          />
-          <q-select
-            outlined
-            dense
-            v-model="filters.search_mode"
-            :options="searchModeOptions"
-            emit-value
-            map-options
-            option-value="value"
-            option-label="label"
-            class="search-mode-select"
-          />
-        </div>
-
-        <div class="q-ml-md">
-          <q-btn color="primary" :label="t('搜索')" @click="handleSearch" />
+        <KeywordSearch
+          v-model:search_mode="filters.search_mode"
+          v-model:search_type="filters.search_type"
+          v-model:search_value="filters.keywords"
+          :searchTypeList="searchTypeOptions"
+        ></KeywordSearch>
+        <div>
+          <q-btn color="primary" class="filter-btn" :label="t('搜索')" @click="handleSearch" />
         </div>
       </div>
     </div>
 
     <!-- 表格容器 -->
-    <div class="stock-container">
+    <div class="main-table">
       <div class="row justify-end q-mb-md">
         <q-btn
           v-if="tab === 'segment'"
@@ -92,7 +66,6 @@
           :columns="columns"
           row-key="id"
           flat
-          bordered
           :rows-per-page-options="[10, 20, 50]"
           v-model:pagination="tablePagination"
           :loading="loading"
@@ -104,7 +77,7 @@
           <template v-slot:no-data="{ icon, filter }">
             <div class="full-width row flex-center text-grey-6 q-gutter-sm">
               <q-icon size="2em" :name="filter ? 'filter_b_and_w' : icon" />
-              <span> {{ t('暂无数据') }} </span>
+              <span>{{ t('暂无数据') }}</span>
             </div>
           </template>
           <template v-slot:header-selection="props">
@@ -126,7 +99,7 @@
                 <q-img
                   v-if="props.row.product_spec_image"
                   :src="props.row.product_spec_image"
-                  style="width: 40px; height: 40px; object-fit: cover;"
+                  style="width: 40px; height: 40px; object-fit: cover"
                   class="q-mr-sm"
                 />
                 <div>
@@ -154,7 +127,7 @@
 
     <!-- 添加库龄设置弹窗 -->
     <q-dialog v-model="showAgeSettingDialog">
-      <q-card style="width: 600px; max-width: 90vw;">
+      <q-card style="width: 600px; max-width: 90vw">
         <q-card-section class="row items-center">
           <div class="text-h6">{{ t('库龄区间设置') }}</div>
           <q-space />
@@ -187,39 +160,19 @@
                 @update:model-value="handleMaxDaysChange(index, $event)"
                 @blur="handleMaxDaysBlur(index)"
               />
-              <q-btn
-                flat
-                round
-                dense
-                color="negative"
-                icon="delete"
-                class="q-ml-sm"
-                @click="deleteRow(index)"
-              />
+              <q-btn flat round dense color="negative" icon="delete" class="q-ml-sm" @click="deleteRow(index)" />
             </div>
-            
+
             <!-- 添加行按钮 -->
             <div class="q-mt-md">
-              <q-btn
-                flat
-                color="primary"
-                :label="t('添加行')"
-                icon="add"
-                @click="addNewRow"
-              />
+              <q-btn flat color="primary" :label="t('添加行')" icon="add" @click="addNewRow" />
             </div>
           </div>
         </q-card-section>
 
         <q-card-section align="right">
           <q-btn flat :label="t('取消')" v-close-popup />
-          <q-btn 
-            color="primary" 
-            :label="t('确认')" 
-            class="q-ml-sm" 
-            @click="handleSave"
-            :loading="loading"
-          />
+          <q-btn color="primary" :label="t('确认')" class="q-ml-sm" @click="handleSave" :loading="loading" />
         </q-card-section>
       </q-card>
     </q-dialog>
@@ -227,35 +180,36 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from "vue";
-import { useQuasar } from "quasar";
-import { useI18n } from "vue-i18n";
-import Pagination from "@/components/Pagination.vue";
-import api from "@/api/index";
+import api from '@/api/index';
+import KeywordSearch from '@/components/KeywordSearch/Index.vue';
+import Pagination from '@/components/Pagination.vue';
+import { useQuasar } from 'quasar';
+import { computed, onMounted, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const $q = useQuasar();
 const { t } = useI18n();
 
 // 筛选条件
 const filters = ref({
-  start_date: "",
-  end_date: "",
-  search_type: "sku",
-  keywords: "",
-  search_mode: "exact",
+  start_date: '',
+  end_date: '',
+  search_type: 'sku',
+  keywords: '',
+  search_mode: 'exact',
 });
 
 // 搜索类型选项
 const searchTypeOptions = [
-  { label: "SKU", value: "sku" },
-  { label: t("商品名称"), value: "product_name" },
+  { label: 'SKU', value: 'sku' },
+  { label: t('商品名称'), value: 'product_name' },
 ];
 
 // 搜索模式选项
 const searchModeOptions = [
-  { label: t("精确搜索"), value: "exact" },
-  { label: t("前缀搜索"), value: "prefix" },
-  { label: t("模糊搜索"), value: "fuzzy" },
+  { label: t('精确搜索'), value: 'exact' },
+  { label: t('前缀搜索'), value: 'prefix' },
+  { label: t('模糊搜索'), value: 'fuzzy' },
 ];
 
 // 表格列定义
@@ -265,19 +219,20 @@ const standardColumns = [
     label: t('商品信息'),
     field: 'product',
     align: 'left',
-    style: 'width: 500px'
+    style: 'width: 500px',
   },
   {
     name: 'size',
     label: t('商品尺寸'),
-    field: row => `${row.product_spec_size_length} x ${row.product_spec_size_width} x ${row.product_spec_size_height}cm`,
+    field: (row) =>
+      `${row.product_spec_size_length} x ${row.product_spec_size_width} x ${row.product_spec_size_height}cm`,
     align: 'left',
   },
   {
     name: 'inbound_date',
     label: t('上架日期'),
     field: 'created_at',
-    format: val => val.split(' ')[0],
+    format: (val) => val.split(' ')[0],
     align: 'left',
   },
   {
@@ -297,7 +252,7 @@ const standardColumns = [
     label: t('更新时间'),
     field: 'updated_at',
     align: 'left',
-  }
+  },
 ];
 
 // 分段库龄的列定义
@@ -309,28 +264,30 @@ const groupColumns = computed(() => {
       label: t('商品信息'),
       field: 'product',
       align: 'left',
-      style: 'width: 500px'
+      style: 'width: 500px',
     },
     {
       name: 'size',
       label: t('商品尺寸'),
-      field: row => `${row.product_spec_size_length} x ${row.product_spec_size_width} x ${row.product_spec_size_height}cm`,
+      field: (row) =>
+        `${row.product_spec_size_length} x ${row.product_spec_size_width} x ${row.product_spec_size_height}cm`,
       align: 'left',
-    }
+    },
   ];
 
   // 如果有数据，添加动态库龄区间列
   if (tableData.value.length > 0) {
     const firstItem = tableData.value[0];
     firstItem.group_ages.forEach((group, index) => {
-      const label = group.max_days === 999 
-        ? `${group.min_days}${t('天')}${t('以上')}`
-        : `${group.min_days}~${group.max_days}${t('天')}`;
-      
+      const label =
+        group.max_days === 999
+          ? `${group.min_days}${t('天')}${t('以上')}`
+          : `${group.min_days}~${group.max_days}${t('天')}`;
+
       baseColumns.push({
         name: `age_group_${index}`,
         label,
-        field: row => row.group_ages[index]?.total_qty || 0,
+        field: (row) => row.group_ages[index]?.total_qty || 0,
         align: 'center',
       });
     });
@@ -368,14 +325,14 @@ const pagination = ref({
 
 // 表格分页配置
 const tablePagination = ref({
-  sortBy: "",
+  sortBy: '',
   descending: false,
   page: 1,
   rowsPerPage: 0,
 });
 
 // 标签页
-const tab = ref("standard");
+const tab = ref('standard');
 
 // 分段库龄配置数据
 const groupConfig = ref([]);
@@ -402,7 +359,7 @@ const openAgeSettingDialog = async () => {
     console.error('获取分段库龄配置失败:', error);
     $q.notify({
       message: t('获取分段库龄配置失败'),
-      color: 'negative'
+      color: 'negative',
     });
   } finally {
     loading.value = false;
@@ -416,13 +373,13 @@ const fetchData = async () => {
     // 重置数据
     tableData.value = [];
     pagination.value.page = 1;
-    
+
     const params = {
       page: pagination.value.page,
       page_size: pagination.value.rowsPerPage,
       search_type: filters.value.search_type,
       keywords: filters.value.keywords,
-      search_mode: filters.value.search_mode
+      search_mode: filters.value.search_mode,
     };
 
     let response;
@@ -440,14 +397,14 @@ const fetchData = async () => {
         page: meta.current_page,
         maxPage: meta.last_page,
         rowsPerPage: meta.per_page,
-        total: meta.total
+        total: meta.total,
       };
     }
   } catch (error) {
     console.error('获取库龄列表失败:', error);
     $q.notify({
       message: t('获取库龄列表失败'),
-      color: 'negative'
+      color: 'negative',
     });
   } finally {
     loading.value = false;
@@ -470,7 +427,7 @@ const handleExport = async (type) => {
     };
 
     // 如果是按勾选导出，添加 ids 参数
-    if (type === "selected") {
+    if (type === 'selected') {
       params.ids = selectedRows.value.map((row) => row.id);
     }
 
@@ -479,7 +436,7 @@ const handleExport = async (type) => {
 
     if (response.success) {
       // 如果返回的是文件URL，则创建下载链接
-      const link = document.createElement("a");
+      const link = document.createElement('a');
       link.href = response.data.url;
       link.download = `库存清单_${new Date().toLocaleDateString()}.xlsx`;
       document.body.appendChild(link);
@@ -487,15 +444,15 @@ const handleExport = async (type) => {
       document.body.removeChild(link);
 
       $q.notify({
-        type: "positive",
-        message: t("导出成功"),
+        type: 'positive',
+        message: t('导出成功'),
       });
     }
   } catch (error) {
-    console.error("导出失败:", error);
+    console.error('导出失败:', error);
     $q.notify({
-      type: "negative",
-      message: t("导出失败"),
+      type: 'negative',
+      message: t('导出失败'),
     });
   }
 };
@@ -508,12 +465,9 @@ const handlePageChange = ({ page, rowsPerPage }) => {
 };
 
 // 监听排序变化
-watch(
-  [() => tablePagination.value.sortBy, () => tablePagination.value.descending],
-  ([newSortBy, newDescending]) => {
-    fetchData();
-  }
-);
+watch([() => tablePagination.value.sortBy, () => tablePagination.value.descending], ([newSortBy, newDescending]) => {
+  fetchData();
+});
 
 // 添加新行
 const addNewRow = () => {
@@ -522,7 +476,7 @@ const addNewRow = () => {
   groupConfig.value.push({
     min_days: newMinDays,
     max_days: '',
-    total_qty: 0
+    total_qty: 0,
   });
 };
 
@@ -552,10 +506,10 @@ const canSave = computed(() => {
 const handleMaxDaysChange = (index, value) => {
   const currentItem = groupConfig.value[index];
   const nextItem = groupConfig.value[index + 1];
-  
+
   // 更新当前行的max_days
   currentItem.max_days = value;
-  
+
   // 如果存在下一行，更新其min_days
   if (nextItem) {
     nextItem.min_days = value !== '' ? parseInt(value) + 1 : '';
@@ -567,7 +521,7 @@ const handleMaxDaysBlur = (index) => {
   const currentItem = groupConfig.value[index];
   const nextItem = groupConfig.value[index + 1];
   let newValue = parseInt(currentItem.max_days) || '';
-  
+
   // 如果小于min_days，设置为min_days并提示
   if (newValue !== '' && newValue < currentItem.min_days) {
     newValue = currentItem.min_days;
@@ -575,7 +529,7 @@ const handleMaxDaysBlur = (index) => {
     $q.notify({
       type: 'warning',
       message: t('结束天数不能小于开始天数'),
-      position: 'top'
+      position: 'top',
     });
   }
 
@@ -586,7 +540,7 @@ const handleMaxDaysBlur = (index) => {
     $q.notify({
       type: 'warning',
       message: t('结束天数不能大于或等于下一行的结束天数'),
-      position: 'top'
+      position: 'top',
     });
   }
 
@@ -603,7 +557,7 @@ const handleSave = async () => {
     $q.notify({
       type: 'warning',
       message: t('最后一级阶梯应是无穷大，请设置为999'),
-      position: 'top'
+      position: 'top',
     });
     return;
   }
@@ -611,9 +565,9 @@ const handleSave = async () => {
   try {
     loading.value = true;
     // 构造请求数据
-    const items = groupConfig.value.map(item => ({
+    const items = groupConfig.value.map((item) => ({
       min_days: parseInt(item.min_days),
-      max_days: parseInt(item.max_days)
+      max_days: parseInt(item.max_days),
     }));
 
     const response = await api.editGroupConfig({ items });
@@ -627,7 +581,7 @@ const handleSave = async () => {
     $q.notify({
       type: 'negative',
       message: t('保存失败'),
-      position: 'top'
+      position: 'top',
     });
   } finally {
     loading.value = false;
@@ -642,7 +596,6 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .stock-list {
-
   :deep(.q-checkbox) {
     .q-checkbox__inner--truthy {
       color: var(--q-primary);
@@ -714,7 +667,7 @@ onMounted(() => {
 
   .q-table {
     width: 100%;
-    
+
     :deep(table) {
       width: 100%;
     }

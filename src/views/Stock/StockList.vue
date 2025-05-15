@@ -1,61 +1,34 @@
 <template>
   <div class="stock-list">
     <!-- 筛选模块 -->
-    <div class="product-search">
-      <!-- 搜索过滤区域 -->
-      <div class="row items-center">
+    <div class="search-bar">
+      <div class="row q-col-gutter-sm">
         <!-- 关键词搜索模块 -->
-        <div class="row items-center no-wrap search-group">
-          <q-select
-            outlined
-            dense
-            v-model="filters.search_type"
-            :options="searchTypeOptions"
-            emit-value
-            map-options
-            option-value="value"
-            option-label="label"
-            class="search-type-select"
-          />
-          <q-input
-            outlined
-            dense
-            v-model="filters.keywords"
-            :placeholder="t('批量搜索用逗号隔开')"
-            class="keywords-input"
-          />
-          <q-select
-            outlined
-            dense
-            v-model="filters.search_mode"
-            :options="searchModeOptions"
-            emit-value
-            map-options
-            option-value="value"
-            option-label="label"
-            class="search-mode-select"
-          />
-        </div>
-
-        <div class="q-ml-md">
-          <q-btn color="primary" :label="t('搜索')" @click="handleSearch" />
+        <KeywordSearch
+          v-model:search_mode="filters.search_mode"
+          v-model:search_type="filters.search_type"
+          v-model:search_value="filters.keywords"
+          :searchTypeList="searchTypeOptions"
+        ></KeywordSearch>
+        <div>
+          <q-btn color="primary" class="filter-btn" :label="t('搜索')" @click="handleSearch" />
         </div>
       </div>
     </div>
 
     <!-- 表格容器 -->
-    <div class="stock-container">
-      <div class="row justify-end q-mb-md">
-        <q-btn-dropdown color="primary" :label="t('导出')" icon="file_download">
+    <div class="main-table">
+      <div class="row q-py-md">
+        <q-btn-dropdown color="primary" flat :label="t('导出')" icon="file_download">
           <q-list>
             <q-item clickable v-close-popup @click="handleExport('selected')">
               <q-item-section>
-                <q-item-label>{{ t("按勾选导出") }}</q-item-label>
+                <q-item-label>{{ t('按勾选导出') }}</q-item-label>
               </q-item-section>
             </q-item>
             <q-item clickable v-close-popup @click="handleExport('all')">
               <q-item-section>
-                <q-item-label>{{ t("按筛选导出") }}</q-item-label>
+                <q-item-label>{{ t('按筛选导出') }}</q-item-label>
               </q-item-section>
             </q-item>
           </q-list>
@@ -69,7 +42,6 @@
           :columns="columns"
           row-key="id"
           flat
-          bordered
           :rows-per-page-options="[10, 20, 50]"
           v-model:pagination="tablePagination"
           hide-pagination
@@ -80,7 +52,7 @@
           <template v-slot:no-data="{ icon, filter }">
             <div class="full-width row flex-center text-grey-6 q-gutter-sm">
               <q-icon size="2em" :name="filter ? 'filter_b_and_w' : icon" />
-              <span> {{ t('暂无数据') }} </span>
+              <span>{{ t('暂无数据') }}</span>
             </div>
           </template>
           <template v-slot:header-selection="props">
@@ -96,23 +68,16 @@
             <q-td :props="props">
               <div class="row items-start">
                 <img
-                  :src="props.row.image || 'https://testoms.cangmishu.com/api/uploads/52331320-d813-40d8-a6db-3cf28f4938b1'"
-                  class="q-mr-md"
-                  style="
-                    width: 60px;
-                    height: 60px;
-                    object-fit: cover;
-                    border-radius: 4px;
+                  :src="
+                    props.row.image || 'https://testoms.cangmishu.com/api/uploads/52331320-d813-40d8-a6db-3cf28f4938b1'
                   "
+                  class="q-mr-md"
+                  style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px"
                 />
                 <div class="col">
                   <div class="text-weight-medium">{{ props.row.sku }}</div>
-                  <div class="text-grey-7 q-mt-xs">
-                    {{ t("名称") }}：{{ props.row.product_name }}
-                  </div>
-                  <div class="text-grey-7">
-                    {{ t("规格") }}：{{ props.row.name }}
-                  </div>
+                  <div class="text-grey-7 q-mt-xs">{{ t('名称') }}：{{ props.row.product_name }}</div>
+                  <div class="text-grey-7">{{ t('规格') }}：{{ props.row.name }}</div>
                 </div>
               </div>
             </q-td>
@@ -121,7 +86,7 @@
           <!-- 表格底部合计行 -->
           <template v-slot:bottom-row>
             <q-tr>
-              <q-td colspan="2">{{ t("合计") }}</q-td>
+              <q-td colspan="2">{{ t('合计') }}</q-td>
               <q-td align="right">{{ totalInTransit }}</q-td>
               <q-td align="right">{{ totalPendingReceipt }}</q-td>
               <q-td align="right">{{ totalPendingShelf }}</q-td>
@@ -149,93 +114,94 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from "vue";
-import { useQuasar } from "quasar";
-import { useI18n } from "vue-i18n";
-import Pagination from "@/components/Pagination.vue";
-import api from "@/api/index";
+import api from '@/api/index';
+import KeywordSearch from '@/components/KeywordSearch/Index.vue';
+import Pagination from '@/components/Pagination.vue';
+import { useQuasar } from 'quasar';
+import { computed, onMounted, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const $q = useQuasar();
 const { t } = useI18n();
 
 // 筛选条件
 const filters = ref({
-  start_date: "",
-  end_date: "",
-  search_type: "sku",
-  keywords: "",
-  search_mode: "exact",
+  start_date: '',
+  end_date: '',
+  search_type: 'sku',
+  keywords: '',
+  search_mode: 'exact',
 });
 
 // 搜索类型选项
 const searchTypeOptions = [
-  { label: "SKU", value: "sku" },
-  { label: t("商品名称"), value: "name" },
+  { label: 'SKU', value: 'sku' },
+  { label: t('商品名称'), value: 'name' },
 ];
 
 // 搜索模式选项
 const searchModeOptions = [
-  { label: t("精确搜索"), value: "exact" },
-  { label: t("前缀搜索"), value: "prefix" },
-  { label: t("模糊搜索"), value: "fuzzy" },
+  { label: t('精确搜索'), value: 'exact' },
+  { label: t('前缀搜索'), value: 'prefix' },
+  { label: t('模糊搜索'), value: 'fuzzy' },
 ];
 
 // 表格数据
 const columns = [
   {
-    name: "sku",
-    label: "SKU信息",
-    field: "sku",
-    align: "left",
-    style: "width: 300px",
+    name: 'sku',
+    label: 'SKU信息',
+    field: 'sku',
+    align: 'left',
+    style: 'width: 300px',
   },
   {
-    name: "in_transit_qty",
-    label: t("在途"),
-    field: "in_transit_qty",
-    align: "right",
+    name: 'in_transit_qty',
+    label: t('在途'),
+    field: 'in_transit_qty',
+    align: 'right',
     sortable: true,
   },
   {
-    name: "pending_receipt_qty",
-    label: t("待收货"),
-    field: "pending_receipt_qty",
-    align: "right",
+    name: 'pending_receipt_qty',
+    label: t('待收货'),
+    field: 'pending_receipt_qty',
+    align: 'right',
     sortable: true,
   },
   {
-    name: "pending_shelf_qty",
-    label: t("待上架"),
-    field: "pending_shelf_qty",
-    align: "right",
+    name: 'pending_shelf_qty',
+    label: t('待上架'),
+    field: 'pending_shelf_qty',
+    align: 'right',
     sortable: true,
   },
   {
-    name: "locked_qty",
-    label: t("已锁定"),
-    field: "locked_qty",
-    align: "right",
+    name: 'locked_qty',
+    label: t('已锁定'),
+    field: 'locked_qty',
+    align: 'right',
     sortable: true,
   },
   {
-    name: "available_qty",
-    label: t("可用库存"),
-    field: "available_qty",
-    align: "right",
+    name: 'available_qty',
+    label: t('可用库存'),
+    field: 'available_qty',
+    align: 'right',
     sortable: true,
   },
   {
-    name: "defective_qty",
-    label: t("不良品"),
-    field: "defective_qty",
-    align: "right",
+    name: 'defective_qty',
+    label: t('不良品'),
+    field: 'defective_qty',
+    align: 'right',
     sortable: true,
   },
   {
-    name: "total_qty",
-    label: t("库存总量"),
-    field: "total_qty",
-    align: "right",
+    name: 'total_qty',
+    label: t('库存总量'),
+    field: 'total_qty',
+    align: 'right',
     sortable: true,
   },
 ];
@@ -256,34 +222,22 @@ const pagination = ref({
 
 // 表格分页配置
 const tablePagination = ref({
-  sortBy: "",
+  sortBy: '',
   descending: false,
   page: 1,
   rowsPerPage: 0,
 });
 
 // 计算合计数据
-const totalInTransit = computed(() =>
-  tableData.value.reduce((sum, row) => sum + (row.in_transit_qty || 0), 0)
-);
+const totalInTransit = computed(() => tableData.value.reduce((sum, row) => sum + (row.in_transit_qty || 0), 0));
 const totalPendingReceipt = computed(() =>
   tableData.value.reduce((sum, row) => sum + (row.pending_receipt_qty || 0), 0)
 );
-const totalPendingShelf = computed(() =>
-  tableData.value.reduce((sum, row) => sum + (row.pending_shelf_qty || 0), 0)
-);
-const totalLocked = computed(() =>
-  tableData.value.reduce((sum, row) => sum + (row.locked_qty || 0), 0)
-);
-const totalAvailable = computed(() =>
-  tableData.value.reduce((sum, row) => sum + (row.available_qty || 0), 0)
-);
-const totalDefective = computed(() =>
-  tableData.value.reduce((sum, row) => sum + (row.defective_qty || 0), 0)
-);
-const totalQuantity = computed(() =>
-  tableData.value.reduce((sum, row) => sum + (row.total_qty || 0), 0)
-);
+const totalPendingShelf = computed(() => tableData.value.reduce((sum, row) => sum + (row.pending_shelf_qty || 0), 0));
+const totalLocked = computed(() => tableData.value.reduce((sum, row) => sum + (row.locked_qty || 0), 0));
+const totalAvailable = computed(() => tableData.value.reduce((sum, row) => sum + (row.available_qty || 0), 0));
+const totalDefective = computed(() => tableData.value.reduce((sum, row) => sum + (row.defective_qty || 0), 0));
+const totalQuantity = computed(() => tableData.value.reduce((sum, row) => sum + (row.total_qty || 0), 0));
 
 // 获取数据
 const fetchData = async () => {
@@ -310,10 +264,10 @@ const fetchData = async () => {
       };
     }
   } catch (error) {
-    console.error("获取库存列表失败:", error);
+    console.error('获取库存列表失败:', error);
     $q.notify({
-      message: t("获取库存列表失败"),
-      color: "negative",
+      message: t('获取库存列表失败'),
+      color: 'negative',
     });
   } finally {
     loading.value = false;
@@ -336,45 +290,45 @@ const handleExport = async (type) => {
     };
 
     // 如果是按勾选导出，添加 ids 参数
-    if (type === "selected") {
+    if (type === 'selected') {
       params.ids = selectedRows.value.map((row) => row.id);
     }
 
     // 调用导出API
     const response = await api.stocksExport(params);
-    
+
     // 获取文件名
     const filename = `库存清单_${new Date().toLocaleDateString()}.xlsx`;
-    
+
     // 创建 Blob 对象
-    const blob = new Blob([response], { 
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+    const blob = new Blob([response], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     });
-    
+
     // 创建下载链接
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
     link.download = filename;
-    
+
     // 触发下载
     document.body.appendChild(link);
     link.click();
-    
+
     // 清理
     document.body.removeChild(link);
     window.URL.revokeObjectURL(url);
 
     $q.notify({
-      type: "positive",
-      message: t("导出成功"),
+      type: 'positive',
+      message: t('导出成功'),
     });
   } catch (error) {
     // 只在真正的错误情况下显示错误提示
     if (!error.response || error.response.status !== 200) {
       $q.notify({
-        type: "negative",
-        message: t("导出失败"),
+        type: 'negative',
+        message: t('导出失败'),
       });
     }
   }
@@ -388,12 +342,9 @@ const handlePageChange = ({ page, rowsPerPage }) => {
 };
 
 // 监听排序变化
-watch(
-  [() => tablePagination.value.sortBy, () => tablePagination.value.descending],
-  ([newSortBy, newDescending]) => {
-    fetchData();
-  }
-);
+watch([() => tablePagination.value.sortBy, () => tablePagination.value.descending], ([newSortBy, newDescending]) => {
+  fetchData();
+});
 
 // 组件挂载时获取数据
 onMounted(() => {

@@ -1,146 +1,55 @@
 <template>
   <div class="warehouse-warrant">
     <!-- 状态选项卡和筛选区域 -->
-    <div class="product-search">
+    <div class="tabs-section q-mb-md">
       <!-- 状态选项卡 -->
-      <div class="q-mb-md">
-        <q-tabs
-          v-model="tab"
-          dense
-          class="text-grey"
-          active-color="primary"
-          indicator-color="primary"
-          align="left"
-          narrow-indicator
-        >
-          <q-tab name="all" :label="t('全部')" />
-          <q-tab name="draft" :label="t('草稿')" />
-          <q-tab name="reported" :label="t('已预报')" />
-          <q-tab name="in_transit" :label="t('运输中')" />
-          <q-tab name="pending_inbound" :label="t('待入库')" />
-          <q-tab name="inbound_processing" :label="t('入库中')" />
-          <q-tab name="shelved" :label="t('已完成')" />
-        </q-tabs>
-      </div>
 
-      <!-- 搜索过滤区域 -->
-      <div class="row items-center">
-        <!-- 时间筛选模块 -->
-        <div class="row items-center no-wrap time-group">
-          <div class="col-3">
-            <q-select
-              outlined
-              dense
-              v-model="filters.date_type"
-              :options="dateTypeOptions"
-              emit-value
-              map-options
-              option-value="value"
-              option-label="label"
-              class="date-type-select"
-            />
-          </div>
-          <div class="col date-range">
-            <div class="row no-wrap">
-              <q-input
-                outlined
-                dense
-                v-model="filters.start_date"
-                :label="t('开始时间')"
-                clearable
-                readonly
-                class="date-input start-date"
-                @click="$refs.startDatePopup.show()"
-              >
-                <template v-slot:append>
-                  <q-icon name="event" class="cursor-pointer">
-                    <q-popup-proxy
-                      ref="startDatePopup"
-                      cover
-                      transition-show="scale"
-                      transition-hide="scale"
-                    >
-                      <q-date v-model="filters.start_date" mask="YYYY-MM-DD" />
-                    </q-popup-proxy>
-                  </q-icon>
-                </template>
-              </q-input>
-              <div class="date-separator">To</div>
-              <q-input
-                outlined
-                dense
-                v-model="filters.end_date"
-                :label="t('结束时间')"
-                clearable
-                class="date-input end-date"
-                readonly
-                @click="$refs.endDatePopup.show()"
-              >
-                <template v-slot:append>
-                  <q-icon name="event" class="cursor-pointer">
-                    <q-popup-proxy
-                      ref="endDatePopup"
-                      cover
-                      transition-show="scale"
-                      transition-hide="scale"
-                    >
-                      <q-date v-model="filters.end_date" mask="YYYY-MM-DD" />
-                    </q-popup-proxy>
-                  </q-icon>
-                </template>
-              </q-input>
-            </div>
-          </div>
-        </div>
+      <q-tabs
+        v-model="tab"
+        dense
+        class="text-grey"
+        active-color="primary"
+        indicator-color="primary"
+        align="left"
+        narrow-indicator
+      >
+        <q-tab name="all" :label="t('全部')" />
+        <q-tab name="draft" :label="t('草稿')" />
+        <q-tab name="reported" :label="t('已预报')" />
+        <q-tab name="in_transit" :label="t('运输中')" />
+        <q-tab name="pending_inbound" :label="t('待入库')" />
+        <q-tab name="inbound_processing" :label="t('入库中')" />
+        <q-tab name="shelved" :label="t('已完成')" />
+      </q-tabs>
+    </div>
 
+    <!-- 搜索过滤区域 -->
+    <div class="search-bar">
+      <div class="row q-col-gutter-sm">
+        <!-- 时间筛选+类型 -->
+        <DatePickerNew
+          v-model:date_type="filters.date_type"
+          v-model:start_date="filters.start_date"
+          v-model:end_date="filters.end_date"
+          :dateList="dateTypeOptions"
+        ></DatePickerNew>
         <!-- 关键词搜索模块 -->
-        <div class="row items-center no-wrap search-group q-ml-md">
-          <q-select
-            outlined
-            dense
-            v-model="filters.search_type"
-            :options="searchTypeOptions"
-            emit-value
-            map-options
-            option-value="value"
-            option-label="label"
-            class="search-type-select"
-          />
-          <q-input
-            outlined
-            dense
-            v-model="filters.keywords"
-            :placeholder="t('批量搜索用逗号隔开')"
-            class="keywords-input"
-          />
-          <q-select
-            outlined
-            dense
-            v-model="filters.search_mode"
-            :options="searchModeOptions"
-            emit-value
-            map-options
-            option-value="value"
-            option-label="label"
-            class="search-mode-select"
-          />
-        </div>
-
-        <div class="q-ml-md">
-          <q-btn color="primary" :label="t('搜索')" @click="handleSearch" />
+        <KeywordSearch
+          v-model:search_mode="filters.search_mode"
+          v-model:search_type="filters.search_type"
+          v-model:search_value="filters.keywords"
+          :searchTypeList="searchTypeOptions"
+        ></KeywordSearch>
+        <div>
+          <q-btn color="primary" class="filter-btn" :label="t('搜索')" @click="handleSearch" />
         </div>
       </div>
     </div>
 
     <!-- 操作按钮和表格容器 -->
-    <div class="warehouse-container">
-      <div class="row justify-end q-mb-md">
-        <q-btn
-          color="primary"
-          :label="t('新建')"
-          icon="add"
-          @click="handleCreate"
-        />
+    <div class="main-table">
+      <div class="row q-py-md">
+        <q-btn color="primary" :label="t('新建')" icon="add" flat @click="handleCreate" />
       </div>
 
       <!-- 数据表格 -->
@@ -150,7 +59,6 @@
           :columns="columns"
           row-key="id"
           flat
-          bordered
           :pagination="tablePagination"
           hide-pagination
           :loading="loading"
@@ -158,7 +66,7 @@
           <template v-slot:no-data="{ icon, filter }">
             <div class="full-width row flex-center text-grey-6 q-gutter-sm">
               <q-icon size="2em" :name="filter ? 'filter_b_and_w' : icon" />
-              <span> {{ t('暂无数据') }} </span>
+              <span>{{ t('暂无数据') }}</span>
             </div>
           </template>
           <!-- 自定义SKU单元格 -->
@@ -172,31 +80,20 @@
 
           <!-- 自定义到仓方式 -->
           <template v-slot:body-cell-shippingMethod="props">
-            <q-td
-              :props="props"
-              :class="
-                props.row.arrival_method === 'express_parcel'
-                  ? 'text-primary'
-                  : ''
-              "
-            >
-              {{
-                props.row.arrival_method === "express_parcel"
-                  ? t("快递包裹")
-                  : t("按箱")
-              }}
+            <q-td :props="props" :class="props.row.arrival_method === 'express_parcel' ? 'text-primary' : ''">
+              {{ props.row.arrival_method === 'express_parcel' ? t('快递包裹') : t('按箱') }}
             </q-td>
           </template>
 
           <!-- 自定义箱数 -->
           <template v-slot:body-cell-boxCount="props">
             <q-td :props="props">
-              <div 
+              <div
                 class="cursor-pointer relative-position"
                 @mouseenter="props.row.total_box_qty && handleBoxDetails(props.row.id, true)"
                 @mouseleave="props.row.total_box_qty && handleBoxDetails(props.row.id, false)"
               >
-                {{ props.row.total_box_qty || "--" }}
+                {{ props.row.total_box_qty || '--' }}
                 <q-menu
                   v-if="props.row.total_box_qty"
                   :modelValue="activeBoxId === props.row.id"
@@ -245,12 +142,12 @@
           <!-- sku详情 -->
           <template v-slot:body-cell-skus="props">
             <q-td :props="props">
-              <div 
+              <div
                 class="cursor-pointer relative-position"
                 @mouseenter="handleSkuDetails(props.row.id, true)"
                 @mouseleave="handleSkuDetails(props.row.id, false)"
               >
-                {{ props.row.total_sku_type_qty == 1 ? t('单个') : t('多个')}} ({{ props.row.total_sku_type_qty }})
+                {{ props.row.total_sku_type_qty == 1 ? t('单个') : t('多个') }} ({{ props.row.total_sku_type_qty }})
                 <q-menu
                   :modelValue="activeSkuId === props.row.id"
                   anchor="bottom middle"
@@ -274,8 +171,8 @@
                         <q-spinner color="primary" size="40px" />
                       </div>
                       <template v-else>
-                        <div 
-                          v-for="(item, index) in skuDetailsList" 
+                        <div
+                          v-for="(item, index) in skuDetailsList"
                           :key="index"
                           class="row items-center q-px-md q-py-sm hover-highlight"
                         >
@@ -298,15 +195,8 @@
           <template v-slot:body-cell-operations="props">
             <q-td :props="props">
               <div class="row q-gutter-xs justify-center">
-                <q-btn
-                  flat
-                  round
-                  color="grey-8"
-                  icon="visibility"
-                  size="sm"
-                  @click="handleView(props.row)"
-                >
-                  <q-tooltip>{{ t("查看") }}</q-tooltip>
+                <q-btn flat round color="grey-8" icon="visibility" size="sm" @click="handleView(props.row)">
+                  <q-tooltip>{{ t('查看') }}</q-tooltip>
                 </q-btn>
                 <q-btn flat round color="grey-8" icon="more_horiz" size="sm">
                   <q-menu>
@@ -317,14 +207,10 @@
                         v-if="props.row.status === 'draft'"
                         @click="handleEdit(props.row)"
                       >
-                        <q-item-section>{{ t("编辑") }}</q-item-section>
+                        <q-item-section>{{ t('编辑') }}</q-item-section>
                       </q-item>
-                      <q-item
-                        clickable
-                        v-close-popup
-                        @click="openTrackingDialog(props.row)"
-                      >
-                        <q-item-section>{{ t("编辑运单号") }}</q-item-section>
+                      <q-item clickable v-close-popup @click="openTrackingDialog(props.row)">
+                        <q-item-section>{{ t('编辑运单号') }}</q-item-section>
                       </q-item>
                       <q-item
                         clickable
@@ -332,7 +218,7 @@
                         v-if="props.row.status === 'draft'"
                         @click="handleSubmitInbound(props.row)"
                       >
-                        <q-item-section>{{ t("提交入库单") }}</q-item-section>
+                        <q-item-section>{{ t('提交入库单') }}</q-item-section>
                       </q-item>
                       <q-item
                         clickable
@@ -340,14 +226,10 @@
                         v-if="props.row.status === 'reported'"
                         @click="handleShipInbound(props.row)"
                       >
-                        <q-item-section>{{ t("发货") }}</q-item-section>
+                        <q-item-section>{{ t('发货') }}</q-item-section>
                       </q-item>
-                      <q-item
-                        clickable
-                        v-close-popup
-                        @click="handlePrintInbound(props.row)"
-                      >
-                        <q-item-section>{{ t("打印入库单") }}</q-item-section>
+                      <q-item clickable v-close-popup @click="handlePrintInbound(props.row)">
+                        <q-item-section>{{ t('打印入库单') }}</q-item-section>
                       </q-item>
                       <q-item
                         v-if="props.row.arrival_method == 'express_parcel'"
@@ -355,7 +237,7 @@
                         v-close-popup
                         @click="handlePrintLabel(props.row)"
                       >
-                        <q-item-section>{{ t("打印标签") }}</q-item-section>
+                        <q-item-section>{{ t('打印标签') }}</q-item-section>
                       </q-item>
                       <q-item
                         v-if="props.row.arrival_method == 'box'"
@@ -363,7 +245,7 @@
                         v-close-popup
                         @click="handlePrintBoxLabel(props.row)"
                       >
-                        <q-item-section>{{ t("打印箱唛") }}</q-item-section>
+                        <q-item-section>{{ t('打印箱唛') }}</q-item-section>
                       </q-item>
                       <q-item
                         clickable
@@ -371,7 +253,7 @@
                         v-if="props.row.status === 'draft'"
                         @click="handleDelete(props.row)"
                       >
-                        <q-item-section>{{ t("删除") }}</q-item-section>
+                        <q-item-section>{{ t('删除') }}</q-item-section>
                       </q-item>
                     </q-list>
                   </q-menu>
@@ -444,14 +326,16 @@
                 <div class="row items-center q-mb-sm">
                   <q-radio v-model="printForm.box_size" val="medium">
                     <template v-slot:default>
-                      100*100 <span class="text-grey-6">(显示SKU信息)</span>
+                      100*100
+                      <span class="text-grey-6">(显示SKU信息)</span>
                     </template>
                   </q-radio>
                 </div>
                 <div class="row items-center">
                   <q-radio v-model="printForm.box_size" val="large">
                     <template v-slot:default>
-                      100*150 <span class="text-grey-6">(显示SKU信息)</span>
+                      100*150
+                      <span class="text-grey-6">(显示SKU信息)</span>
                     </template>
                   </q-radio>
                 </div>
@@ -472,12 +356,7 @@
 
         <q-card-actions align="right" class="q-pa-md">
           <q-btn :label="t('取消')" color="grey-7" flat v-close-popup />
-          <q-btn
-            :label="t('确定')"
-            color="primary"
-            flat
-            @click="handlePrintConfirm"
-          />
+          <q-btn :label="t('确定')" color="primary" flat @click="handlePrintConfirm" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -496,7 +375,7 @@
             v-model="trackingNumber"
             outlined
             :label="t('运单号')"
-            :rules="[val => !!val || t('运单号不能为空')]"
+            :rules="[(val) => !!val || t('运单号不能为空')]"
             class="q-mb-md"
           >
             <template v-slot:append>
@@ -523,46 +402,48 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from "vue";
-import { useQuasar } from "quasar";
-import { useRouter } from "vue-router";
-import { useI18n } from "vue-i18n";
-import Pagination from "@/components/Pagination.vue";
-import api from "@/api/index";
+import api from '@/api/index';
+import DatePickerNew from '@/components/DatePickerNew/Index.vue';
+import KeywordSearch from '@/components/KeywordSearch/Index.vue';
+import Pagination from '@/components/Pagination.vue';
 import PrintLabelDialog from '@/views/Product/components/PrintLabelDialog.vue';
+import { useQuasar } from 'quasar';
+import { onMounted, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 
 const $q = useQuasar();
 const router = useRouter();
 const { t } = useI18n();
 
 // 标签页
-const tab = ref("all");
+const tab = ref('all');
 
 // 筛选条件
 const filters = ref({
-  date_type: "created_at",
-  start_date: "",
-  end_date: "",
-  search_type: "sku",
-  keywords: "",
-  search_mode: "exact",
+  date_type: 'created_at',
+  start_date: '',
+  end_date: '',
+  search_type: 'sku',
+  keywords: '',
+  search_mode: 'exact',
 });
 
 // 日期类型选项
-const dateTypeOptions = [{ label: t("创建时间"), value: "created_at" }];
+const dateTypeOptions = [{ label: t('创建时间'), value: 'created_at' }];
 
 // 搜索类型选项
 const searchTypeOptions = [
-  { label: "SKU", value: "sku" },
-  { label: t("商品名称"), value: "product_name" },
-  { label: t("自定义单号"), value: "custom_order_number" },
+  { label: 'SKU', value: 'sku' },
+  { label: t('商品名称'), value: 'product_name' },
+  { label: t('自定义单号'), value: 'custom_order_number' },
 ];
 
 // 搜索模式选项
 const searchModeOptions = [
-  { label: t("精确搜索"), value: "exact" },
-  { label: t("前缀搜索"), value: "prefix" },
-  { label: t("模糊搜索"), value: "fuzzy" },
+  { label: t('精确搜索'), value: 'exact' },
+  { label: t('前缀搜索'), value: 'prefix' },
+  { label: t('模糊搜索'), value: 'fuzzy' },
 ];
 const statusMap = {
   draft: t('草稿'),
@@ -570,74 +451,73 @@ const statusMap = {
   in_transit: t('运输中'),
   pending_inbound: t('待入库'),
   inbound_processing: t('入库中'),
-  shelved: t('已完成')
+  shelved: t('已完成'),
 };
 
 // 表格数据
 const columns = [
   {
-    name: "warehouseId",
-    label: t("入库单号"),
-    field: "system_order_number",
-    align: "left",
+    name: 'warehouseId',
+    label: t('入库单号'),
+    field: 'system_order_number',
+    align: 'left',
   },
   {
-    name: "customId",
-    label: t("自定义单号"),
-    field: "custom_order_number",
-    align: "left",
+    name: 'customId',
+    label: t('自定义单号'),
+    field: 'custom_order_number',
+    align: 'left',
   },
   {
-    name: "trackingId",
-    label: t("运单号"),
-    field: "tracking_number",
-    align: "left",
+    name: 'trackingId',
+    label: t('运单号'),
+    field: 'tracking_number',
+    align: 'left',
   },
   {
-    name: "shippingMethod",
-    label: t("到仓方式"),
-    field: (row) =>
-      row.arrival_method === "express_parcel" ? t("快递包裹") : t("按箱"),
-    align: "center",
+    name: 'shippingMethod',
+    label: t('到仓方式'),
+    field: (row) => (row.arrival_method === 'express_parcel' ? t('快递包裹') : t('按箱')),
+    align: 'center',
   },
   {
-    name: "boxCount",
-    label: t("箱数"),
-    field: "total_box_qty",
-    format: (val) => val || "--",
-    align: "center",
+    name: 'boxCount',
+    label: t('箱数'),
+    field: 'total_box_qty',
+    format: (val) => val || '--',
+    align: 'center',
   },
   {
-    name: "skus",
-    label: t("SKU*Qty"),
-    field: "skus",
-    align: "center",
+    name: 'skus',
+    label: t('SKU*Qty'),
+    field: 'skus',
+    align: 'center',
   },
   {
-    name: "status",
-    label: t("状态"),
-    field: "status",
+    name: 'status',
+    label: t('状态'),
+    field: 'status',
     format: (val) => statusMap[val] || val,
-    align: "center",
+    align: 'center',
   },
   {
-    name: "createTime",
-    label: t("创建时间"),
-    field: "created_at",
-    align: "center",
+    name: 'createTime',
+    label: t('创建时间'),
+    field: 'created_at',
+    align: 'center',
   },
   {
-    name: "arrivalTime",
-    label: t("到仓时间"),
-    field: "received_at",
-    format: (val) => val || "--",
-    align: "center",
+    name: 'arrivalTime',
+    label: t('到仓时间'),
+    field: 'received_at',
+    format: (val) => val || '--',
+    align: 'center',
   },
   {
-    name: "operations",
-    label: t("操作"),
-    field: "operations",
-    align: "center",
+    name: 'operations',
+    label: t('操作'),
+    field: 'operations',
+    align: 'center',
   },
 ];
 
@@ -654,7 +534,7 @@ const pagination = ref({
 
 // 表格分页配置
 const tablePagination = ref({
-  sortBy: "",
+  sortBy: '',
   descending: false,
   page: 1,
   rowsPerPage: 0, // 设置为0以禁用表格内置分页
@@ -666,7 +546,7 @@ const currentInboundId = ref(null);
 const printForm = ref({
   start_box: null,
   end_box: null,
-  box_size: "small",
+  box_size: 'small',
   additional_info: [],
 });
 
@@ -693,8 +573,8 @@ watch(printDialogVisible, (newVal) => {
     printForm.value = {
       start_box: null,
       end_box: null,
-      box_size: "small",
-      additional_info: []
+      box_size: 'small',
+      additional_info: [],
     };
     // 重置当前选中的入库单ID
     currentInboundId.value = null;
@@ -706,7 +586,6 @@ watch(tab, () => {
   pagination.value.page = 1; // 重置页码到第一页
   fetchInboundList();
 });
-
 
 // 获取入库单列表
 const fetchInboundList = async () => {
@@ -721,7 +600,7 @@ const fetchInboundList = async () => {
       search_type: filters.value.search_type,
       keywords: filters.value.keywords,
       search_mode: filters.value.search_mode,
-      inbound_status: tab.value === "all" ? "" : tab.value,
+      inbound_status: tab.value === 'all' ? '' : tab.value,
     };
 
     const response = await api.getInboundList(params);
@@ -732,7 +611,7 @@ const fetchInboundList = async () => {
       pagination.value.maxPage = response.data.meta.last_page;
     }
   } catch (error) {
-    console.error("获取入库单列表失败:", error);
+    console.error('获取入库单列表失败:', error);
   } finally {
     loading.value = false;
   }
@@ -746,7 +625,7 @@ const handleSearch = () => {
 
 // 处理新建
 const handleCreate = () => {
-  router.push("/inbound/createwarehouse");
+  router.push('/inbound/createwarehouse');
 };
 
 // 处理分页变更
@@ -766,7 +645,7 @@ const handleSubmitInbound = async (row) => {
       fetchInboundList();
     }
   } catch (error) {
-    console.error("提交入库单失败:", error);
+    console.error('提交入库单失败:', error);
   }
 };
 
@@ -776,7 +655,7 @@ const handleShipInbound = async (row) => {
   if (!row.tracking_number && row.arrival_method == 'express_parcel') {
     $q.notify({
       type: 'warning',
-      message: t('当前到仓方式必须填写运单号')
+      message: t('当前到仓方式必须填写运单号'),
     });
     openTrackingDialog(row, true); // 传入标记
     return;
@@ -790,7 +669,7 @@ const handleShipInbound = async (row) => {
       fetchInboundList();
     }
   } catch (error) {
-    console.error("发货失败:", error);
+    console.error('发货失败:', error);
   }
 };
 
@@ -802,7 +681,7 @@ const handleView = (row) => {
 // 处理编辑
 const handleEdit = (row) => {
   router.push({
-    path: "/inbound/createwarehouse",
+    path: '/inbound/createwarehouse',
     query: { id: row.id },
   });
 };
@@ -810,17 +689,17 @@ const handleEdit = (row) => {
 // 处理删除
 const handleDelete = (row) => {
   $q.dialog({
-    title: t("确认删除"),
-    message: t("确定要删除该入库单吗？"),
+    title: t('确认删除'),
+    message: t('确定要删除该入库单吗？'),
     cancel: {
-      label: t("取消"),
+      label: t('取消'),
       flat: true,
-      color: "grey-7",
+      color: 'grey-7',
     },
     ok: {
-      label: t("确定"),
+      label: t('确定'),
       flat: true,
-      color: "primary",
+      color: 'primary',
     },
     persistent: true,
   }).onOk(async () => {
@@ -830,7 +709,7 @@ const handleDelete = (row) => {
         fetchInboundList();
       }
     } catch (error) {
-      console.error("删除失败:", error);
+      console.error('删除失败:', error);
     }
   });
 };
@@ -869,12 +748,12 @@ const handlePrintConfirm = async () => {
       start_box: parseInt(printForm.value.start_box),
       end_box: parseInt(printForm.value.end_box),
       box_size: printForm.value.box_size,
-      additional_info: printForm.value.additional_info
+      additional_info: printForm.value.additional_info,
     };
 
     // 设置responseType为blob
     const response = await api.inboundBoxLabel(currentInboundId.value, params, { responseType: 'blob' });
-    
+
     // 检查响应类型
     if (response instanceof Blob) {
       const url = window.URL.createObjectURL(response);
@@ -883,7 +762,7 @@ const handlePrintConfirm = async () => {
       printDialogVisible.value = false;
       $q.notify({
         message: t('打印箱唛生成成功'),
-        color: 'positive'
+        color: 'positive',
       });
     } else {
       throw new Error('Invalid response type');
@@ -892,7 +771,7 @@ const handlePrintConfirm = async () => {
     console.error('打印箱唛失败:', error);
     $q.notify({
       message: t('打印箱唛生成失败'),
-      color: 'negative'
+      color: 'negative',
     });
   }
 };
@@ -911,29 +790,28 @@ const handleTrackingConfirm = async () => {
     if (!trackingNumber.value) {
       $q.notify({
         type: 'warning',
-        message: t('运单号不能为空')
+        message: t('运单号不能为空'),
       });
       return;
     }
 
     await api.inboundResetTracking(currentEditId.value, {
-      tracking_number: trackingNumber.value
+      tracking_number: trackingNumber.value,
     });
     // 关闭对话框
     trackingDialog.value = false;
-    
-    
+
     // 如果是从发货按钮点击的，编辑完成后自动发货
     if (isFromShipButton.value) {
       handleShipInbound({ id: currentEditId.value });
-    }else {
+    } else {
       // 刷新数据
-    fetchInboundList();
+      fetchInboundList();
     }
   } catch (error) {
     $q.notify({
       type: 'negative',
-      message: t('修改失败')
+      message: t('修改失败'),
     });
   }
 };
@@ -957,7 +835,7 @@ const fetchBoxDetails = async (id) => {
 // 修改处理箱子详情的显示/隐藏
 const handleBoxDetails = async (id, show) => {
   if (!id) return; // 添加 id 检查
-  
+
   if (show) {
     if (hideBoxTimer.value) {
       clearTimeout(hideBoxTimer.value);
@@ -982,7 +860,7 @@ const fetchSkuDetails = async (id) => {
   skuDetailsLoading.value = true;
   skuDetailsList.value = [];
   try {
-    const response = await api.getInboundSkus(id,{});
+    const response = await api.getInboundSkus(id, {});
     if (response.success) {
       skuDetailsList.value = response.data;
     }
@@ -1024,14 +902,14 @@ const handlePrintInbound = async (row) => {
     } else {
       $q.notify({
         type: 'negative',
-        message: t('获取入库单PDF失败')
+        message: t('获取入库单PDF失败'),
       });
     }
   } catch (error) {
     console.error('打印入库单失败:', error);
     $q.notify({
       type: 'negative',
-      message: t('打印入库单失败')
+      message: t('打印入库单失败'),
     });
   }
 };
@@ -1044,7 +922,7 @@ const validateBoxNumber = (value, type) => {
   } else if (num > maxBoxQty.value) {
     num = maxBoxQty.value;
   }
-  
+
   if (type === 'start') {
     printForm.value.start_box = num;
     // 确保结束箱号不小于开始箱号
@@ -1186,7 +1064,7 @@ onMounted(() => {
 }
 
 .box-details {
-  min-width: 320px;  // 调整最小宽度
+  min-width: 320px; // 调整最小宽度
   background: white;
   border-radius: 4px;
 

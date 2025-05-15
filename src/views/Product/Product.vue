@@ -5,7 +5,7 @@
 
     <div class="search-bar">
       <!-- 搜索过滤区域 -->
-      <div class="row q-col-gutter-sm items-center">
+      <div class="row q-col-gutter-sm">
         <!-- 时间筛选+类型 -->
         <DatePickerNew
           v-model:date_type="filters.date_type"
@@ -22,8 +22,8 @@
           :searchTypeList="searchTypeOptions"
         ></KeywordSearch>
 
-        <div class="q-ml-md">
-          <q-btn color="primary" class="filter-btn" :label="t('搜索')" @click="handleSearch" />
+        <div>
+          <q-btn color="primary" class="h-40" :label="t('搜索')" @click="handleSearch" />
         </div>
       </div>
     </div>
@@ -138,7 +138,7 @@ import ImportDialog from '@/components/ImportDialog.vue';
 import KeywordSearch from '@/components/KeywordSearch/Index.vue';
 import Pagination from '@/components/Pagination.vue';
 import { useQuasar } from 'quasar';
-import { onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import CombinationSku from './components/CombinationSku.vue';
@@ -158,7 +158,7 @@ const filters = ref({
   date_type: 'created_at',
   start_date: '',
   end_date: '',
-  search_type: 'name',
+  search_type: 'sku',
   keywords: '',
   search_mode: 'exact',
 });
@@ -170,15 +170,30 @@ const dateTypeOptions = [
 ];
 
 // 搜索类型选项
-const searchTypeOptions = [
-  { label: t('名字搜索'), value: 'name' },
-  { label: t('SKU搜索'), value: 'sku' },
-];
+const searchTypeOptions = computed(() => {
+  if (tab.value === 'combo') {
+    return [
+      { label: t('组合商品 SKU'), value: 'bundle_code' },
+      { label: t('子商品 SKU'), value: 'sku' },
+      { label: t('组合商品名称'), value: 'bundle_name' },
+    ];
+  }
+  if (tab.value === 'spu') {
+    return [
+      { label: t('名字搜索'), value: 'name' },
+      { label: t('SKU搜索'), value: 'sku' },
+    ];
+  }
+  return [
+    { label: t('名字搜索'), value: 'product_name' },
+    { label: t('SKU搜索'), value: 'sku' },
+  ];
+});
 
 // 搜索模式选项
 const searchModeOptions = [
   { label: t('精确搜索'), value: 'exact' },
-  { label: t('模糊搜索'), value: 'like' },
+  { label: t('模糊搜索'), value: 'fuzzy' },
   { label: t('前缀搜索'), value: 'prefix' },
 ];
 
@@ -258,8 +273,18 @@ const fetchData = async () => {
 };
 
 // 监听标签页变化
-watch(tab, () => {
+watch(tab, (newTab) => {
   pagination.value.page = 1; // 切换标签页时重置为第一页
+
+  // 切换搜索类型的默认值
+  if (newTab === 'combo') {
+    filters.value.search_type = 'bundle_code';
+  } else if (newTab === 'spu') {
+    filters.value.search_type = 'name';
+  } else {
+    filters.value.search_type = 'product_name';
+  }
+
   fetchData();
 });
 
@@ -355,7 +380,6 @@ const combinationSkuRef = ref(null);
 
 <style lang="scss" scoped>
 .product {
-  // 2.tab切换
   .tabs-section {
     display: flex;
     justify-content: flex-start;

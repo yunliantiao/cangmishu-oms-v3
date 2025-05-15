@@ -1,129 +1,43 @@
 <template>
   <div class="stock-flow">
-    <!-- 筛选模块 -->
-    <div class="product-search bg-white">
-      <!-- 搜索过滤区域 -->
-      <div class="row items-center">
+    <!-- 搜索过滤区域 -->
+    <div class="search-bar">
+      <div class="row q-col-gutter-sm items-center">
+        <!-- 时间筛选+类型 -->
+        <DatePickerNew
+          v-model:start_date="filters.start_date"
+          v-model:end_date="filters.end_date"
+          :showSelect="false"
+        ></DatePickerNew>
+
         <!-- 关键词搜索模块 -->
-        <div class="row items-center no-wrap search-group q-mr-md">
-          <q-select
-            outlined
-            dense
-            v-model="filters.log_type"
-            :options="logTypeOptions"
-            emit-value
-            map-options
-            option-value="value"
-            option-label="label"
-            :label="t('流水类型')"
-            clearable
-            class="log-type-select q-mr-md"
-          />
-          <q-select
-            outlined
-            dense
-            v-model="filters.search_type"
-            :options="searchTypeOptions"
-            emit-value
-            map-options
-            option-value="value"
-            option-label="label"
-            class="search-type-select"
-          />
-          <q-input
-            outlined
-            dense
-            v-model="filters.keywords"
-            :placeholder="t('批量搜索用逗号隔开')"
-            class="keywords-input"
-          />
-          <q-select
-            outlined
-            dense
-            v-model="filters.search_mode"
-            :options="searchModeOptions"
-            emit-value
-            map-options
-            option-value="value"
-            option-label="label"
-            class="search-mode-select"
-          />
-        </div>
+        <KeywordSearch
+          v-model:search_mode="filters.search_mode"
+          v-model:search_type="filters.search_type"
+          v-model:search_value="filters.keywords"
+          :searchTypeList="searchTypeOptions"
+        ></KeywordSearch>
 
-        <!-- 时间筛选模块 -->
-        <div class="row items-center no-wrap time-group">
-          <div class="col date-range">
-            <div class="row no-wrap">
-              <q-input
-                outlined
-                dense
-                v-model="filters.start_date"
-                :label="t('开始时间')"
-                clearable
-                class="date-input start-date"
-                @click="$refs.startDatePopup.show()"
-                readonly
-              >
-                <template v-slot:append>
-                  <q-icon name="event" class="cursor-pointer">
-                    <q-popup-proxy
-                      ref="startDatePopup"
-                      cover
-                      transition-show="scale"
-                      transition-hide="scale"
-                    >
-                      <q-date v-model="filters.start_date" mask="YYYY-MM-DD" />
-                    </q-popup-proxy>
-                  </q-icon>
-                </template>
-              </q-input>
-              <div class="date-separator flex items-center">To</div>
-              <q-input
-                outlined
-                dense
-                v-model="filters.end_date"
-                :label="t('结束时间')"
-                clearable
-                class="date-input end-date"
-                @click="$refs.endDatePopup.show()"
-                readonly
-              >
-                <template v-slot:append>
-                  <q-icon name="event" class="cursor-pointer">
-                    <q-popup-proxy
-                      ref="endDatePopup"
-                      cover
-                      transition-show="scale"
-                      transition-hide="scale"
-                    >
-                      <q-date v-model="filters.end_date" mask="YYYY-MM-DD" />
-                    </q-popup-proxy>
-                  </q-icon>
-                </template>
-              </q-input>
-            </div>
-          </div>
-        </div>
-
-        <div class="q-ml-md">
-          <q-btn color="primary" :label="t('搜索')" @click="handleSearch" />
+        <div>
+          <q-btn color="primary" class="filter-btn" :label="t('搜索')" @click="handleSearch" />
         </div>
       </div>
     </div>
+
     <!-- 表格 -->
-    <div class="bg-white rounded-borders q-pa-md">
+    <div class="main-table">
       <!-- 导出按钮 -->
-      <div class="text-right q-mb-md">
-        <q-btn-dropdown color="primary" :label="t('导出')" icon="file_download">
+      <div class="q-py-md">
+        <q-btn-dropdown color="primary" flat :label="t('导出')" icon="file_download">
           <q-list>
             <q-item clickable v-close-popup @click="handleExport('selected')">
               <q-item-section>
-                <q-item-label>{{ t("按勾选导出") }}</q-item-label>
+                <q-item-label>{{ t('按勾选导出') }}</q-item-label>
               </q-item-section>
             </q-item>
             <q-item clickable v-close-popup @click="handleExport('all')">
               <q-item-section>
-                <q-item-label>{{ t("按筛选导出") }}</q-item-label>
+                <q-item-label>{{ t('按筛选导出') }}</q-item-label>
               </q-item-section>
             </q-item>
           </q-list>
@@ -134,7 +48,6 @@
         :columns="columns"
         row-key="id"
         flat
-        bordered
         :rows-per-page-options="[10, 20, 50]"
         v-model:pagination="tablePagination"
         hide-pagination
@@ -153,7 +66,7 @@
         <template v-slot:no-data="{ icon, filter }">
           <div class="full-width row flex-center text-grey-6 q-gutter-sm">
             <q-icon size="2em" :name="filter ? 'filter_b_and_w' : icon" />
-            <span> {{ t("暂无数据") }} </span>
+            <span>{{ t('暂无数据') }}</span>
           </div>
         </template>
         <!-- 商品信息列自定义 -->
@@ -179,7 +92,7 @@
         <template v-slot:body-cell-change_qty="props">
           <q-td :props="props">
             <span :class="props.row.stock > 0 ? 'text-green' : 'text-red'">
-              {{ props.row.stock > 0 ? "+" : "" }}{{ props.row.stock }}
+              {{ props.row.stock > 0 ? '+' : '' }}{{ props.row.stock }}
             </span>
           </q-td>
         </template>
@@ -188,26 +101,18 @@
         <template v-slot:body-cell-reference="props">
           <q-td :props="props">
             <template v-if="props.row.type === '销售出库'">
-              <div class="text-grey-7">{{ t("ERP包裹号") }}:</div>
-              <div>{{ props.row.reference_number || "--" }}</div>
-              <div class="text-grey-7">
-                {{ t("订单号") }}: {{ props.row.order_no || "--" }}
-              </div>
-              <div class="text-grey-7">
-                {{ t("运单号") }}: {{ props.row.tracking_no || "--" }}
-              </div>
+              <div class="text-grey-7">{{ t('ERP包裹号') }}:</div>
+              <div>{{ props.row.reference_number || '--' }}</div>
+              <div class="text-grey-7">{{ t('订单号') }}: {{ props.row.order_no || '--' }}</div>
+              <div class="text-grey-7">{{ t('运单号') }}: {{ props.row.tracking_no || '--' }}</div>
             </template>
             <template v-else>
+              <div>{{ t('调整单号') }}:{{ props.row.reference_number || '--' }}</div>
               <div>
-                {{ t("调整单号") }}:{{ props.row.reference_number || "--" }}
+                {{ t('入库批次号') }}:
+                {{ props.row.inbound_batch_number || '--' }}
               </div>
-              <div>
-                {{ t("入库批次号") }}:
-                {{ props.row.inbound_batch_number || "--" }}
-              </div>
-              <div>
-                {{ t("库位") }}: {{ props.row.warehouse_location_code || "--" }}
-              </div>
+              <div>{{ t('库位') }}: {{ props.row.warehouse_location_code || '--' }}</div>
             </template>
           </q-td>
         </template>
@@ -230,93 +135,93 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
-import { useI18n } from "vue-i18n";
-import Pagination from "@/components/Pagination.vue";
-import api from "@/api/index";
-import { useQuasar } from "quasar";
+import api from '@/api/index';
+import Pagination from '@/components/Pagination.vue';
+import { useQuasar } from 'quasar';
+import { onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
 const $q = useQuasar();
 
 // 筛选条件
 const filters = ref({
-  start_date: "",
-  end_date: "",
-  search_type: "sku",
-  keywords: "",
-  search_mode: "exact",
-  log_type: "",
+  start_date: '',
+  end_date: '',
+  search_type: 'sku',
+  keywords: '',
+  search_mode: 'exact',
+  log_type: '',
 });
 
 // 添加流水类型选项
 const logTypeOptions = [
-  { label: t("标准入库"), value: "inbound" },
-  { label: t("销售出库"), value: "outbound" },
-  { label: t("退货入库"), value: "return" },
-  { label: t("库存调整"), value: "adjustment" },
-  { label: t("初始化库存"), value: "initial" },
-  { label: t("盘点"), value: "check" },
+  { label: t('标准入库'), value: 'inbound' },
+  { label: t('销售出库'), value: 'outbound' },
+  { label: t('退货入库'), value: 'return' },
+  { label: t('库存调整'), value: 'adjustment' },
+  { label: t('初始化库存'), value: 'initial' },
+  { label: t('盘点'), value: 'check' },
 ];
 
 // 搜索类型选项
 const searchTypeOptions = [
-  { label: "SKU", value: "sku" },
-  { label: t("商品名称"), value: "name" },
+  { label: 'SKU', value: 'sku' },
+  { label: t('商品名称'), value: 'name' },
 ];
 
 // 搜索模式选项
 const searchModeOptions = [
-  { label: t("精确搜索"), value: "exact" },
-  { label: t("前缀搜索"), value: "prefix" },
-  { label: t("模糊搜索"), value: "fuzzy" },
+  { label: t('精确搜索'), value: 'exact' },
+  { label: t('前缀搜索'), value: 'prefix' },
+  { label: t('模糊搜索'), value: 'fuzzy' },
 ];
 
 // 类型映射
 const typeMap = {
   inbound: t('入库'),
-  outbound: t('出库')
+  outbound: t('出库'),
 };
 
 // 表格列定义
 const columns = [
   {
-    name: "time",
-    label: t("时间"),
-    field: "created_at",
-    align: "left",
+    name: 'time',
+    label: t('时间'),
+    field: 'created_at',
+    align: 'left',
   },
   {
-    name: "product",
-    label: t("商品信息"),
-    field: "product",
-    align: "left",
+    name: 'product',
+    label: t('商品信息'),
+    field: 'product',
+    align: 'left',
   },
   {
-    name: "change_qty",
-    label: t("变化数量"),
-    field: "stock",
-    align: "right",
+    name: 'change_qty',
+    label: t('变化数量'),
+    field: 'stock',
+    align: 'right',
   },
   {
-    name: "total_qty",
-    label: t("变动后库存总量"),
-    field: "stock_after",
-    align: "right",
+    name: 'total_qty',
+    label: t('变动后库存总量'),
+    field: 'stock_after',
+    align: 'right',
   },
   {
-    name: "type",
-    label: t("类型"),
-    field: "type",
-    align: "left",
-    format: (val) => typeMap[val] || t('出库')
+    name: 'type',
+    label: t('类型'),
+    field: 'type',
+    align: 'left',
+    format: (val) => typeMap[val] || t('出库'),
   },
   {
-    name: "reference",
-    label: t("关联单据号"),
-    field: "reference",
-    align: "left",
-    style: "width: 350px",
+    name: 'reference',
+    label: t('关联单据号'),
+    field: 'reference',
+    align: 'left',
+    style: 'width: 350px',
   },
 ];
 
@@ -332,7 +237,7 @@ const pagination = ref({
 
 // 表格分页配置
 const tablePagination = ref({
-  sortBy: "",
+  sortBy: '',
   descending: false,
   page: 1,
   rowsPerPage: 0,
@@ -366,10 +271,10 @@ const fetchData = async () => {
       };
     }
   } catch (error) {
-    console.error("获取库存流水失败:", error);
+    console.error('获取库存流水失败:', error);
     $q.notify({
-      message: t("获取库存流水失败"),
-      color: "negative",
+      message: t('获取库存流水失败'),
+      color: 'negative',
     });
   } finally {
     loading.value = false;
@@ -409,15 +314,15 @@ const handleExport = async (type) => {
       keywords: filters.value.keywords,
       start_date: filters.value.start_date,
       end_date: filters.value.end_date,
-      log_type: filters.value.log_type
+      log_type: filters.value.log_type,
     };
 
     // 如果是按勾选导出，添加 ids 参数
-    if (type === "selected") {
+    if (type === 'selected') {
       if (selectedRows.value.length === 0) {
         $q.notify({
-          type: "warning",
-          message: t("请先选择要导出的记录"),
+          type: 'warning',
+          message: t('请先选择要导出的记录'),
         });
         return;
       }
@@ -426,39 +331,39 @@ const handleExport = async (type) => {
 
     // 调用导出API
     const response = await api.stocksLogsExport(params);
-    
+
     // 获取文件名
     const filename = `库存流水_${new Date().toLocaleDateString()}.xlsx`;
-    
+
     // 创建 Blob 对象
-    const blob = new Blob([response], { 
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+    const blob = new Blob([response], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     });
-    
+
     // 创建下载链接
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
     link.download = filename;
-    
+
     // 触发下载
     document.body.appendChild(link);
     link.click();
-    
+
     // 清理
     document.body.removeChild(link);
     window.URL.revokeObjectURL(url);
 
     $q.notify({
-      type: "positive",
-      message: t("导出成功"),
+      type: 'positive',
+      message: t('导出成功'),
     });
   } catch (error) {
     // 只在真正的错误情况下显示错误提示
     if (!error.response || error.response.status !== 200) {
       $q.notify({
-        type: "negative",
-        message: t("导出失败"),
+        type: 'negative',
+        message: t('导出失败'),
       });
     }
   }
