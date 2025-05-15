@@ -1,0 +1,82 @@
+// 定义的公共筛选样式 开始
+.filter-btn {
+  height: 40px !important;
+
+  .q-btn__content {
+    font-size: 14px !important;
+  }
+}
+
+.filter-item {
+  width: 200px;
+}
+
+.search-bar {
+  background: #ffffff;
+  box-shadow: 0px 1px 10px 1px rgba(102, 102, 102, 0.08);
+  border-radius: 16px 16px 16px 16px;
+  padding: 16px;
+}
+
+.main-table {
+  background: #ffffff;
+  box-shadow: 0px 1px 10px 1px rgba(102, 102, 102, 0.08);
+  border-radius: 16px 16px 16px 16px;
+  padding: 0px 16px 16px;
+  margin-top: 16px;
+}
+
+.global-mt {
+  margin-top: 16px;
+}
+
+.add-icon {
+  width: 16px;
+  height: 16px;
+  margin-right: 6px;
+}
+
+.table-icon {
+  img {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.hover-copy {
+  cursor: pointer;
+
+  &:hover {
+    color: $primary !important;
+    text-decoration: underline;
+
+  }
+}
+
+// 定义的公共筛选样式 结束
+
+.q-table {
+  .q-tr {
+    td {
+      padding: 8px 5px !important;
+      font-size: 14px !important;
+      color: #1f1f1f !important;
+    }
+
+
+  }
+
+  th {
+    padding: 8px 5px !important;
+    font-size: 14px !important;
+    color: #1f1f1f !important;
+    line-height: 16px !important;
+    font-weight: bold !important;
+  }
+}
+
+.q-table__container {
+  .q-table__bottom {
+    border-top: none !important;
+  }
+}

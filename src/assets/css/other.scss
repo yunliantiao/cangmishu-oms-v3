@@ -1,0 +1,111 @@
+// 文字水平对齐方式 ********************************************
+@each $var in (left, center, right) {
+  .text-#{$var} {
+    text-align: $var;
+  }
+}
+
+// ********************************************
+.overflow-x-scroll {
+  overflow-x: scroll; // 水平方向超出滚动
+}
+.overflow-y-scroll {
+  overflow-y: scroll; // 垂直方向超出滚动
+}
+.overflow-y-auto {
+  overflow-y: auto; // 垂直方向高度超出后才显示滚动条
+}
+.overflow-x-hidden {
+  overflow-x: hidden;
+}
+
+// 字体 ********************************************
+.font-bold {
+  font-weight: bold;
+}
+
+// 边框颜色 ********************************************
+// 类名  .border-b
+$orientation: (
+  t: top,
+  b: bottom,
+  l: left,
+  r: right,
+);
+@each $orientationKey, $orientationVal in $orientation {
+  .border-#{$orientationKey} {
+    border-#{$orientationVal}: 1px solid #e6e6e6;
+  }
+}
+
+// *******************************************************
+// 外边框圆角
+@for $i from 1 through 50 {
+  // 如果能够被 2 整除，将应用以下样式
+  @if ($i % 2 == 0) {
+    // b-rd-6
+    .b-rd-#{$i} {
+      border-radius: #{$i}px;
+    }
+  }
+}
+
+.w-full {
+  width: 100%;
+}
+.h-full {
+  height: 100%;
+}
+
+// 宽高
+@for $i from 0 through 300 {
+  @each $key, $val in w width, h height, lh line-height, min-w min-width, min-h min-height {
+    // 如果能够被 2 整除，将应用以下样式
+    @if ($i % 2 == 0) {
+      // w-20 || lh-100
+      .#{$key}-#{$i} {
+        #{$val}: 1px * $i;
+      }
+    }
+  }
+}
+
+.position-relative {
+  position: relative; // 父：相
+}
+.position-absolute {
+  position: absolute; // 子：绝
+}
+
+// 元素显示模式 eg: display-inline-block
+@each $val in block, inline, inline-block {
+  .display-#{$val} {
+    display: #{$val};
+  }
+}
+
+// 文字超出？行溢出隐藏...  text-overflow-1
+@for $i from 1 through 10 {
+  .text-overflow-#{$i} {
+    display: -webkit-box; /* 使用旧版WebKit内核布局盒模型 */
+    -webkit-line-clamp: #{$i}; /* 限制文本显示的行数为2行 */
+    -webkit-box-orient: vertical; /* 设置盒模型布局方向为垂直 */
+    overflow: hidden; /* 超出部分隐藏 */
+    text-overflow: ellipsis; /* 使用省略号表示被截断的部分 */
+    word-break: break-word; // 英文按单词分割
+    // &:hover {
+    //   white-space: normal; /* 显示全部 */
+    //   overflow: visible; /* 取消超出隐藏 */
+    // }
+  }
+}
+@for $i from 0 through 48 {
+  @if ($i % 2 == 0) {
+    .font-#{$i} {
+      font-size: 1px * $i !important;
+    }
+    .gap-#{$i} {
+      gap: 1px * $i !important;
+    }
+  }
+}
