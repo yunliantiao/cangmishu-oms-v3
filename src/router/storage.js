@@ -8,7 +8,7 @@ export default [
         name: 'Inbound',
         redirect: '/inbound/warehousewarrant',
         component: Container,
-        icon: 'text_snippet',
+        icon: 'warehouse',
         meta: {
             name: '入库',
             icon: '',

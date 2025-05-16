@@ -6,7 +6,7 @@ export default [
         name: 'Outbound',
         redirect: '/outbound/list',
         component: Container,
-        icon: 'local_shipping',
+        icon: 'out',
         meta: {
             name: '出库',
             icon: '',

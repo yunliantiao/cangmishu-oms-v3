@@ -6,7 +6,7 @@ export default [
         name: 'Stock',
         redirect: '/stock/stocklist',
         component: Container,
-        icon: 'inventory_2',
+        icon: 'stock',
         meta: {
             name: '库存',
             icon: '',
