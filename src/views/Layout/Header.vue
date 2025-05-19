@@ -7,7 +7,7 @@
         round
         @click="toggleDrawer"
         aria-label="Menu"
-        icon="menu"
+        :icon="leftDrawerOpen ? 'menu_open' : 'read_more'"
       />
 
       <q-btn flat no-caps no-wrap class="q-ml-xs" v-if="$q.screen.gt.xs">
@@ -34,7 +34,7 @@
           @update:model-value="handleLangChange"
           class="language-select"
         />
-        
+
         <q-btn round flat>
           <q-avatar size="26px">
             <img src="https://cdn.quasar.dev/img/boy-avatar.png" />
@@ -58,14 +58,14 @@
 </template>
 
 <script>
-import { fabYoutube } from "@quasar/extras/fontawesome-v6";
-import { useStore } from "vuex";
-import { computed, ref, onMounted, nextTick } from "vue";
+import { fabYoutube } from '@quasar/extras/fontawesome-v6';
+import { useStore } from 'vuex';
+import { computed, ref, onMounted, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useQuasar } from 'quasar';
 
 export default {
-  name: "HeaderComponent",
+  name: 'HeaderComponent',
 
   setup() {
     const store = useStore();
@@ -75,7 +75,7 @@ export default {
     // 语言选项
     const langOptions = [
       { label: '简体中文', value: 'zh_cn' },
-      { label: 'English', value: 'en_us' }
+      { label: 'English', value: 'en_us' },
     ];
 
     // 当前语言
@@ -83,7 +83,7 @@ export default {
 
     // 从Vuex获取侧边栏状态
     const leftDrawerOpen = computed(() => store.state.leftDrawerOpen);
-    
+
     // 从Vuex获取用户信息
     const userInfo = computed(() => store.state.userInfo);
 
@@ -92,13 +92,13 @@ export default {
       locale.value = value;
       localStorage.setItem('lang', value);
       currentLang.value = value;
-      
+
       // 直接刷新页面
       window.location.reload();
     };
 
     function toggleDrawer() {
-      store.dispatch("toggleLeftDrawer");
+      store.dispatch('toggleLeftDrawer');
     }
 
     function handleLogout() {
@@ -114,8 +114,7 @@ export default {
         locale.value = savedLang;
         currentLang.value = savedLang;
       }
-      console.log(warehouse.value,'78978979');
-      
+      console.log(warehouse.value, '78978979');
     });
 
     return {
@@ -135,13 +134,13 @@ export default {
 
 <style lang="scss" scoped>
 .language-select {
-  :deep(.q-field__native), 
-  :deep(.q-field__prefix), 
-  :deep(.q-field__suffix), 
+  :deep(.q-field__native),
+  :deep(.q-field__prefix),
+  :deep(.q-field__suffix),
   :deep(.q-field__label) {
     color: white !important;
   }
-  
+
   :deep(.q-field__control) {
     color: white !important;
     background: transparent !important;

@@ -69,197 +69,204 @@
               <span>{{ t('暂无数据') }}</span>
             </div>
           </template>
-          <!-- 自定义SKU单元格 -->
-          <template v-slot:body-cell-sku="props">
-            <q-td :props="props">
-              <div>
-                {{ props.row.sku }}
-              </div>
-            </q-td>
-          </template>
-
-          <!-- 自定义到仓方式 -->
-          <template v-slot:body-cell-shippingMethod="props">
-            <q-td :props="props" :class="props.row.arrival_method === 'express_parcel' ? 'text-primary' : ''">
-              {{ props.row.arrival_method === 'express_parcel' ? t('快递包裹') : t('按箱') }}
-            </q-td>
-          </template>
-
-          <!-- 自定义箱数 -->
-          <template v-slot:body-cell-boxCount="props">
-            <q-td :props="props">
-              <div
-                class="cursor-pointer relative-position"
-                @mouseenter="props.row.total_box_qty && handleBoxDetails(props.row.id, true)"
-                @mouseleave="props.row.total_box_qty && handleBoxDetails(props.row.id, false)"
+          <template v-slot:body="props">
+            <q-tr :props="props">
+              <q-td key="system_order_number" :props="props">
+                {{ props.row.system_order_number }}
+              </q-td>
+              <q-td key="custom_order_number" :props="props">
+                {{ props.row.custom_order_number }}
+              </q-td>
+              <q-td key="tracking_number" :props="props">
+                {{ props.row.tracking_number }}
+              </q-td>
+              <q-td key="sku" :props="props">
+                <div>
+                  {{ props.row.sku }}
+                </div>
+              </q-td>
+              <q-td
+                key="shippingMethod"
+                :props="props"
+                :class="props.row.arrival_method === 'express_parcel' ? 'text-primary' : ''"
               >
-                {{ props.row.total_box_qty || '--' }}
-                <q-menu
-                  v-if="props.row.total_box_qty"
-                  :modelValue="activeBoxId === props.row.id"
-                  anchor="bottom middle"
-                  self="top middle"
-                  :offset="[0, 10]"
-                  class="box-details-menu"
-                  @mouseenter="handleBoxDetails(props.row.id, true)"
-                  @mouseleave="handleBoxDetails(props.row.id, false)"
+                {{ props.row.arrival_method === 'express_parcel' ? t('快递包裹') : t('按箱') }}
+              </q-td>
+              <q-td key="total_box_qty" :props="props">
+                <div
+                  class="cursor-pointer relative-position"
+                  @mouseenter="props.row.total_box_qty && handleBoxDetails(props.row.id, true)"
+                  @mouseleave="props.row.total_box_qty && handleBoxDetails(props.row.id, false)"
                 >
-                  <div class="box-details">
-                    <div class="box-details-content q-pa-none">
-                      <div class="row items-center box-details-title q-px-md q-py-sm bg-grey-2">
-                        <div style="width: 120px">箱号</div>
-                        <div style="width: 100px">SKU</div>
-                        <div style="width: 60px">数量</div>
-                      </div>
-                      <q-separator />
-                      <div v-if="boxDetailsLoading" class="q-pa-md flex flex-center">
-                        <q-spinner color="primary" size="40px" />
-                      </div>
-                      <template v-else>
-                        <template v-for="(box, boxIndex) in boxDetailsList" :key="box.id">
-                          <!-- 箱子信息 -->
-                          <template v-for="(item, itemIndex) in box.items" :key="item.id">
-                            <div class="row items-center q-px-md q-py-sm hover-highlight">
-                              <!-- 只在每个箱子的第一个item显示箱号 -->
-                              <div style="width: 120px">
-                                <template v-if="itemIndex === 0">{{ box.box_number }}</template>
+                  {{ props.row.total_box_qty || '--' }}
+                  <q-menu
+                    v-if="props.row.total_box_qty"
+                    :modelValue="activeBoxId === props.row.id"
+                    anchor="bottom middle"
+                    self="top middle"
+                    :offset="[0, 10]"
+                    class="box-details-menu"
+                    @mouseenter="handleBoxDetails(props.row.id, true)"
+                    @mouseleave="handleBoxDetails(props.row.id, false)"
+                  >
+                    <div class="box-details">
+                      <div class="box-details-content q-pa-none">
+                        <div class="row items-center box-details-title q-px-md q-py-sm bg-grey-2">
+                          <div style="width: 120px">箱号</div>
+                          <div style="width: 100px">SKU</div>
+                          <div style="width: 60px">数量</div>
+                        </div>
+                        <q-separator />
+                        <div v-if="boxDetailsLoading" class="q-pa-md flex flex-center">
+                          <q-spinner color="primary" size="40px" />
+                        </div>
+                        <template v-else>
+                          <template v-for="(box, boxIndex) in boxDetailsList" :key="box.id">
+                            <!-- 箱子信息 -->
+                            <template v-for="(item, itemIndex) in box.items" :key="item.id">
+                              <div class="row items-center q-px-md q-py-sm hover-highlight">
+                                <!-- 只在每个箱子的第一个item显示箱号 -->
+                                <div style="width: 120px">
+                                  <template v-if="itemIndex === 0">{{ box.box_number }}</template>
+                                </div>
+                                <div style="width: 100px">{{ item.product_spec_sku }}</div>
+                                <div style="width: 60px">{{ item.quantity }}</div>
                               </div>
-                              <div style="width: 100px">{{ item.product_spec_sku }}</div>
-                              <div style="width: 60px">{{ item.quantity }}</div>
-                            </div>
+                            </template>
+                            <!-- 只在每个箱子后添加分割线，除非是最后一个箱子 -->
+                            <q-separator v-if="boxIndex !== boxDetailsList.length - 1" />
                           </template>
-                          <!-- 只在每个箱子后添加分割线，除非是最后一个箱子 -->
-                          <q-separator v-if="boxIndex !== boxDetailsList.length - 1" />
                         </template>
-                      </template>
+                      </div>
                     </div>
-                  </div>
-                </q-menu>
-              </div>
-            </q-td>
-          </template>
-
-          <!-- sku详情 -->
-          <template v-slot:body-cell-skus="props">
-            <q-td :props="props">
-              <div
-                class="cursor-pointer relative-position"
-                @mouseenter="handleSkuDetails(props.row.id, true)"
-                @mouseleave="handleSkuDetails(props.row.id, false)"
-              >
-                {{ props.row.total_sku_type_qty == 1 ? t('单个') : t('多个') }} ({{ props.row.total_sku_type_qty }})
-                <q-menu
-                  :modelValue="activeSkuId === props.row.id"
-                  anchor="bottom middle"
-                  self="top middle"
-                  :offset="[0, 10]"
-                  class="box-details-menu"
+                  </q-menu>
+                </div>
+              </q-td>
+              <q-td key="skus" :props="props">
+                <div
+                  class="cursor-pointer relative-position"
                   @mouseenter="handleSkuDetails(props.row.id, true)"
                   @mouseleave="handleSkuDetails(props.row.id, false)"
                 >
-                  <div class="box-details">
-                    <div class="box-details-content q-pa-none">
-                      <div class="row items-center box-details-title q-px-md q-py-sm bg-grey-2">
-                        <div style="width: 100px">SKU</div>
-                        <div style="width: 100px">申报数量</div>
-                        <div style="width: 100px">收货数量</div>
-                        <!-- <div style="width: 120px">上架良品</div>
-                        <div style="width: 120px">上架不良品</div> -->
-                      </div>
-                      <q-separator />
-                      <div v-if="skuDetailsLoading" class="q-pa-md flex flex-center">
-                        <q-spinner color="primary" size="40px" />
-                      </div>
-                      <template v-else>
-                        <div
-                          v-for="(item, index) in skuDetailsList"
-                          :key="index"
-                          class="row items-center q-px-md q-py-sm hover-highlight"
-                        >
-                          <div style="width: 100px">{{ item.product_spec_sku }}</div>
-                          <div style="width: 100px">{{ item.quantity }}</div>
-                          <div style="width: 100px">{{ item.received_quantity }}</div>
-                          <!-- <div style="width: 120px">{{ item.shelf_quantity || '--' }}</div>
-                          <div style="width: 120px">{{ item.defective_quantity || '--' }}</div> -->
-                          <q-separator v-if="index !== skuDetailsList.length - 1" />
+                  {{ props.row.total_sku_type_qty == 1 ? t('单个') : t('多个') }} ({{ props.row.total_sku_type_qty }})
+                  <q-menu
+                    :modelValue="activeSkuId === props.row.id"
+                    anchor="bottom middle"
+                    self="top middle"
+                    :offset="[0, 10]"
+                    class="box-details-menu"
+                    @mouseenter="handleSkuDetails(props.row.id, true)"
+                    @mouseleave="handleSkuDetails(props.row.id, false)"
+                  >
+                    <div class="box-details">
+                      <div class="box-details-content q-pa-none">
+                        <div class="row items-center box-details-title q-px-md q-py-sm bg-grey-2">
+                          <div style="width: 100px">SKU</div>
+                          <div style="width: 100px">申报数量</div>
+                          <div style="width: 100px">收货数量</div>
+                          <!-- <div style="width: 120px">上架良品</div>
+                          <div style="width: 120px">上架不良品</div> -->
                         </div>
-                      </template>
+                        <q-separator />
+                        <div v-if="skuDetailsLoading" class="q-pa-md flex flex-center">
+                          <q-spinner color="primary" size="40px" />
+                        </div>
+                        <template v-else>
+                          <div
+                            v-for="(item, index) in skuDetailsList"
+                            :key="index"
+                            class="row items-center q-px-md q-py-sm hover-highlight"
+                          >
+                            <div style="width: 100px">{{ item.product_spec_sku }}</div>
+                            <div style="width: 100px">{{ item.quantity }}</div>
+                            <div style="width: 100px">{{ item.received_quantity }}</div>
+                            <!-- <div style="width: 120px">{{ item.shelf_quantity || '--' }}</div>
+                            <div style="width: 120px">{{ item.defective_quantity || '--' }}</div> -->
+                            <q-separator v-if="index !== skuDetailsList.length - 1" />
+                          </div>
+                        </template>
+                      </div>
                     </div>
-                  </div>
-                </q-menu>
-              </div>
-            </q-td>
-          </template>
-
-          <!-- 操作列 -->
-          <template v-slot:body-cell-operations="props">
-            <q-td :props="props">
-              <div class="row q-gutter-xs justify-center">
-                <q-btn flat round color="grey-8" icon="visibility" size="sm" @click="handleView(props.row)">
-                  <q-tooltip>{{ t('查看') }}</q-tooltip>
-                </q-btn>
-                <q-btn flat round color="grey-8" icon="more_horiz" size="sm">
-                  <q-menu>
-                    <q-list style="min-width: 100px">
-                      <q-item
-                        clickable
-                        v-close-popup
-                        v-if="props.row.status === 'draft'"
-                        @click="handleEdit(props.row)"
-                      >
-                        <q-item-section>{{ t('编辑') }}</q-item-section>
-                      </q-item>
-                      <q-item clickable v-close-popup @click="openTrackingDialog(props.row)">
-                        <q-item-section>{{ t('编辑运单号') }}</q-item-section>
-                      </q-item>
-                      <q-item
-                        clickable
-                        v-close-popup
-                        v-if="props.row.status === 'draft'"
-                        @click="handleSubmitInbound(props.row)"
-                      >
-                        <q-item-section>{{ t('提交入库单') }}</q-item-section>
-                      </q-item>
-                      <q-item
-                        clickable
-                        v-close-popup
-                        v-if="props.row.status === 'reported'"
-                        @click="handleShipInbound(props.row)"
-                      >
-                        <q-item-section>{{ t('发货') }}</q-item-section>
-                      </q-item>
-                      <q-item clickable v-close-popup @click="handlePrintInbound(props.row)">
-                        <q-item-section>{{ t('打印入库单') }}</q-item-section>
-                      </q-item>
-                      <q-item
-                        v-if="props.row.arrival_method == 'express_parcel'"
-                        clickable
-                        v-close-popup
-                        @click="handlePrintLabel(props.row)"
-                      >
-                        <q-item-section>{{ t('打印标签') }}</q-item-section>
-                      </q-item>
-                      <q-item
-                        v-if="props.row.arrival_method == 'box'"
-                        clickable
-                        v-close-popup
-                        @click="handlePrintBoxLabel(props.row)"
-                      >
-                        <q-item-section>{{ t('打印箱唛') }}</q-item-section>
-                      </q-item>
-                      <q-item
-                        clickable
-                        v-close-popup
-                        v-if="props.row.status === 'draft'"
-                        @click="handleDelete(props.row)"
-                      >
-                        <q-item-section>{{ t('删除') }}</q-item-section>
-                      </q-item>
-                    </q-list>
                   </q-menu>
-                </q-btn>
-              </div>
-            </q-td>
+                </div>
+              </q-td>
+              <q-td key="status" :props="props">
+                {{ props.row.status }}
+              </q-td>
+              <q-td key="created_at" :props="props">
+                {{ props.row.created_at }}
+              </q-td>
+              <q-td key="received_at" :props="props">
+                {{ props.row.received_at }}
+              </q-td>
+              <q-td key="operations" :props="props">
+                <div class="row q-gutter-xs justify-center">
+                  <q-btn flat round color="grey-8" icon="visibility" size="sm" @click="handleView(props.row)">
+                    <q-tooltip>{{ t('查看') }}</q-tooltip>
+                  </q-btn>
+                  <q-btn flat round color="grey-8" icon="more_horiz" size="sm">
+                    <q-menu>
+                      <q-list style="min-width: 100px">
+                        <q-item
+                          clickable
+                          v-close-popup
+                          v-if="props.row.status === 'draft'"
+                          @click="handleEdit(props.row)"
+                        >
+                          <q-item-section>{{ t('编辑') }}</q-item-section>
+                        </q-item>
+                        <q-item clickable v-close-popup @click="openTrackingDialog(props.row)">
+                          <q-item-section>{{ t('编辑运单号') }}</q-item-section>
+                        </q-item>
+                        <q-item
+                          clickable
+                          v-close-popup
+                          v-if="props.row.status === 'draft'"
+                          @click="handleSubmitInbound(props.row)"
+                        >
+                          <q-item-section>{{ t('提交入库单') }}</q-item-section>
+                        </q-item>
+                        <q-item
+                          clickable
+                          v-close-popup
+                          v-if="props.row.status === 'reported'"
+                          @click="handleShipInbound(props.row)"
+                        >
+                          <q-item-section>{{ t('发货') }}</q-item-section>
+                        </q-item>
+                        <q-item clickable v-close-popup @click="handlePrintInbound(props.row)">
+                          <q-item-section>{{ t('打印入库单') }}</q-item-section>
+                        </q-item>
+                        <q-item
+                          v-if="props.row.arrival_method == 'express_parcel'"
+                          clickable
+                          v-close-popup
+                          @click="handlePrintLabel(props.row)"
+                        >
+                          <q-item-section>{{ t('打印标签') }}</q-item-section>
+                        </q-item>
+                        <q-item
+                          v-if="props.row.arrival_method == 'box'"
+                          clickable
+                          v-close-popup
+                          @click="handlePrintBoxLabel(props.row)"
+                        >
+                          <q-item-section>{{ t('打印箱唛') }}</q-item-section>
+                        </q-item>
+                        <q-item
+                          clickable
+                          v-close-popup
+                          v-if="props.row.status === 'draft'"
+                          @click="handleDelete(props.row)"
+                        >
+                          <q-item-section>{{ t('删除') }}</q-item-section>
+                        </q-item>
+                      </q-list>
+                    </q-menu>
+                  </q-btn>
+                </div>
+              </q-td>
+            </q-tr>
           </template>
         </q-table>
 
@@ -457,19 +464,19 @@ const statusMap = {
 // 表格数据
 const columns = [
   {
-    name: 'warehouseId',
+    name: 'system_order_number',
     label: t('入库单号'),
     field: 'system_order_number',
     align: 'left',
   },
   {
-    name: 'customId',
+    name: 'custom_order_number',
     label: t('自定义单号'),
     field: 'custom_order_number',
     align: 'left',
   },
   {
-    name: 'trackingId',
+    name: 'tracking_number',
     label: t('运单号'),
     field: 'tracking_number',
     align: 'left',
@@ -481,7 +488,7 @@ const columns = [
     align: 'center',
   },
   {
-    name: 'boxCount',
+    name: 'total_box_qty',
     label: t('箱数'),
     field: 'total_box_qty',
     format: (val) => val || '--',
@@ -501,13 +508,13 @@ const columns = [
     align: 'center',
   },
   {
-    name: 'createTime',
+    name: 'created_at',
     label: t('创建时间'),
     field: 'created_at',
     align: 'center',
   },
   {
-    name: 'arrivalTime',
+    name: 'received_at',
     label: t('到仓时间'),
     field: 'received_at',
     format: (val) => val || '--',

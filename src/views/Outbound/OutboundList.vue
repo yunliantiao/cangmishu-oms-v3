@@ -139,8 +139,12 @@
               <q-td colspan="8" class="order-info q-pa-none">
                 <div class="row items-center justify-between" style="padding: 8px">
                   <div class="order-basic-info">
-                    <span class="q-mr-md">{{ t('订单号') }}：{{ props.row.order_number }}</span>
-                    <span class="q-mr-md">{{ t('包裹号') }}：{{ props.row.system_order_number || '--' }}</span>
+                    <span class="q-mr-md hover-copy" @click="$copy(props.row.order_number)">
+                      {{ t('订单号') }}：{{ props.row.order_number }}
+                    </span>
+                    <span class="q-mr-md hover-copy" @click="$copy(props.row.system_order_number)">
+                      {{ t('包裹号') }}：{{ props.row.system_order_number || '--' }}
+                    </span>
                   </div>
                   <div>{{ sourceMap[props.row.source] || props.row.source }}</div>
                 </div>
