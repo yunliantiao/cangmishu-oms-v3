@@ -1,6 +1,6 @@
 <template>
   <div class="row items-center justify-end full-width custom-pagination">
-    <div class="total-count">总计 {{ totalCount }}</div>
+    <div class="total-count">{{ t('总计') }} {{ totalCount }}</div>
     <q-pagination
       v-model="currentPage"
       :max="maxPage"
@@ -14,7 +14,7 @@
     <q-select
       v-model="rowsPerPage"
       :options="pageSizeOptions"
-      label="每页显示"
+      :label="t('每页显示')"
       dense
       outlined
       options-dense
@@ -26,6 +26,9 @@
 
 <script setup>
 import { ref, watch, defineProps, defineEmits, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+
 
 const props = defineProps({
   totalCount: {
@@ -45,6 +48,7 @@ const props = defineProps({
     default: () => [10, 20, 50, 100]
   }
 });
+const { t } = useI18n();
 
 const emit = defineEmits(['update:page', 'update:rowsPerPage', 'pageChange']);
 
