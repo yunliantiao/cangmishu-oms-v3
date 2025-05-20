@@ -1,23 +1,22 @@
 <template>
   <div class="stock-list">
-    <!-- 状态选项卡 -->
-    <div class="tabs-section q-mb-md">
-      <q-tabs
-        v-model="tab"
-        dense
-        class="text-grey"
-        active-color="primary"
-        indicator-color="primary"
-        align="left"
-        narrow-indicator
-      >
-        <q-tab name="standard" :label="t('标准库龄')" />
-        <q-tab name="segment" :label="t('分段库龄')" />
-      </q-tabs>
-    </div>
-
     <!-- 筛选模块 -->
     <div class="search-bar">
+      <div class="tabs-section q-mb-md">
+        <q-tabs
+          v-model="tab"
+          dense
+          class="text-grey"
+          active-color="primary"
+          indicator-color="primary"
+          align="left"
+          narrow-indicator
+        >
+          <q-tab name="standard" :label="t('标准库龄')" />
+          <q-tab name="segment" :label="t('分段库龄')" />
+        </q-tabs>
+      </div>
+
       <!-- 搜索过滤区域 -->
       <div class="row q-col-gutter-sm">
         <!-- 关键词搜索模块 -->
@@ -35,9 +34,10 @@
 
     <!-- 表格容器 -->
     <div class="main-table">
-      <div class="row justify-end q-mb-md">
+      <div class="row">
         <q-btn
           v-if="tab === 'segment'"
+          flat
           color="primary"
           :label="t('库龄区间设置')"
           class="q-mr-sm"
@@ -80,35 +80,68 @@
               <span>{{ t('暂无数据') }}</span>
             </div>
           </template>
-          <template v-slot:header-selection="props">
-            <div class="text-left">
-              <q-checkbox color="primary" v-model="props.selected" />
-            </div>
-          </template>
 
-          <template v-slot:body-selection="props">
-            <div class="text-left">
-              <q-checkbox color="primary" v-model="props.selected" />
-            </div>
-          </template>
+          <!-- 自定义表格内容 -->
+          <template v-slot:body="props">
+            <q-tr :props="props">
+              <!-- 多选框列 -->
+              <q-td auto-width style="padding: 0 8px">
+                <q-checkbox color="primary" v-model="props.selected" />
+              </q-td>
 
-          <!-- 商品信息列自定义 -->
-          <template v-slot:body-cell-product="props">
-            <q-td :props="props">
-              <div class="row items-center">
-                <q-img
-                  v-if="props.row.product_spec_image"
-                  :src="props.row.product_spec_image"
-                  style="width: 40px; height: 40px; object-fit: cover"
-                  class="q-mr-sm"
-                />
-                <div>
-                  <div>{{ props.row.product_spec_sku }}</div>
-                  <div class="text-caption">{{ props.row.product_name }}</div>
-                  <div class="text-grey-7">{{ props.row.product_spec_name }}</div>
+              <!-- 商品信息列 -->
+              <q-td key="product" :props="props">
+                <div class="row items-center">
+                  <q-img
+                    v-if="props.row.product_spec_image"
+                    :src="props.row.product_spec_image"
+                    style="width: 40px; height: 40px; object-fit: cover"
+                    class="q-mr-sm"
+                  />
+                  <div>
+                    <div class="hover-copy" @click="$copy(props.row.product_spec_sku)">
+                      {{ props.row.product_spec_sku }}
+                    </div>
+                    <div class="text-caption">{{ props.row.product_name }}</div>
+                    <div class="text-grey-7">{{ props.row.product_spec_name }}</div>
+                  </div>
                 </div>
-              </div>
-            </q-td>
+              </q-td>
+
+              <!-- 商品尺寸列 -->
+              <q-td key="size" :props="props">
+                {{
+                  `${props.row.product_spec_size_length} x ${props.row.product_spec_size_width} x ${props.row.product_spec_size_height}cm`
+                }}
+              </q-td>
+
+              <!-- 上架日期列 -->
+              <q-td key="inbound_date" :props="props">
+                {{ props.row.created_at.split(' ')[0] }}
+              </q-td>
+
+              <!-- 数量列 -->
+              <q-td key="total_qty" :props="props">
+                {{ props.row.total_qty }}
+              </q-td>
+
+              <!-- 库龄列 -->
+              <q-td key="age" :props="props">
+                {{ props.row.age }}
+              </q-td>
+
+              <!-- 更新时间列 -->
+              <q-td key="updated_at" :props="props">
+                {{ props.row.updated_at }}
+              </q-td>
+
+              <!-- 动态库龄区间列 -->
+              <template v-if="tab === 'segment'">
+                <q-td v-for="(group, index) in props.row.group_ages" :key="`age_group_${index}`" :props="props">
+                  {{ group.total_qty || 0 }}
+                </q-td>
+              </template>
+            </q-tr>
           </template>
         </q-table>
 
@@ -596,91 +629,30 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .stock-list {
+  .tabs-section {
+    display: flex;
+    justify-content: flex-start;
+    border-bottom: 1px solid #e6e6e6;
+    .q-tabs {
+      &__content {
+        height: 40px;
+      }
+      &__tab {
+        font-weight: 500;
+        letter-spacing: 0.5px;
+      }
+      .q-tab {
+        padding: 0;
+        &:not(:last-child) {
+          margin-right: 50px;
+        }
+      }
+    }
+  }
+
   :deep(.q-checkbox) {
     .q-checkbox__inner--truthy {
       color: var(--q-primary);
-    }
-  }
-
-  .product-search {
-    padding: 16px;
-    border-radius: 8px;
-    margin-bottom: 16px;
-
-    .q-tabs {
-      margin: -16px -16px 16px -16px;
-      padding: 0;
-    }
-
-    .search-group {
-      :deep(.q-field__control) {
-        border: 1px solid rgba(0, 0, 0, 0.12) !important;
-        height: 40px;
-      }
-
-      :deep(.q-field--outlined .q-field__control:before) {
-        border: none;
-      }
-
-      :deep(.q-field--outlined .q-field__control:after) {
-        border: none;
-      }
-
-      .search-type-select {
-        min-width: fit-content;
-        :deep(.q-field__control) {
-          border-radius: 4px 0 0 4px !important;
-          border-right: none !important;
-        }
-      }
-
-      .keywords-input {
-        flex: 1;
-        :deep(.q-field__control) {
-          border-radius: 0 !important;
-          border-right: none !important;
-        }
-      }
-
-      .search-mode-select {
-        min-width: fit-content;
-        :deep(.q-field__control) {
-          border-radius: 0 4px 4px 0 !important;
-        }
-      }
-    }
-  }
-
-  .stock-container {
-    background-color: white;
-    padding: 16px;
-    border-radius: 8px;
-  }
-
-  .q-table th {
-    font-weight: 500;
-  }
-
-  .q-table tbody td {
-    height: 56px;
-  }
-
-  .q-table {
-    width: 100%;
-
-    :deep(table) {
-      width: 100%;
-    }
-
-    :deep(th:first-child),
-    :deep(td:first-child) {
-      width: 40px;
-      padding: 4px 4px 4px 8px;
-    }
-
-    :deep(th:nth-child(2)),
-    :deep(td:nth-child(2)) {
-      padding-left: 4px;
     }
   }
 

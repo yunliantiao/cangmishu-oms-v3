@@ -23,7 +23,8 @@
         ></KeywordSearch>
 
         <div>
-          <q-btn color="primary" class="h-40" :label="t('搜索')" @click="handleSearch" />
+          <q-btn color="primary" class="h-40" :label="t('重置')" outline @click="handleReset" />
+          <q-btn color="primary" class="h-40 q-ml-sm" :label="t('搜索')" @click="handleSearch" />
         </div>
       </div>
     </div>
@@ -360,6 +361,16 @@ const handlePageChange = ({ page, rowsPerPage }) => {
   pagination.value.page = parseInt(page) || 1;
   pagination.value.rowsPerPage = parseInt(rowsPerPage) || 50;
   fetchData();
+};
+const handleReset = () => {
+  filters.value = {
+    date_type: 'created_at',
+    start_date: '',
+    end_date: '',
+    search_type: 'sku',
+    keywords: '',
+    search_mode: 'exact',
+  };
 };
 
 // 处理搜索按钮点击

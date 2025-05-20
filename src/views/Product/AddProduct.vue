@@ -1,8 +1,17 @@
 <template>
   <div>
     <q-form @submit="saveProductInfo">
-      <div class="text-h5 q-mb-md">
-        {{ route.query.id ? t('编辑产品') : t('添加产品') }}
+      <div class="flex-between-center q-mb-md">
+        <!-- 标题 -->
+        <div class="text-h5 row items-center">
+          <q-icon name="arrow_back" class="q-mr-sm cursor-pointer" @click="$router.back()" />
+          {{ route.query.id ? t('编辑产品') : t('添加产品') }}
+        </div>
+
+        <div class="row q-gutter-sm">
+          <q-btn outline :label="t('取消')" color="grey-7" @click="$router.back()" />
+          <q-btn color="primary" :label="t('保存')" type="submit" :loading="$store.state.btnLoading" class="q-mx-sm" />
+        </div>
       </div>
 
       <div class="compile-product">
@@ -287,7 +296,7 @@
           </q-card>
 
           <!-- 产品详情卡片 -->
-          <q-card class="box-card q-mb-lg" flat id="detail-content">
+          <q-card class="box-card" flat id="detail-content">
             <q-card-section class="q-pb-none">
               <div class="text-h6 bg-white q-pa-sm">{{ t('商品描述') }}</div>
             </q-card-section>
@@ -303,23 +312,6 @@
             </q-card-section>
           </q-card>
         </div>
-
-        <!-- 底部固定操作栏 -->
-        <div class="fixed-bottom-bar">
-          <div class="row justify-center q-pa-md">
-            <q-btn outline :label="t('取消')" color="grey-7" @click="$router.back()" />
-            <q-btn
-              color="primary"
-              :label="t('保存')"
-              type="submit"
-              :loading="$store.state.btnLoading"
-              class="q-mx-sm"
-            />
-          </div>
-        </div>
-
-        <!-- 底部占位,防止内容被固定栏遮挡 -->
-        <div class="bottom-placeholder" />
 
         <!-- 右侧导航锚点 -->
         <!-- <div class="right-nav">
@@ -890,9 +882,8 @@ export default {
   position: relative;
 
   .product-content {
-    height: calc(100vh - 205px);
+    height: calc(100vh - 150px);
     overflow-y: auto;
-    padding-bottom: 70px;
 
     /* 美化滚动条 */
     &::-webkit-scrollbar {
@@ -923,10 +914,6 @@ export default {
     background: white;
     box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
     z-index: 1000;
-  }
-
-  .bottom-placeholder {
-    height: 72px;
   }
 
   /* 右侧导航锚点 */

@@ -1,5 +1,5 @@
 <template>
-  <q-header elevated class="bg-primary text-white q-py-xs" height-hint="58">
+  <q-header elevated class="bg-white text-black q-py-xs" height-hint="58">
     <q-toolbar>
       <q-btn
         flat
@@ -35,13 +35,34 @@
           class="language-select"
         />
 
-        <q-btn round flat>
+        <!-- <q-btn round flat>
           <q-avatar size="26px">
             <img src="https://cdn.quasar.dev/img/boy-avatar.png" />
           </q-avatar>
           <q-tooltip>Account</q-tooltip>
-        </q-btn>
-        <q-btn color="primary" :label="userInfo.email">
+        </q-btn> -->
+        
+        <q-btn-dropdown flat no-caps auto-close :menu-anchor="'bottom left'" :menu-self="'top left'">
+          <template v-slot:label>
+            <div class="row items-center no-wrap">
+              {{ '(' + userInfo.name + ')' + userInfo.email }}
+              <!-- <q-toolbar-title shrink class="">
+               
+              </q-toolbar-title> -->
+            </div>
+          </template>
+
+          <q-list style="min-width: 220px">
+            <q-item clickable v-close-popup @click="handleLogout">
+              <q-item-section>
+                <q-item-label>{{ t('退出') }}</q-item-label>
+              </q-item-section>
+            </q-item>
+            <q-separator />
+          </q-list>
+        </q-btn-dropdown>
+
+        <!-- <q-btn color="primary" :label="userInfo.email">
           <q-menu style="width: 100px">
             <q-list>
               <q-item>
@@ -51,7 +72,7 @@
               </q-item>
             </q-list>
           </q-menu>
-        </q-btn>
+        </q-btn> -->
       </div>
     </q-toolbar>
   </q-header>
@@ -138,24 +159,24 @@ export default {
   :deep(.q-field__prefix),
   :deep(.q-field__suffix),
   :deep(.q-field__label) {
-    color: white !important;
+    color: #1f1f1f !important;
   }
 
   :deep(.q-field__control) {
-    color: white !important;
+    color: #1f1f1f !important;
     background: transparent !important;
   }
 
   :deep(.q-field__control:before) {
-    border: 1px solid white !important;
+    border: 1px solid #1f1f1f !important;
   }
 
   :deep(.q-field__control:after) {
-    border: 1px solid white !important;
+    border: 1px solid #1f1f1f !important;
   }
 
   :deep(.q-icon) {
-    color: white !important;
+    color: #1f1f1f !important;
   }
 
   :deep(.q-field--outlined .q-field__control:hover:before) {

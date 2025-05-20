@@ -3,28 +3,28 @@
     <!-- 添加隐藏的文件输入框 -->
     <input type="file" ref="fileInput" accept=".pdf" style="display: none" @change="onFileSelected" />
 
-    <!-- 状态选项卡 -->
-    <div class="tabs-section q-mb-md">
-      <q-tabs
-        v-model="tab"
-        dense
-        class="text-grey"
-        active-color="primary"
-        indicator-color="primary"
-        align="left"
-        narrow-indicator
-      >
-        <q-tab name="all" :label="t('全部')" />
-        <q-tab name="draft" :label="t('草稿')" />
-        <q-tab name="pending_shipment" :label="t('待出库')" />
-        <q-tab name="exception" :label="t('异常')" />
-        <q-tab name="shipped" :label="t('已发货')" />
-        <q-tab name="cancelled" :label="t('已取消')" />
-      </q-tabs>
-    </div>
-
     <!-- 状态选项卡和筛选区域 -->
     <div class="search-bar">
+      <!-- 状态选项卡 -->
+      <div class="tabs-section q-mb-md">
+        <q-tabs
+          v-model="tab"
+          dense
+          class="text-grey"
+          active-color="primary"
+          indicator-color="primary"
+          align="left"
+          narrow-indicator
+        >
+          <q-tab name="all" :label="t('全部')" />
+          <q-tab name="draft" :label="t('草稿')" />
+          <q-tab name="pending_shipment" :label="t('待出库')" />
+          <q-tab name="exception" :label="t('异常')" />
+          <q-tab name="shipped" :label="t('已发货')" />
+          <q-tab name="cancelled" :label="t('已取消')" />
+        </q-tabs>
+      </div>
+
       <!-- 搜索过滤区域 -->
       <div class="row items-center q-col-gutter-sm">
         <!-- 来源和平台筛选 -->
@@ -721,127 +721,28 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .outbound-list {
-  .outbound-search {
-    background-color: white;
-    padding: 16px;
-    border-radius: 8px;
-    margin-bottom: 16px;
-
+  .tabs-section {
+    display: flex;
+    justify-content: flex-start;
+    border-bottom: 1px solid #e6e6e6;
     .q-tabs {
-      margin: -16px -16px 16px -16px;
-      padding: 0;
-    }
-
-    .time-group,
-    .search-group {
-      :deep(.q-field__control) {
-        border: 1px solid rgba(0, 0, 0, 0.12) !important;
+      &__content {
         height: 40px;
       }
-
-      :deep(.q-field--outlined .q-field__control:before) {
-        border: none;
+      &__tab {
+        font-weight: 500;
+        letter-spacing: 0.5px;
       }
-
-      :deep(.q-field--outlined .q-field__control:after) {
-        border: none;
-      }
-    }
-
-    // 日期选择器组样式
-    .date-type-select {
-      :deep(.q-field__control) {
-        border-radius: 4px 0 0 4px !important;
-        border-right: none !important;
-      }
-    }
-
-    .date-range {
-      .row {
-        margin: 0;
-      }
-
-      .date-input {
-        :deep(.q-field__control) {
-          border-radius: 0 !important;
-        }
-      }
-
-      .start-date {
-        :deep(.q-field__control) {
-          border-right: none !important;
-        }
-      }
-
-      .end-date {
-        :deep(.q-field__control) {
-          border-left: none !important;
-          border-radius: 0 4px 4px 0 !important;
-        }
-      }
-
-      .date-separator {
-        padding: 0 4px;
-        display: flex;
-        align-items: center;
-        background: #fff;
-        border-top: 1px solid rgba(0, 0, 0, 0.12);
-        border-bottom: 1px solid rgba(0, 0, 0, 0.12);
-      }
-    }
-
-    // 搜索组样式
-    .search-group {
-      .search-type-select {
-        min-width: fit-content;
-        :deep(.q-field__control) {
-          border-radius: 4px 0 0 4px !important;
-          border-right: none !important;
-        }
-      }
-
-      .keywords-input {
-        flex: 1;
-        :deep(.q-field__control) {
-          border-radius: 0 !important;
-          border-right: none !important;
-        }
-      }
-
-      .search-mode-select {
-        min-width: fit-content;
-        :deep(.q-field__control) {
-          border-radius: 0 4px 4px 0 !important;
+      .q-tab {
+        padding: 0;
+        &:not(:last-child) {
+          margin-right: 50px;
         }
       }
     }
-  }
-
-  .outbound-container {
-    background-color: white;
-    padding: 16px;
-    border-radius: 8px;
-  }
-
-  .q-table th {
-    font-weight: 500;
-  }
-
-  .q-table tbody td {
-    height: 56px;
   }
 
   .order-detail {
-    td {
-      &:not(:first-child) {
-        border-right: 1px solid rgba(0, 0, 0, 0.12);
-      }
-
-      &:last-child {
-        border-right: none;
-      }
-    }
-
     .sku-item {
       margin-bottom: 4px;
       font-size: 13px;

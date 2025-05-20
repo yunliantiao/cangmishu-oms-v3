@@ -1,30 +1,27 @@
 <template>
   <div class="warehouse-warrant">
-    <!-- 状态选项卡和筛选区域 -->
-    <div class="tabs-section q-mb-md">
-      <!-- 状态选项卡 -->
-
-      <q-tabs
-        v-model="tab"
-        dense
-        class="text-grey"
-        active-color="primary"
-        indicator-color="primary"
-        align="left"
-        narrow-indicator
-      >
-        <q-tab name="all" :label="t('全部')" />
-        <q-tab name="draft" :label="t('草稿')" />
-        <q-tab name="reported" :label="t('已预报')" />
-        <q-tab name="in_transit" :label="t('运输中')" />
-        <q-tab name="pending_inbound" :label="t('待入库')" />
-        <q-tab name="inbound_processing" :label="t('入库中')" />
-        <q-tab name="shelved" :label="t('已完成')" />
-      </q-tabs>
-    </div>
-
-    <!-- 搜索过滤区域 -->
     <div class="search-bar">
+      <!-- 状态选项卡和筛选区域 -->
+      <div class="tabs-section q-mb-md">
+        <q-tabs
+          v-model="tab"
+          dense
+          class="text-grey"
+          active-color="primary"
+          indicator-color="primary"
+          narrow-indicator
+          align="left"
+        >
+          <q-tab name="all" :label="t('全部')" />
+          <q-tab name="draft" :label="t('草稿')" />
+          <q-tab name="reported" :label="t('已预报')" />
+          <q-tab name="in_transit" :label="t('运输中')" />
+          <q-tab name="pending_inbound" :label="t('待入库')" />
+          <q-tab name="inbound_processing" :label="t('入库中')" />
+          <q-tab name="shelved" :label="t('已完成')" />
+        </q-tabs>
+      </div>
+      <!-- 搜索过滤区域 -->
       <div class="row q-col-gutter-sm">
         <!-- 时间筛选+类型 -->
         <DatePickerNew
@@ -41,7 +38,8 @@
           :searchTypeList="searchTypeOptions"
         ></KeywordSearch>
         <div>
-          <q-btn color="primary" class="filter-btn" :label="t('搜索')" @click="handleSearch" />
+          <q-btn color="primary" class="filter-btn" :label="t('重置')" outline @click="handleReset" />
+          <q-btn color="primary" class="filter-btn q-ml-sm" :label="t('搜索')" @click="handleSearch" />
         </div>
       </div>
     </div>
@@ -72,13 +70,19 @@
           <template v-slot:body="props">
             <q-tr :props="props">
               <q-td key="system_order_number" :props="props">
-                {{ props.row.system_order_number }}
+                <span class="hover-copy" @click="$copy(props.row.system_order_number)">
+                  {{ props.row.system_order_number }}
+                </span>
               </q-td>
               <q-td key="custom_order_number" :props="props">
-                {{ props.row.custom_order_number }}
+                <span class="hover-copy" @click="$copy(props.row.custom_order_number)">
+                  {{ props.row.custom_order_number }}
+                </span>
               </q-td>
               <q-td key="tracking_number" :props="props">
-                {{ props.row.tracking_number }}
+                <span class="hover-copy" @click="$copy(props.row.tracking_number)">
+                  {{ props.row.tracking_number }}
+                </span>
               </q-td>
               <q-td key="sku" :props="props">
                 <div>
@@ -624,6 +628,17 @@ const fetchInboundList = async () => {
   }
 };
 
+// 处理重置
+const handleReset = () => {
+  filters.value = {
+    date_type: 'created_at',
+    start_date: '',
+    end_date: '',
+    search_type: 'sku',
+    keywords: '',
+    search_mode: 'exact',
+  };
+};
 // 处理搜索
 const handleSearch = () => {
   pagination.value.page = 1;
@@ -953,114 +968,25 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .warehouse-warrant {
-  .product-search {
-    background-color: white;
-    padding: 16px;
-    border-radius: 8px;
-    margin-bottom: 16px;
-
+  .tabs-section {
+    display: flex;
+    justify-content: flex-start;
+    border-bottom: 1px solid #e6e6e6;
     .q-tabs {
-      margin: -16px -16px 16px -16px;
-      padding: 0;
-    }
-
-    .time-group,
-    .search-group {
-      :deep(.q-field__control) {
-        border: 1px solid rgba(0, 0, 0, 0.12) !important;
+      &__content {
         height: 40px;
       }
-
-      :deep(.q-field--outlined .q-field__control:before) {
-        border: none;
+      &__tab {
+        font-weight: 500;
+        letter-spacing: 0.5px;
       }
-
-      :deep(.q-field--outlined .q-field__control:after) {
-        border: none;
-      }
-    }
-
-    // 日期选择器组样式
-    .date-type-select {
-      :deep(.q-field__control) {
-        border-radius: 4px 0 0 4px !important;
-        border-right: none !important;
-      }
-    }
-
-    .date-range {
-      .row {
-        margin: 0;
-      }
-
-      .date-input {
-        :deep(.q-field__control) {
-          border-radius: 0 !important;
-        }
-      }
-
-      .start-date {
-        :deep(.q-field__control) {
-          border-right: none !important;
-        }
-      }
-
-      .end-date {
-        :deep(.q-field__control) {
-          border-left: none !important;
-          border-radius: 0 4px 4px 0 !important;
-        }
-      }
-
-      .date-separator {
-        padding: 0 4px;
-        display: flex;
-        align-items: center;
-        background: #fff;
-        border-top: 1px solid rgba(0, 0, 0, 0.12);
-        border-bottom: 1px solid rgba(0, 0, 0, 0.12);
-      }
-    }
-
-    // 搜索组样式
-    .search-group {
-      .search-type-select {
-        min-width: fit-content;
-        :deep(.q-field__control) {
-          border-radius: 4px 0 0 4px !important;
-          border-right: none !important;
-        }
-      }
-
-      .keywords-input {
-        flex: 1;
-        :deep(.q-field__control) {
-          border-radius: 0 !important;
-          border-right: none !important;
-        }
-      }
-
-      .search-mode-select {
-        min-width: fit-content;
-        :deep(.q-field__control) {
-          border-radius: 0 4px 4px 0 !important;
+      .q-tab {
+        padding: 0;
+        &:not(:last-child) {
+          margin-right: 50px;
         }
       }
     }
-  }
-
-  .warehouse-container {
-    background-color: white;
-    padding: 16px;
-    border-radius: 8px;
-  }
-
-  .q-table th {
-    font-weight: 500;
-  }
-
-  .q-table tbody td {
-    height: 56px;
   }
 }
 

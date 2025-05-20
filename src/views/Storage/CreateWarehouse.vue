@@ -1,100 +1,92 @@
 <template>
   <div class="create-warehouse">
     <q-form @submit="submitForm" class="q-gutter-md">
-      <!-- 标题 -->
-      <div class="text-h5 q-mb-md">
-        {{ isEdit ? t("编辑入库单") : t("创建入库单") }}
+      <div class="flex-between-center q-mb-md">
+        <!-- 标题 -->
+        <div class="text-h5 row items-center">
+          <q-icon name="arrow_back" class="q-mr-sm cursor-pointer" @click="goBack" />
+          {{ isEdit ? t('编辑入库单') : t('创建入库单') }}
+        </div>
+
+        <div class="row q-gutter-sm">
+          <q-btn outline :label="t('取消')" color="grey-7" @click="goBack" />
+          <q-btn color="primary" outline :label="t('保存')" @click="handleSave" :loading="submitting" />
+          <q-btn type="submit" :label="t('保存并提交')" color="primary" :loading="submitting" />
+        </div>
       </div>
 
       <!-- 主卡片 -->
       <q-card class="warehouse-card">
         <!-- 基本信息区域 -->
         <q-card-section>
-          <div class="text-h6 q-mb-lg">{{ t("基本信息") }}</div>
+          <div class="text-h6 q-mb-lg">{{ t('基本信息') }}</div>
 
           <div class="row q-col-gutter-md">
             <!-- 第一行 -->
-            <div class="col-12 col-md-4">
+            <div class="col-12 col-xs-6 col-sm-6 col-md-3">
               <!-- 到仓方式 -->
-              <div class="form-item">
-                <div class="form-item-label">
-                  {{ t("到仓方式") }} <span class="text-negative">*</span>
-                </div>
-                <q-select
-                  v-model="form.arrival_method"
-                  :options="shippingMethodOptions"
-                  outlined
-                  dense
-                  emit-value
-                  map-options
-                  option-value="value"
-                  option-label="label"
-                  :rules="[(val) => !!val || t('请选择到仓方式')]"
-                  class="full-width"
-                />
+              <div class="form-item-label">
+                {{ t('到仓方式') }}
+                <span class="text-negative">*</span>
               </div>
+              <q-select
+                v-model="form.arrival_method"
+                :options="shippingMethodOptions"
+                outlined
+                dense
+                emit-value
+                map-options
+                option-value="value"
+                option-label="label"
+                :rules="[(val) => !!val || t('请选择到仓方式')]"
+                class="full-width"
+              />
             </div>
 
-            <div class="col-12 col-md-4">
+            <div class="col-12 col-xs-6 col-sm-6 col-md-3">
               <!-- 自定义单号 -->
-              <div class="form-item">
-                <div class="form-item-label">
-                  {{ t("自定义单号") }} <span class="text-negative">*</span>
-                </div>
-                <q-input
-                  v-model="form.custom_order_number"
-                  outlined
-                  dense
-                  :placeholder="t('请输入')"
-                  class="full-width"
-                  maxlength="30"
-                  :rules="[(val) => !!val || t('请输入自定义单号')]"
-                />
+              <div class="form-item-label">
+                {{ t('自定义单号') }}
+                <span class="text-negative">*</span>
               </div>
+              <q-input
+                v-model="form.custom_order_number"
+                outlined
+                dense
+                :placeholder="t('请输入')"
+                class="full-width"
+                maxlength="30"
+                :rules="[(val) => !!val || t('请输入自定义单号')]"
+              />
             </div>
 
             <!-- 第二行 -->
-            <div class="col-12 col-md-4">
+            <div class="col-12 col-xs-6 col-sm-6 col-md-3">
               <!-- 运单号 -->
-              <div class="form-item">
-                <div class="form-item-label">{{ t("运单号") }}</div>
-                <q-input
-                  v-model="form.tracking_number"
-                  outlined
-                  dense
-                  :placeholder="t('请输入')"
-                  class="full-width"
-                />
-              </div>
+              <div class="form-item-label">{{ t('运单号') }}</div>
+              <q-input v-model="form.tracking_number" outlined dense :placeholder="t('请输入')" class="full-width" />
             </div>
 
-            <div class="col-12 col-md-4">
+            <div class="col-12 col-xs-6 col-sm-6 col-md-3">
               <!-- 预计到达日期 -->
-              <div class="form-item">
-                <div class="form-item-label">{{ t("预计到达日期") }}</div>
-                <date-picker
-                  v-model="form.estimated_arrival_date"
-                  :label="t('预计到达日期')"
-                />
-              </div>
+              <div class="form-item-label">{{ t('预计到达日期') }}</div>
+              <date-picker v-model="form.estimated_arrival_date" :label="t('预计到达日期')" />
             </div>
 
             <!-- 备注（跨越整行） -->
             <div class="col-12">
               <!-- 备注 -->
-              <div class="form-item">
-                <div class="form-item-label">{{ t("备注") }}</div>
-                <q-input
-                  v-model="form.remark"
-                  outlined
-                  dense
-                  type="textarea"
-                  :placeholder="t('请输入备注信息')"
-                  class="full-width"
-                  rows="4"
-                  maxlength="200"
-                />
-              </div>
+              <div class="form-item-label">{{ t('备注') }}</div>
+              <q-input
+                v-model="form.remark"
+                outlined
+                dense
+                type="textarea"
+                :placeholder="t('请输入备注信息')"
+                class="full-width"
+                rows="4"
+                maxlength="200"
+              />
             </div>
           </div>
         </q-card-section>
@@ -105,10 +97,7 @@
         <!-- 商品装箱区域 -->
         <q-card-section>
           <!-- 快递包裹模式 -->
-          <div
-            v-if="form.arrival_method === 'express_parcel'"
-            class="express-mode"
-          >
+          <div v-if="form.arrival_method === 'express_parcel'" class="express-mode">
             <div class="row items-center q-mb-md">
               <!-- <q-input
                 v-model="searchSkuText"
@@ -122,11 +111,7 @@
                   <q-btn round dense flat icon="search" @click="searchSku" />
                 </template>
               </q-input> -->
-              <q-btn
-                color="primary"
-                :label="t('添加商品')"
-                @click="openSkuDialog"
-              />
+              <q-btn color="primary" :label="t('添加商品')" @click="openSkuDialog" />
             </div>
 
             <q-table
@@ -149,23 +134,20 @@
               <!-- 无数据时的显示 -->
               <template v-slot:no-data>
                 <div
-                  v-if="
-                    !loading &&
-                    (!expressSkuItems || expressSkuItems.length === 0)
-                  "
+                  v-if="!loading && (!expressSkuItems || expressSkuItems.length === 0)"
                   class="full-width row flex-center q-my-lg"
                 >
-                  <span class="text-grey">{{ t("暂无数据") }}</span>
+                  <span class="text-grey">{{ t('暂无数据') }}</span>
                 </div>
               </template>
 
               <template v-slot:header="props">
                 <q-tr :props="props">
                   <q-th class="text-center">#</q-th>
-                  <q-th class="text-left">{{ t("商品SKU") }}</q-th>
-                  <q-th class="text-left">{{ t("商品名称") }}</q-th>
-                  <q-th class="text-center">{{ t("数量") }}</q-th>
-                  <q-th class="text-center">{{ t("操作") }}</q-th>
+                  <q-th class="text-left">{{ t('商品SKU') }}</q-th>
+                  <q-th class="text-left">{{ t('商品名称') }}</q-th>
+                  <q-th class="text-center">{{ t('数量') }}</q-th>
+                  <q-th class="text-center">{{ t('操作') }}</q-th>
                 </q-tr>
               </template>
 
@@ -185,14 +167,7 @@
                     />
                   </q-td>
                   <q-td class="text-center">
-                    <q-btn
-                      flat
-                      round
-                      dense
-                      color="negative"
-                      icon="delete"
-                      @click="removeExpressSku(props.rowIndex)"
-                    />
+                    <q-btn flat round dense color="negative" icon="delete" @click="removeExpressSku(props.rowIndex)" />
                   </q-td>
                 </q-tr>
               </template>
@@ -202,10 +177,8 @@
           <!-- 按箱模式（原有的装箱界面） -->
           <div v-else>
             <div class="text-h6 q-mb-md">
-              {{ t("商品装箱") }}
-              <span class="text-caption"
-                >{{ t("箱子总数") }}: {{ boxTotal }}</span
-              >
+              {{ t('商品装箱') }}
+              <span class="text-caption">{{ t('箱子总数') }}: {{ boxTotal }}</span>
             </div>
             <!-- 装箱模式选择 -->
             <!-- <div class="q-mb-md">
@@ -252,34 +225,20 @@
                 </template>
 
                 <template v-slot:body-cell-boxNumber="props">
-                  <q-td
-                    :props="props"
-                    class="text-center"
-                    style="height: 40px; line-height: 40px"
-                  >
+                  <q-td :props="props" class="text-center" style="height: 40px; line-height: 40px">
                     {{ getBoxNumberRange(props.rowIndex) }}
                   </q-td>
                 </template>
 
                 <template v-slot:body-cell-boxQuantity="props">
                   <q-td :props="props" style="height: 40px">
-                    <q-input
-                      v-model.number="props.row.boxQuantity"
-                      type="number"
-                      dense
-                      outlined
-                      style="width: 100px"
-                    />
+                    <q-input v-model.number="props.row.boxQuantity" type="number" dense outlined style="width: 100px" />
                   </q-td>
                 </template>
 
                 <template v-slot:body-cell-sku="props">
                   <q-td :props="props">
-                    <div
-                      v-for="(item, index) in props.row.items"
-                      :key="index"
-                      class="sku-item"
-                    >
+                    <div v-for="(item, index) in props.row.items" :key="index" class="sku-item">
                       <div class="row items-center q-gutter-sm">
                         <q-btn
                           flat
@@ -310,18 +269,8 @@
 
                 <template v-slot:body-cell-quantity="props">
                   <q-td :props="props">
-                    <div
-                      v-for="(item, index) in props.row.items"
-                      :key="index"
-                      class="q-mb-sm"
-                    >
-                      <q-input
-                        v-model="item.quantity"
-                        type="number"
-                        dense
-                        outlined
-                        style="width: 100px"
-                      />
+                    <div v-for="(item, index) in props.row.items" :key="index" class="q-mb-sm">
+                      <q-input v-model="item.quantity" type="number" dense outlined style="width: 100px" />
                     </div>
                     <div v-if="props.row.items.length === 0" class="q-mb-sm">
                       <q-input disabled dense outlined style="width: 100px" />
@@ -379,26 +328,13 @@
 
                 <template v-slot:body-cell-operations="props">
                   <q-td :props="props">
-                    <q-btn
-                      flat
-                      round
-                      dense
-                      color="negative"
-                      icon="delete"
-                      @click="removeBox(props.rowIndex)"
-                    />
+                    <q-btn flat round dense color="negative" icon="delete" @click="removeBox(props.rowIndex)" />
                   </q-td>
                 </template>
               </q-table>
 
               <div class="q-mt-md">
-                <q-btn
-                  color="primary"
-                  outline
-                  :label="t('添加箱子')"
-                  icon="add"
-                  @click="addBox"
-                />
+                <q-btn color="primary" outline :label="t('添加箱子')" icon="add" @click="addBox" />
               </div>
             </div>
 
@@ -407,12 +343,7 @@
               <div class="row justify-between items-center q-mb-sm">
                 <div></div>
                 <div>
-                  <q-btn
-                    color="primary"
-                    flat
-                    :label="t('选择商品')"
-                    @click="selectProducts"
-                  />
+                  <q-btn color="primary" flat :label="t('选择商品')" @click="selectProducts" />
                   <q-btn
                     class="q-ml-sm"
                     color="primary"
@@ -422,19 +353,11 @@
                   >
                     <q-menu>
                       <q-list style="min-width: 100px">
-                        <q-item
-                          clickable
-                          v-close-popup
-                          @click="downloadTemplate"
-                        >
-                          <q-item-section>{{ t("下载模板") }}</q-item-section>
+                        <q-item clickable v-close-popup @click="downloadTemplate">
+                          <q-item-section>{{ t('下载模板') }}</q-item-section>
                         </q-item>
-                        <q-item
-                          clickable
-                          v-close-popup
-                          @click="importFromExcel"
-                        >
-                          <q-item-section>{{ t("导入Excel") }}</q-item-section>
+                        <q-item clickable v-close-popup @click="importFromExcel">
+                          <q-item-section>{{ t('导入Excel') }}</q-item-section>
                         </q-item>
                       </q-list>
                     </q-menu>
@@ -454,23 +377,11 @@
               >
                 <template v-slot:header="props">
                   <q-tr :props="props">
-                    <q-th class="text-left">{{ t("商品信息") }}</q-th>
-                    <q-th class="text-center">{{ t("总数量") }}</q-th>
-                    <q-th
-                      v-for="i in boxCountArray"
-                      :key="i"
-                      class="text-center"
-                      >{{ i }}</q-th
-                    >
+                    <q-th class="text-left">{{ t('商品信息') }}</q-th>
+                    <q-th class="text-center">{{ t('总数量') }}</q-th>
+                    <q-th v-for="i in boxCountArray" :key="i" class="text-center">{{ i }}</q-th>
                     <q-th class="text-center">
-                      <q-btn
-                        flat
-                        round
-                        dense
-                        color="primary"
-                        icon="add"
-                        @click="addBoxColumn"
-                      />
+                      <q-btn flat round dense color="primary" icon="add" @click="addBoxColumn" />
                     </q-th>
                   </q-tr>
                 </template>
@@ -480,10 +391,7 @@
                     <q-td class="text-left">
                       <div class="row items-center">
                         <q-img
-                          :src="
-                            props.row.img ||
-                            'https://cdn.quasar.dev/img/avatar2.jpg'
-                          "
+                          :src="props.row.img || 'https://cdn.quasar.dev/img/avatar2.jpg'"
                           style="width: 50px; height: 50px"
                           class="rounded-borders q-mr-md"
                         />
@@ -498,11 +406,7 @@
                     <q-td class="text-center">
                       {{ calculateSkuTotalQuantity(props.row) }}
                     </q-td>
-                    <q-td
-                      v-for="i in boxCountArray"
-                      :key="i"
-                      class="text-center"
-                    >
+                    <q-td v-for="i in boxCountArray" :key="i" class="text-center">
                       <q-input
                         v-model.number="props.row.quantities[i - 1]"
                         type="number"
@@ -513,41 +417,26 @@
                       />
                     </q-td>
                     <q-td class="text-center">
-                      <q-btn
-                        flat
-                        round
-                        color="negative"
-                        icon="delete"
-                        size="sm"
-                        @click="removeSku(props.rowIndex)"
-                      />
+                      <q-btn flat round color="negative" icon="delete" size="sm" @click="removeSku(props.rowIndex)" />
                     </q-td>
                   </q-tr>
                 </template>
 
                 <template v-slot:bottom>
                   <div class="row full-width">
-                    <div class="col-3 text-left">{{ t("合计") }}</div>
+                    <div class="col-3 text-left">{{ t('合计') }}</div>
                     <div class="col-1 text-center">
                       {{ calculateAllSkuTotalQuantity() }}
                     </div>
-                    <div
-                      v-for="i in boxCountArray"
-                      :key="i"
-                      class="col-1 text-center"
-                    >
+                    <div v-for="i in boxCountArray" :key="i" class="col-1 text-center">
                       {{ calculateBoxTotalQuantity(i - 1) }}
                     </div>
                   </div>
                   <div class="row full-width q-mt-md">
                     <div class="col-3 text-left">
-                      {{ t("箱子重量 kg 批量") }}
+                      {{ t('箱子重量 kg 批量') }}
                     </div>
-                    <div
-                      v-for="i in boxCountArray"
-                      :key="i"
-                      class="col-1 text-center"
-                    >
+                    <div v-for="i in boxCountArray" :key="i" class="col-1 text-center">
                       <q-input
                         v-model.number="boxWeights[i - 1]"
                         type="number"
@@ -559,19 +448,9 @@
                     </div>
                   </div>
                   <div class="row full-width q-mt-md">
-                    <div class="col-3 text-left">{{ t("箱子尺寸 cm") }}</div>
-                    <div
-                      v-for="i in boxCountArray"
-                      :key="i"
-                      class="col-1 text-center"
-                    >
-                      <q-btn
-                        color="primary"
-                        flat
-                        dense
-                        :label="t('添加')"
-                        @click="addBoxDimension(i - 1)"
-                      />
+                    <div class="col-3 text-left">{{ t('箱子尺寸 cm') }}</div>
+                    <div v-for="i in boxCountArray" :key="i" class="col-1 text-center">
+                      <q-btn color="primary" flat dense :label="t('添加')" @click="addBoxDimension(i - 1)" />
                     </div>
                   </div>
                 </template>
@@ -580,27 +459,6 @@
           </div>
         </q-card-section>
       </q-card>
-
-      <!-- 底部操作按钮 -->
-      <div class="fixed-bottom-bar">
-        <div class="row justify-center q-pa-md">
-          <q-btn outline :label="t('取消')" color="grey-7" @click="cancel" />
-          <q-btn
-            color="primary"
-            outline
-            :label="t('保存')"
-            @click="handleSave"
-            :loading="submitting"
-            class="q-mx-sm"
-          />
-          <q-btn
-            type="submit"
-            :label="t('保存并提交')"
-            color="primary"
-            :loading="submitting"
-          />
-        </div>
-      </div>
 
       <!-- 底部占位,防止内容被固定栏遮挡 -->
       <div class="bottom-placeholder" />
@@ -612,13 +470,13 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from "vue";
-import { useRouter, useRoute } from "vue-router";
-import { useQuasar } from "quasar";
-import { useI18n } from "vue-i18n";
-import DatePicker from "@/components/DatePicker/DatePicker.vue";
-import api from "@/api/index";
-import SkuSelectDialog from "@/components/SkuSelectDialog/SkuSelectDialog.vue";
+import { ref, computed, onMounted, watch } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { useQuasar } from 'quasar';
+import { useI18n } from 'vue-i18n';
+import DatePicker from '@/components/DatePicker/DatePicker.vue';
+import api from '@/api/index';
+import SkuSelectDialog from '@/components/SkuSelectDialog/SkuSelectDialog.vue';
 
 const $q = useQuasar();
 const router = useRouter();
@@ -630,45 +488,45 @@ const submitting = ref(false);
 
 // 表单数据
 const form = ref({
-  arrival_method: "express_parcel", // 默认选择快递包裹
-  tracking_number: "",
-  custom_order_number: "",
-  remark: "",
+  arrival_method: 'express_parcel', // 默认选择快递包裹
+  tracking_number: '',
+  custom_order_number: '',
+  remark: '',
   boxCount: 1,
-  estimated_arrival_date: "",
-  type: "standard_inbound"
+  estimated_arrival_date: '',
+  type: 'standard_inbound',
 });
 
 // 监听到仓方式变化
-watch(() => form.value.arrival_method, (newMethod) => {
-  // 如果是编辑模式，不清空数据
-  if (isEdit.value) return;
+watch(
+  () => form.value.arrival_method,
+  (newMethod) => {
+    // 如果是编辑模式，不清空数据
+    if (isEdit.value) return;
 
-  // 清空相关数据
-  if (newMethod === 'express_parcel') {
-    // 切换到快递包裹模式
-    expressSkuItems.value = [];
-    boxItems.value = [];
-  } else {
-    // 切换到按箱模式
-    expressSkuItems.value = [];
-    boxItems.value = [];
-    // 添加一个默认的空箱子
-    addBox();
+    // 清空相关数据
+    if (newMethod === 'express_parcel') {
+      // 切换到快递包裹模式
+      expressSkuItems.value = [];
+      boxItems.value = [];
+    } else {
+      // 切换到按箱模式
+      expressSkuItems.value = [];
+      boxItems.value = [];
+      // 添加一个默认的空箱子
+      addBox();
+    }
   }
-});
+);
 
 // 装箱模式相关
-const packingMode = ref("box"); // 默认箱维度
+const packingMode = ref('box'); // 默认箱维度
 const boxTotal = computed(() => {
-  if (form.value.arrival_method === "express_parcel") {
+  if (form.value.arrival_method === 'express_parcel') {
     // 快递包裹模式下，每个SKU当作一个包裹
     return expressSkuItems.value.length;
-  } else if (packingMode.value === "box") {
-    return boxItems.value.reduce(
-      (total, item) => total + (item.boxQuantity || 0),
-      0
-    );
+  } else if (packingMode.value === 'box') {
+    return boxItems.value.reduce((total, item) => total + (item.boxQuantity || 0), 0);
   } else {
     return boxCountArray.value.length;
   }
@@ -678,60 +536,60 @@ const boxTotal = computed(() => {
 const boxItems = ref([]);
 const boxModeColumns = [
   {
-    name: "boxNumber",
+    name: 'boxNumber',
     required: false,
-    label: "#",
-    field: "boxNumber",
-    align: "left",
-    style: "width: 80px",
+    label: '#',
+    field: 'boxNumber',
+    align: 'left',
+    style: 'width: 80px',
   },
   {
-    name: "boxQuantity",
+    name: 'boxQuantity',
     required: true,
     label: t('箱子数量'),
-    field: "boxQuantity",
-    align: "left",
-    style: "width: 120px",
+    field: 'boxQuantity',
+    align: 'left',
+    style: 'width: 120px',
   },
   {
-    name: "sku",
+    name: 'sku',
     required: true,
     label: t('SKU'),
-    field: "sku",
-    align: "left",
-    style: "min-width: 200px",
+    field: 'sku',
+    align: 'left',
+    style: 'min-width: 200px',
   },
   {
-    name: "quantity",
+    name: 'quantity',
     required: true,
     label: t('单箱数量'),
-    field: "quantity",
-    align: "left",
-    style: "min-width: 200px",
+    field: 'quantity',
+    align: 'left',
+    style: 'min-width: 200px',
   },
   {
-    name: "dimensions",
+    name: 'dimensions',
     required: false,
     label: t('单箱尺寸'),
-    field: "dimensions",
-    align: "left",
-    style: "min-width: 250px",
+    field: 'dimensions',
+    align: 'left',
+    style: 'min-width: 250px',
   },
   {
-    name: "weight",
+    name: 'weight',
     required: false,
     label: t('单箱重量'),
-    field: "weight",
-    align: "left",
-    style: "min-width: 150px",
+    field: 'weight',
+    align: 'left',
+    style: 'min-width: 150px',
   },
   {
-    name: "operations",
+    name: 'operations',
     required: false,
     label: t('操作'),
-    field: "operations",
-    align: "center",
-    style: "width: 80px",
+    field: 'operations',
+    align: 'center',
+    style: 'width: 80px',
   },
 ];
 
@@ -748,24 +606,24 @@ const boxDimensions = ref(
 // 动态SKU模式列定义
 const skuModeColumns = computed(() => {
   const columns = [
-    { name: "info", align: "left", label: t('商品信息'), field: "info" },
-    { name: "totalQty", align: "center", label: t('总数量'), field: "totalQty" },
+    { name: 'info', align: 'left', label: t('商品信息'), field: 'info' },
+    { name: 'totalQty', align: 'center', label: t('总数量'), field: 'totalQty' },
   ];
 
   boxCountArray.value.forEach((boxNum, index) => {
     columns.push({
       name: `box-${boxNum}`,
-      align: "center",
+      align: 'center',
       label: `${boxNum}`,
       field: (row) => row.quantities[index],
     });
   });
 
   columns.push({
-    name: "operations",
-    align: "center",
-    label: "",
-    field: "operations",
+    name: 'operations',
+    align: 'center',
+    label: '',
+    field: 'operations',
   });
 
   return columns;
@@ -773,56 +631,56 @@ const skuModeColumns = computed(() => {
 
 // 选项数据
 const shippingMethodOptions = [
-  { label: t('快递包裹'), value: "express_parcel" },
-  { label: t('按箱'), value: "box" },
+  { label: t('快递包裹'), value: 'express_parcel' },
+  { label: t('按箱'), value: 'box' },
 ];
 
 // 快递包裹模式数据
-const searchSkuText = ref("");
+const searchSkuText = ref('');
 const expressSkuItems = ref([]);
 const expressSkuColumns = [
   {
-    name: "index",
-    label: "#",
-    field: "index",
-    align: "center",
-    style: "width: 50px"
+    name: 'index',
+    label: '#',
+    field: 'index',
+    align: 'center',
+    style: 'width: 50px',
   },
   {
-    name: "sku",
+    name: 'sku',
     label: t('商品SKU'),
-    field: "sku",
-    align: "left",
-    style: "min-width: 120px"
+    field: 'sku',
+    align: 'left',
+    style: 'min-width: 120px',
   },
   {
-    name: "name",
+    name: 'name',
     label: t('商品名称'),
-    field: "name",
-    align: "left",
-    style: "min-width: 200px"
+    field: 'name',
+    align: 'left',
+    style: 'min-width: 200px',
   },
   {
-    name: "quantity",
+    name: 'quantity',
     label: t('数量'),
-    field: "quantity",
-    align: "center",
-    style: "width: 100px"
+    field: 'quantity',
+    align: 'center',
+    style: 'width: 100px',
   },
   {
-    name: "operations",
+    name: 'operations',
     label: t('操作'),
-    field: "operations",
-    align: "center",
-    style: "width: 80px"
-  }
+    field: 'operations',
+    align: 'center',
+    style: 'width: 80px',
+  },
 ];
 
 // 搜索SKU
 const searchSku = () => {
   if (!searchSkuText.value) {
     $q.notify({
-      type: "warning",
+      type: 'warning',
       message: t('请输入SKU或条形码'),
     });
     return;
@@ -830,7 +688,7 @@ const searchSku = () => {
 
   // TODO: 调用实际的搜索API
   $q.notify({
-    type: "negative",
+    type: 'negative',
     message: t('未找到匹配的SKU'),
   });
 };
@@ -882,17 +740,11 @@ const calculateSkuTotalQuantity = (row) => {
 };
 
 const calculateAllSkuTotalQuantity = () => {
-  return skuItems.value.reduce(
-    (sum, row) => sum + calculateSkuTotalQuantity(row),
-    0
-  );
+  return skuItems.value.reduce((sum, row) => sum + calculateSkuTotalQuantity(row), 0);
 };
 
 const calculateBoxTotalQuantity = (boxIndex) => {
-  return skuItems.value.reduce(
-    (sum, row) => sum + (row.quantities[boxIndex] || 0),
-    0
-  );
+  return skuItems.value.reduce((sum, row) => sum + (row.quantities[boxIndex] || 0), 0);
 };
 
 const addBoxColumn = () => {
@@ -935,7 +787,7 @@ const handleSkusSelected = (selectedSkus) => {
     });
 
     $q.notify({
-      type: "positive",
+      type: 'positive',
       // message: t('已成功添加 {count} 个商品', { count: selectedSkus.length }),
       message: t(`已成功添加 ${selectedSkus.length} 个商品`),
     });
@@ -943,9 +795,7 @@ const handleSkusSelected = (selectedSkus) => {
     // 箱模式处理逻辑
     if (currentEditingBox.value) {
       selectedSkus.forEach((sku) => {
-        const existing = currentEditingBox.value.items.find(
-          (item) => item.sku === sku.sku
-        );
+        const existing = currentEditingBox.value.items.find((item) => item.sku === sku.sku);
         if (!existing) {
           currentEditingBox.value.items.push({
             id: sku.id,
@@ -957,7 +807,7 @@ const handleSkusSelected = (selectedSkus) => {
       });
 
       $q.notify({
-        type: "positive",
+        type: 'positive',
         message: t(`已成功添加 ${selectedSkus.length} 个商品`),
       });
     }
@@ -983,21 +833,22 @@ const fetchInboundDetail = async () => {
         custom_order_number: detail.custom_order_number,
         remark: detail.remark,
         estimated_arrival_date: detail.estimated_arrival_date?.split(' ')[0],
-        type: "standard_inbound"
+        type: 'standard_inbound',
       };
 
       // 根据到仓方式填充商品数据
       if (detail.arrival_method === 'express_parcel') {
         // 快递包裹模式
-        expressSkuItems.value = detail.details[0]?.items.map(item => ({
-          id: item.id,
-          sku: item.product_spec_sku,
-          name: item.product_name,
-          quantity: item.quantity
-        })) || [];
+        expressSkuItems.value =
+          detail.details[0]?.items.map((item) => ({
+            id: item.id,
+            sku: item.product_spec_sku,
+            name: item.product_name,
+            quantity: item.quantity,
+          })) || [];
       } else {
         // 按箱模式
-        boxItems.value = detail.details.map(box => ({
+        boxItems.value = detail.details.map((box) => ({
           id: box.id,
           boxNumber: parseInt(box.box_number),
           boxQuantity: box.box_quantity,
@@ -1005,18 +856,17 @@ const fetchInboundDetail = async () => {
           size_width: box.size_width,
           size_height: box.size_height,
           weight: box.weight,
-          items: box.items.map(item => ({
+          items: box.items.map((item) => ({
             id: item.id,
             sku: item.product_spec_sku,
             name: item.product_name,
             quantity: item.quantity,
-            image: item.product_spec_image
-          }))
+            image: item.product_spec_image,
+          })),
         }));
         console.log('----7789');
 
         console.log(boxItems.value);
-
       }
     }
   } catch (error) {
@@ -1031,22 +881,20 @@ const handleSave = async () => {
     const params = await buildSubmitParams();
     if (!params) return;
 
-    const response = isEdit.value
-      ? await api.editInbound(inboundId.value, params)
-      : await api.createInbound(params);
+    const response = isEdit.value ? await api.editInbound(inboundId.value, params) : await api.createInbound(params);
 
     if (response.success) {
       $q.notify({
         type: 'positive',
-        message: t(isEdit.value ? '编辑成功' : '创建成功')
+        message: t(isEdit.value ? '编辑成功' : '创建成功'),
       });
-      router.push("/inbound/warehousewarrant");
+      router.push('/inbound/warehousewarrant');
     }
   } catch (error) {
     console.error(t(isEdit.value ? '编辑失败' : '保存失败'), error);
     $q.notify({
       type: 'negative',
-      message: t(isEdit.value ? '编辑失败' : '保存失败')
+      message: t(isEdit.value ? '编辑失败' : '保存失败'),
     });
   } finally {
     submitting.value = false;
@@ -1058,17 +906,17 @@ const buildSubmitParams = async () => {
   // 验证自定义单号
   if (!form.value.custom_order_number) {
     $q.notify({
-      type: "negative",
+      type: 'negative',
       message: t('请输入自定义单号'),
     });
     return null;
   }
 
-  if (form.value.arrival_method === "express_parcel") {
+  if (form.value.arrival_method === 'express_parcel') {
     // 快递包裹模式验证和参数构建
     if (expressSkuItems.value.length === 0) {
       $q.notify({
-        type: "negative",
+        type: 'negative',
         message: t('请至少添加一个商品'),
       });
       return null;
@@ -1078,7 +926,7 @@ const buildSubmitParams = async () => {
     for (const item of expressSkuItems.value) {
       if (!item.quantity || item.quantity <= 0) {
         $q.notify({
-          type: "negative",
+          type: 'negative',
           message: t('SKU {sku} 的数量必须大于0', { sku: item.sku }),
         });
         return null;
@@ -1086,20 +934,22 @@ const buildSubmitParams = async () => {
     }
 
     // 构造提交数据
-    const details = [{
-      mode: 'sku',
-      items: expressSkuItems.value.map(item => ({
-        sku: item.sku,
-        quantity: item.quantity
-      }))
-    }];
+    const details = [
+      {
+        mode: 'sku',
+        items: expressSkuItems.value.map((item) => ({
+          sku: item.sku,
+          quantity: item.quantity,
+        })),
+      },
+    ];
 
-    return {...form.value, details};
+    return { ...form.value, details };
   } else {
     // 箱模式验证和参数构建
     if (boxItems.value.length === 0) {
       $q.notify({
-        type: "negative",
+        type: 'negative',
         message: t('请至少添加一个箱子'),
       });
       return null;
@@ -1109,14 +959,14 @@ const buildSubmitParams = async () => {
     for (const box of boxItems.value) {
       if (!box.boxQuantity || box.boxQuantity <= 0) {
         $q.notify({
-          type: "negative",
+          type: 'negative',
           message: t('箱子数量必须大于0'),
         });
         return null;
       }
       if (!box.items || box.items.length === 0) {
         $q.notify({
-          type: "negative",
+          type: 'negative',
           message: t('请为所有箱子选择SKU'),
         });
         return null;
@@ -1125,7 +975,7 @@ const buildSubmitParams = async () => {
       for (const item of box.items) {
         if (!item.quantity || item.quantity <= 0) {
           $q.notify({
-            type: "negative",
+            type: 'negative',
             message: t('SKU {sku} 的数量必须大于0', { sku: item.sku }),
           });
           return null;
@@ -1134,20 +984,20 @@ const buildSubmitParams = async () => {
     }
 
     // 构造提交数据
-    const details = boxItems.value.map(box => ({
+    const details = boxItems.value.map((box) => ({
       mode: 'box',
       box_quantity: box.boxQuantity,
       size_length: box.size_length || 0,
       size_width: box.size_width || 0,
       size_height: box.size_height || 0,
       weight: box.weight || 0,
-      items: box.items.map(item => ({
+      items: box.items.map((item) => ({
         sku: item.sku,
-        quantity: item.quantity
-      }))
+        quantity: item.quantity,
+      })),
     }));
 
-    return {...form.value, details};
+    return { ...form.value, details };
   }
 };
 
@@ -1167,8 +1017,7 @@ const submitForm = async () => {
       // 创建/编辑成功后提交入库单
       const submitResponse = await api.submitInbound(isEdit.value ? inboundId.value : saveResponse.data.id);
       if (submitResponse.success) {
-
-        router.push("/inbound/warehousewarrant");
+        router.push('/inbound/warehousewarrant');
       }
     }
   } catch (error) {
@@ -1178,45 +1027,31 @@ const submitForm = async () => {
   }
 };
 
-// 取消
-const cancel = () => {
-  router.push("/inbound/warehousewarrant");
-};
-
-// 初始化
-onMounted(async () => {
-  if (isEdit.value) {
-    await fetchInboundDetail();
-  } else if (boxItems.value.length === 0) {
-    addBox();
-  }
-});
-
 // SKU 选择弹窗引用
 const skuSelectDialog = ref(null);
 
 // 处理模式切换
 const handleModeChange = (mode) => {
   // 可以根据需要在模式切换时进行数据转换
-  console.log("Mode changed to:", mode);
+  console.log('Mode changed to:', mode);
 };
 
 const importBoxes = () => {
   // 批量导入箱子的逻辑
-  console.log("批量导入箱子");
+  console.log('批量导入箱子');
 };
 
 const downloadTemplate = () => {
-  console.log("下载Excel模板");
+  console.log('下载Excel模板');
 };
 
 const importFromExcel = () => {
-  console.log("从Excel导入数据");
+  console.log('从Excel导入数据');
 };
 
 const addBoxDimension = (boxIndex) => {
   // 显示一个添加箱子尺寸的对话框
-  console.log("为箱子", boxIndex + 1, "添加尺寸");
+  console.log('为箱子', boxIndex + 1, '添加尺寸');
 };
 
 const selectProducts = () => {
@@ -1225,19 +1060,19 @@ const selectProducts = () => {
   if (skuItems.value.length === 0) {
     skuItems.value.push({
       id: Date.now(),
-      sku: "C-001",
-      barcode: "123456789",
-      img: "https://cdn.quasar.dev/img/mountains.jpg",
-      name: "豹点纹毛衣外套",
+      sku: 'C-001',
+      barcode: '123456789',
+      img: 'https://cdn.quasar.dev/img/mountains.jpg',
+      name: '豹点纹毛衣外套',
       quantities: Array(boxCountArray.value.length).fill(0),
     });
 
     skuItems.value.push({
       id: Date.now() + 1,
-      sku: "C-002",
-      barcode: "987654321",
-      img: "https://cdn.quasar.dev/img/parallax2.jpg",
-      name: "蓝色T恤",
+      sku: 'C-002',
+      barcode: '987654321',
+      img: 'https://cdn.quasar.dev/img/parallax2.jpg',
+      name: '蓝色T恤',
       quantities: Array(boxCountArray.value.length).fill(0),
     });
   }
@@ -1267,6 +1102,19 @@ const getBoxNumberRange = (rowIndex) => {
   const endNumber = startNumber + currentBoxCount - 1;
   return `#${startNumber}~${endNumber}`;
 };
+
+const goBack = () => {
+  router.go(-1);
+};
+
+// 初始化
+onMounted(async () => {
+  if (isEdit.value) {
+    await fetchInboundDetail();
+  } else if (boxItems.value.length === 0) {
+    addBox();
+  }
+});
 </script>
 
 <style lang="scss" scoped>
@@ -1275,14 +1123,9 @@ const getBoxNumberRange = (rowIndex) => {
     background-color: white;
     border-radius: 8px;
   }
-
-  .form-item {
-    margin-bottom: 1.5rem;
-
-    .form-item-label {
-      font-weight: 500;
-      margin-bottom: 0.5rem;
-    }
+  .form-item-label {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
   }
 
   // 通用表格样式

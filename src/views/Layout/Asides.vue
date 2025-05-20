@@ -16,12 +16,7 @@
         >
           <template v-slot:header>
             <div class="menu-header-content">
-              <img
-                v-if="getImg(route)"
-                :src="getImg(route)"
-                alt=""
-                class="img-icon"
-              />
+              <img v-if="getImg(route)" :src="getImg(route)" alt="" class="img-icon" />
               <div class="menu-title">
                 {{ route.meta?.name || route.name || route.path }}
               </div>
@@ -35,16 +30,12 @@
             v-ripple
             clickable
             :to="`/${route.path}/${childRoute.path}`"
-            @click.stop.prevent="
-              toPath(`/${route.path}/${childRoute.path}`, childRoute)
-            "
+            @click.stop.prevent="toPath(`/${route.path}/${childRoute.path}`, childRoute)"
             class="route-item"
             active-class="q-item--active"
           >
             <q-item-section class="submenu-title">
-              <q-item-label>{{
-                childRoute.meta?.name || childRoute.name
-              }}</q-item-label>
+              <q-item-label>{{ childRoute.meta?.name || childRoute.name }}</q-item-label>
             </q-item-section>
           </q-item>
         </q-expansion-item>
@@ -59,12 +50,7 @@
           active-class="q-item--active"
         >
           <div class="menu-header-content">
-            <img
-              v-if="getImg(route)"
-              :src="getImg(route)"
-              alt=""
-              class="img-icon"
-            />
+            <img v-if="getImg(route)" :src="getImg(route)" alt="" class="img-icon" />
             <div class="menu-title">
               {{ route.meta?.name || route.name || route.path }}
             </div>
@@ -80,14 +66,14 @@
 </template>
 
 <script>
-import { useQuasar } from "quasar";
-import { computed, watch, ref, reactive } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import { useStore } from "vuex";
-import { routerMap } from "../../router";
+import { useQuasar } from 'quasar';
+import { computed, watch, ref, reactive } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useStore } from 'vuex';
+import { routerMap } from '../../router';
 
 export default {
-  name: "AsidesComponent",
+  name: 'AsidesComponent',
 
   setup() {
     const router = useRouter();
@@ -114,7 +100,7 @@ export default {
     watch(route, () => {
       if (isMobile.value && isOpen.value) {
         // 发射事件通知父组件关闭侧边栏
-        store.dispatch("setLeftDrawer", false);
+        store.dispatch('setLeftDrawer', false);
       }
     });
 
@@ -141,7 +127,7 @@ export default {
 
     // 切换侧边栏状态
     function toggleLeftDrawer() {
-      store.dispatch("toggleLeftDrawer");
+      store.dispatch('toggleLeftDrawer');
     }
 
     // 预加载所有图标
@@ -154,9 +140,7 @@ export default {
               const cacheKey = `${route.icon}`;
               iconCache[cacheKey] = module.default;
             })
-            .catch((error) =>
-              console.error(`无法加载图标: ${route.icon}`, error)
-            );
+            .catch((error) => console.error(`无法加载图标: ${route.icon}`, error));
 
           // 加载选中态图标
           import(`../../assets/images/asides/${route.icon}-select.png`)
@@ -164,9 +148,7 @@ export default {
               const cacheKey = `${route.icon}-select`;
               iconCache[cacheKey] = module.default;
             })
-            .catch((error) =>
-              console.error(`无法加载选中态图标: ${route.icon}-select`, error)
-            );
+            .catch((error) => console.error(`无法加载选中态图标: ${route.icon}-select`, error));
         }
       });
     };
@@ -176,7 +158,7 @@ export default {
 
     // 获取图标路径
     const getImg = (route) => {
-      if (!route.icon) return "";
+      if (!route.icon) return '';
 
       const isActive = isRouteActive(route);
       const hasMulti = hasMultipleChildren(route);
@@ -184,18 +166,18 @@ export default {
       // 多子菜单时使用普通图标
       if (hasMulti) {
         const cacheKey = route.icon;
-        return iconCache[cacheKey] || "";
+        return iconCache[cacheKey] || '';
       } else {
         // 单子菜单时根据激活状态选择图标
         const cacheKey = isActive ? `${route.icon}-select` : route.icon;
-        return iconCache[cacheKey] || "";
+        return iconCache[cacheKey] || '';
       }
     };
 
     const toPath = (path, childRoute) => {
       if (childRoute.redirect && !childRoute?.is_self) {
         let origin = window.location.origin;
-        window.open(origin + childRoute.redirect, "_blank");
+        window.open(origin + childRoute.redirect, '_blank');
       } else {
         router.push(path);
       }
@@ -206,6 +188,7 @@ export default {
       isCollapse,
       isMobile,
       routerMap,
+      route,
       toPath,
       getImg,
       toggleLeftDrawer,
@@ -226,7 +209,7 @@ export default {
   width: 240px;
   height: calc(100vh - 58px);
   background-color: white;
-  z-index: 2000;
+  z-index: 1998;
   overflow-y: auto;
   border-right: 1px solid rgba(0, 31, 77, 0.06);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -276,8 +259,8 @@ export default {
 
 .route-menu {
   background-color: #ffffff;
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  padding: 20px;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  padding: 12px 20px;
   transition: all 0.25s ease;
 
   // 父级菜单项,会与子级route-item重叠,所以用!important

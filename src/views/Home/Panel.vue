@@ -1,92 +1,23 @@
 <template>
   <div class="panel-page">
+    <div class="total-list row q-col-gutter-lg q-mb-md">
+      <div class="col-12 col-sm-6 col-md-2" v-for="item in totalList" :key="item.label">
+        <q-card class="common-card b-rd-16">
+          <q-card-section class="p-20">
+            <div class="text-grey-8 text-subtitle2 q-mb-md">
+              {{ item.label }}
+            </div>
+            <div class="text-primary text-h5">{{ item.value }}</div>
+          </q-card-section>
+        </q-card>
+      </div>
+    </div>
+
     <div class="row q-col-gutter-x-md">
       <!-- 左侧主要内容区域 -->
       <div class="col-xs-12 col-sm-8 col-md-8 col-lg-8">
-        <!-- 统计卡片 -->
-        <div class="row q-col-gutter-md q-mb-lg">
-          <div class="col-12">
-            <q-card class="stats-card" style="background: #001529; color: white">
-              <q-card-section>
-                <div class="row no-wrap">
-                  <!-- 标准入库 -->
-                  <div class="stats-group">
-                    <div class="stats-title">{{ t('标准入库') }}</div>
-                    <div class="row q-gutter-x-lg">
-                      <div class="stats-item">
-                        <div class="label">{{ t('运输中') }}</div>
-                        <div class="value">1</div>
-                      </div>
-                      <div class="stats-item">
-                        <div class="label">{{ t('待入库') }}</div>
-                        <div class="value">1</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- 一件代发入库 -->
-                  <div class="stats-group">
-                    <div class="stats-title">{{ t('一件代发入库') }}</div>
-                    <div class="row">
-                      <div class="stats-item">
-                        <div class="label">{{ t('待发货') }}</div>
-                        <div class="value">43</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- B2B入库 -->
-                  <div class="stats-group">
-                    <div class="stats-title">{{ t('B2B入库') }}</div>
-                    <div class="row q-gutter-x-lg">
-                      <div class="stats-item">
-                        <div class="label">{{ t('运输中') }}</div>
-                        <div class="value">0</div>
-                      </div>
-                      <div class="stats-item">
-                        <div class="label">{{ t('待入库') }}</div>
-                        <div class="value">2</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- B2B出库 -->
-                  <div class="stats-group">
-                    <div class="stats-title">{{ t('B2B出库') }}</div>
-                    <div class="row q-gutter-x-lg">
-                      <div class="stats-item">
-                        <div class="label">{{ t('待出库') }}</div>
-                        <div class="value">0</div>
-                      </div>
-                      <div class="stats-item">
-                        <div class="label">{{ t('待发货') }}</div>
-                        <div class="value">0</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- FBA退货 -->
-                  <div class="stats-group">
-                    <div class="stats-title">{{ t('FBA退货') }}</div>
-                    <div class="row q-gutter-x-lg">
-                      <div class="stats-item">
-                        <div class="label">{{ t('入库中') }}</div>
-                        <div class="value">0</div>
-                      </div>
-                      <div class="stats-item">
-                        <div class="label">{{ t('待出库') }}</div>
-                        <div class="value">0</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </q-card-section>
-            </q-card>
-          </div>
-        </div>
-
         <!-- 单量统计 -->
-        <q-card class="q-mb-md">
+        <q-card>
           <q-card-section>
             <div class="row q-mb-md items-center justify-between">
               <div>
@@ -128,63 +59,42 @@
               </div>
             </q-card-section>
             <!-- 图表 -->
-            <div ref="chartRef" style="height: 300px"></div>
+            <div ref="chartRef" style="height: 400px"></div>
           </q-card-section>
         </q-card>
       </div>
 
-      <!-- 右侧账户信息区域 -->
-      <div class="col-xs-12 col-sm-4 col-md-4 col-lg-4">
-        <q-card class="account-info-card">
-          <q-card-section>
-            <!-- 总可用金额 -->
-            <div class="account-section">
-              <div class="row items-center justify-between q-mb-sm">
-                <div class="text-subtitle1">{{ t('总可用金额') }} (USD)</div>
-                <q-icon name="help_outline" size="xs" class="cursor-pointer" color="grey" />
-              </div>
-              <div class="text-h4 text-primary">999,871.44</div>
+      <!-- 联系我们+公告 -->
+      <div class="col-12 col-xs-12 col-sm-4 col-md-4">
+        <q-card class="q-mb-md">
+          <div class="contact-box bg-white">
+            <div class="text-subtitle1 q-mb-md">{{ t('联系我们') }}</div>
+            <div class="line q-mb-md"></div>
+            <div class="q-mb-md row items-center" @click="onClickPhone('15576601706')">
+              <q-icon name="phone" size="xs" class="q-mr-sm" />
+              <span class="hover-copy">+86 15576601706</span>
             </div>
-
-            <!-- 可用余额 -->
-            <div class="account-section">
-              <div class="row items-center justify-between q-mb-sm">
-                <div class="text-subtitle1">{{ t('可用余额') }} (USD)</div>
-                <q-btn :label="t('立即充值')" color="primary" flat dense @click="router.push('/user/recharge')" />
-              </div>
-              <div class="text-h6 q-mb-xs">0</div>
-              <div class="text-caption text-grey">
-                <span class="q-mr-md">{{ t('代金券') }}: 0</span>
-                <span>{{ t('充值金额') }}: 0</span>
-              </div>
+            <div class="row items-center" @click="onClickEmail('Hubinjie@Tongxiao.Tech')">
+              <q-icon name="email" size="xs" class="q-mr-sm" />
+              <span class="hover-copy">Hubinjie@Tongxiao.Tech</span>
             </div>
-
-            <!-- 可用信用额度 -->
-            <div class="account-section">
-              <div class="text-subtitle1 q-mb-sm">{{ t('可用信用额度') }} (USD)</div>
-              <div class="text-h6 q-mb-xs">999,871.44</div>
-              <div class="text-caption text-grey">{{ t('总额度') }}: 1,000,000</div>
-            </div>
-
-            <!-- 流植费用 -->
-            <div class="account-section">
-              <div class="text-subtitle1 q-mb-sm">{{ t('流植费用') }} (USD)</div>
-              <div class="text-h6 text-negative">0</div>
-            </div>
-          </q-card-section>
+          </div>
         </q-card>
 
-        <!-- 系统公告 -->
-        <q-card class="q-mt-md">
-          <q-card-section>
-            <div class="row items-center justify-between q-mb-md">
-              <div class="text-subtitle1">{{ t('系统公告') }}</div>
-              <q-btn flat dense :label="t('更多') + ' >'" color="primary" />
+        <q-card class="common-card b-rd-16 notice-box">
+          <q-card-section class="p-20">
+            <div class="flex-between-center">
+              <div class="text-subtitle1 font-bold">
+                {{ t('系统公告') }}
+              </div>
+              <q-btn flat color="primary" size="sm" icon="chevron_right" dense />
             </div>
-            <div class="notice-item q-mb-sm">
-              <div class="text-body2">Temu 平台 美国站点 店铺里面的订单 仅可通过平台面单方式...</div>
-              <div class="text-caption text-grey">2025-03-30 18:57</div>
-            </div>
+            <q-scroll-area class="notice-list">
+              <div v-for="item in noticeList" :key="item.label" class="notice-item">
+                <div class="title text-overflow-1">{{ item.label }}</div>
+                <div class="time">{{ item.time }}</div>
+              </div>
+            </q-scroll-area>
           </q-card-section>
         </q-card>
       </div>
@@ -193,10 +103,12 @@
 </template>
 
 <script>
-import { ref, onMounted, computed, nextTick } from 'vue';
+import { ref, onMounted, computed, nextTick, reactive } from 'vue';
 import * as echarts from 'echarts';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import api from '@/api/index';
+import { Notify } from 'quasar';
 
 export default {
   name: 'PanelPage',
@@ -212,31 +124,35 @@ export default {
     const timeRange = ref('week');
     // 时间选项
     const timeOptions = [
-      {
-        label: t('昨天'),
-        value: 'yesterday',
-        getDateRange: () => {
-          const yesterday = new Date();
-          yesterday.setDate(yesterday.getDate() - 1);
-          const dateStr = formatDate(yesterday);
-          return { start_date: dateStr, end_date: dateStr };
-        },
-      },
-      {
-        label: t('今天'),
-        value: 'today',
-        getDateRange: () => {
-          const today = formatDate(new Date());
-          return { start_date: today, end_date: today };
-        },
-      },
+      // {
+      //   label: t('昨天'),
+      //   value: 'yesterday',
+      //   getDateRange: () => {
+      //     const yesterday = new Date();
+      //     yesterday.setDate(yesterday.getDate() - 1);
+      //     const dateStr = formatDate(yesterday);
+      //     return { start_date: dateStr, end_date: dateStr };
+      //   },
+      // },
+      // {
+      //   label: t('今天'),
+      //   value: 'today',
+      //   getDateRange: () => {
+      //     const today = formatDate(new Date());
+      //     return { start_date: today, end_date: today };
+      //   },
+      // },
       {
         label: t('星期'),
         value: 'week',
         getDateRange: () => {
           const now = new Date();
           const weekStart = new Date(now);
-          weekStart.setDate(weekStart.getDate() - 7); // 改为往前推7天（加上今天共8天）
+          // 获取当前是周几（0-6，0代表周日）
+          const currentDay = now.getDay();
+          // 往前推到本周一
+          weekStart.setDate(weekStart.getDate() - (currentDay === 0 ? 6 : currentDay - 1));
+          weekStart.setHours(0, 0, 0, 0);
           return {
             start_date: formatDate(weekStart),
             end_date: formatDate(now),
@@ -249,7 +165,11 @@ export default {
         getDateRange: () => {
           const now = new Date();
           const monthStart = new Date(now);
-          monthStart.setDate(monthStart.getDate() - 30); // 改为往前推30天（加上今天共31天）
+          // 获取当前日期
+          const currentDate = now.getDate();
+          // 往前推到本月1号
+          monthStart.setDate(1);
+          monthStart.setHours(0, 0, 0, 0);
           return {
             start_date: formatDate(monthStart),
             end_date: formatDate(now),
@@ -262,7 +182,9 @@ export default {
         getDateRange: () => {
           const now = new Date();
           const yearStart = new Date(now);
-          yearStart.setDate(yearStart.getDate() - 365); // 改为往前推365天（加上今天共366天）
+          // 往前推到本年1月1号
+          yearStart.setMonth(0, 1);
+          yearStart.setHours(0, 0, 0, 0);
           return {
             start_date: formatDate(yearStart),
             end_date: formatDate(now),
@@ -284,12 +206,42 @@ export default {
       // getHomeChart(dateRange);
     };
 
+    const totalList = computed(() => {
+      return [
+        {
+          label: t('待发货'),
+          value: reportObj.outbound_orders_count.pending_shipment_count,
+        },
+        {
+          label: t('待移货'),
+          value: reportObj.outbound_orders_count.pending_transfer_count,
+        },
+        {
+          label: t('待拣货'),
+          value: reportObj.outbound_orders_count.pending_pick_count,
+        },
+        {
+          label: t('待包装'),
+          value: reportObj.outbound_orders_count.pending_pack_count,
+        },
+        {
+          label: t('包装中'),
+          value: reportObj.outbound_orders_count.packing_count,
+        },
+        {
+          label: t('异常订单'),
+          value: reportObj.outbound_orders_count.exception_count,
+        },
+      ];
+    });
+
     // 图表数据-订单量
     const chartDataObj = ref({
       xAxisData: [],
       seriesData1: [],
       seriesData2: [],
     });
+    // echarts渲染用
     const chartData = computed(() => ({
       grid: {
         left: 10,
@@ -398,6 +350,9 @@ export default {
     };
 
     const getHomeChart = () => {
+      api.homeChart().then((res) => {
+        console.log(res);
+      });
       const data = {
         inbound_orders: [
           {
@@ -486,6 +441,7 @@ export default {
       };
       setChartData(data);
     };
+    // 设置图表数据
     const setChartData = (chartObj) => {
       const inbound = chartObj.inbound_orders || [];
       const outbound = chartObj.outbound_orders || [];
@@ -502,6 +458,97 @@ export default {
       chartDataObj.value.seriesData1 = allDates.map((date) => inboundMap.get(date) || 0);
       chartDataObj.value.seriesData2 = allDates.map((date) => outboundMap.get(date) || 0);
       initChart();
+    };
+
+    // 所有数据
+    const reportObj = reactive({
+      // 扣费记录统计
+      deduction_records_count: {
+        pending_count: 0, // 待处理扣费数量
+        rejected_count: 0, // 已拒绝扣费数量
+        approved_count: 0, // 已通过扣费数量
+      },
+      // 入库订单统计
+      inbound_orders_count: {
+        reported_count: 0, // 已预报入库单数量
+        in_transit_count: 0, // 运输中入库单数量
+        inbound_processing_count: 0, // 入库处理中数量
+      },
+      // 出库订单统计
+      outbound_orders_count: {
+        pending_shipment_count: 0, // 待发货数量
+        pending_transfer_count: 0, // 待移货数量
+        pending_pick_count: 0, // 待拣货数量
+        pending_pack_count: 0, // 待包装数量
+        packing_count: 0, // 包装中数量
+        exception_count: 0, // 异常订单数量
+      },
+      // 充值记录统计
+      recharge_records_count: {
+        pending_count: 0, // 待处理充值数量
+        rejected_count: 0, // 已拒绝充值数量
+        approved_count: 0, // 已通过充值数量
+      },
+    });
+    const getReport = () => {
+      homeApi.homeReport().then((res) => {
+        Object.assign(reportObj, res.data);
+      });
+    };
+
+    // 公告列表
+    const noticeList = ref([
+      {
+        label: '如何设置仓库/货区/货位',
+        desc: '如何设置仓库/货区/货位',
+        time: '2022-07-01 12:00:00',
+      },
+      {
+        label: '如何设置仓租策略',
+        desc: '如何设置仓租策略',
+        time: '2022-07-01 12:00:00',
+      },
+      {
+        label: '如何在操作中再及操作库策略',
+        desc: '如何在操作中再及操作库策略',
+        time: '2022-07-01 12:00:00',
+      },
+      {
+        label: '如何设置计费模板',
+        desc: '如何设置计费模板',
+        time: '2022-07-01 12:00:00',
+      },
+      {
+        label: '如何创建客户',
+        desc: '如何创建客户',
+        time: '2022-07-01 12:00:00',
+      },
+      {
+        label: '其他问题',
+        desc: '其他问题',
+        time: '2022-07-01 12:00:00',
+      },
+    ]);
+
+    const onClickEmail = (email) => {
+      window.location.href = `mailto:${email}`;
+    };
+    const onClickPhone = (phone) => {
+      // 检查是否是移动设备
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+      if (isMobile) {
+        // 移动设备使用 tel: 协议
+        window.location.href = `tel:+86${phone}`;
+      } else {
+        // PC端复制到剪贴板
+        navigator.clipboard.writeText(phone).then(() => {
+          Notify.create({
+            message: trans('电话号码已复制到剪贴板'),
+            color: 'positive',
+          });
+        });
+      }
     };
 
     onMounted(() => {
@@ -521,6 +568,10 @@ export default {
       timeOptions,
       timeRange,
       chartDataObj,
+      totalList,
+      noticeList,
+      onClickEmail,
+      onClickPhone,
       onChangeTimeRange,
     };
   },
@@ -699,6 +750,43 @@ export default {
     .item-2 {
       &::before {
         background: #5745c5;
+      }
+    }
+  }
+  // 2 联系我们
+  .contact-box {
+    padding: 20px;
+    border-radius: 16px;
+    .line {
+      height: 1px;
+      width: 100%;
+      background-color: #e6e6e6;
+    }
+  }
+  // 5 公告
+  .notice-box {
+    height: 310px;
+    box-sizing: border-box;
+    .notice-list {
+      overflow-y: auto;
+      height: 240px;
+      .notice-item {
+        padding: 10px 0;
+        border-bottom: 1px solid #e6e6e6;
+        .title {
+          cursor: pointer;
+          font-size: 14px;
+          color: #1f1f1f;
+          line-height: 18px;
+          margin-bottom: 6px;
+          &:hover {
+            color: $primary;
+          }
+        }
+        .time {
+          color: #666666;
+          font-size: 12px;
+        }
       }
     }
   }

@@ -55,12 +55,15 @@
         selection="multiple"
         v-model:selected="selectedRows"
       >
-        <template v-slot:header-selection="props">
-          <q-checkbox color="primary" v-model="props.selected" />
-        </template>
-
-        <template v-slot:body-selection="props">
-          <q-checkbox color="primary" v-model="props.selected" />
+        <template v-slot:header="props">
+          <q-tr :props="props">
+            <q-th auto-width style="padding: 0 8px">
+              <q-checkbox color="primary" v-model="props.selected" />
+            </q-th>
+            <q-th v-for="col in props.cols" :key="col.name" :props="props">
+              {{ col.label }}
+            </q-th>
+          </q-tr>
         </template>
 
         <template v-slot:no-data="{ icon, filter }">
@@ -69,52 +72,76 @@
             <span>{{ t('暂无数据') }}</span>
           </div>
         </template>
-        <!-- 商品信息列自定义 -->
-        <template v-slot:body-cell-product="props">
-          <q-td :props="props">
-            <div class="row items-center">
-              <q-img
-                v-if="props.row.product_spec_image"
-                :src="props.row.product_spec_image"
-                style="width: 40px; height: 40px; object-fit: cover"
-                class="q-mr-sm"
-              />
-              <div>
-                <div>{{ props.row.sku }}</div>
-                <div>{{ props.row.product_name }}</div>
-                <div class="text-grey-7">{{ props.row.name }}</div>
-              </div>
-            </div>
-          </q-td>
-        </template>
 
-        <!-- 变化数量列自定义 -->
-        <template v-slot:body-cell-change_qty="props">
-          <q-td :props="props">
-            <span :class="props.row.stock > 0 ? 'text-green' : 'text-red'">
-              {{ props.row.stock > 0 ? '+' : '' }}{{ props.row.stock }}
-            </span>
-          </q-td>
-        </template>
+        <!-- 自定义表格内容 -->
+        <template v-slot:body="props">
+          <q-tr :props="props">
+            <!-- 多选框列 -->
+            <q-td auto-width style="padding: 0 8px">
+              <q-checkbox color="primary" v-model="props.selected" />
+            </q-td>
 
-        <!-- 关联单据号列自定义 -->
-        <template v-slot:body-cell-reference="props">
-          <q-td :props="props">
-            <template v-if="props.row.type === '销售出库'">
-              <div class="text-grey-7">{{ t('ERP包裹号') }}:</div>
-              <div>{{ props.row.reference_number || '--' }}</div>
-              <div class="text-grey-7">{{ t('订单号') }}: {{ props.row.order_no || '--' }}</div>
-              <div class="text-grey-7">{{ t('运单号') }}: {{ props.row.tracking_no || '--' }}</div>
-            </template>
-            <template v-else>
-              <div>{{ t('调整单号') }}:{{ props.row.reference_number || '--' }}</div>
-              <div>
-                {{ t('入库批次号') }}:
-                {{ props.row.inbound_batch_number || '--' }}
+            <!-- 时间列 -->
+            <q-td key="time" :props="props">
+              {{ props.row.created_at }}
+            </q-td>
+
+            <!-- 商品信息列 -->
+            <q-td key="product" :props="props">
+              <div class="row items-center">
+                <q-img
+                  v-if="props.row.product_spec_image"
+                  :src="props.row.product_spec_image"
+                  style="width: 40px; height: 40px; object-fit: cover"
+                  class="q-mr-sm"
+                />
+                <div>
+                  <div class="hover-copy" @click="$copy(props.row.sku)">{{ props.row.sku }}</div>
+                  <div>{{ props.row.product_name }}</div>
+                  <div class="text-grey-7">{{ props.row.name }}</div>
+                </div>
               </div>
-              <div>{{ t('库位') }}: {{ props.row.warehouse_location_code || '--' }}</div>
-            </template>
-          </q-td>
+            </q-td>
+
+            <!-- 变化数量列 -->
+            <q-td key="change_qty" :props="props">
+              <span :class="props.row.stock > 0 ? 'text-green' : 'text-red'">
+                {{ props.row.stock > 0 ? '+' : '' }}{{ props.row.stock }}
+              </span>
+            </q-td>
+
+            <!-- 变动后库存总量列 -->
+            <q-td key="total_qty" :props="props">
+              {{ props.row.stock_after }}
+            </q-td>
+
+            <!-- 类型列 -->
+            <q-td key="type" :props="props">
+              {{ typeMap[props.row.type] || t('出库') }}
+            </q-td>
+
+            <!-- 关联单据号列 -->
+            <q-td key="reference" :props="props">
+              <template v-if="props.row.type === '销售出库'">
+                <div class="text-grey-7">{{ t('ERP包裹号') }}:</div>
+                <div class="hover-copy" @click="$copy(props.row.reference_number)">
+                  {{ props.row.reference_number || '--' }}
+                </div>
+                <div class="text-grey-7">{{ t('订单号') }}: {{ props.row.order_no || '--' }}</div>
+                <div class="text-grey-7">{{ t('运单号') }}: {{ props.row.tracking_no || '--' }}</div>
+              </template>
+              <template v-else>
+                <div class="hover-copy" @click="$copy(props.row.reference_number)">
+                  {{ t('调整单号') }}:{{ props.row.reference_number || '--' }}
+                </div>
+                <div>
+                  {{ t('入库批次号') }}:
+                  {{ props.row.inbound_batch_number || '--' }}
+                </div>
+                <div>{{ t('库位') }}: {{ props.row.warehouse_location_code || '--' }}</div>
+              </template>
+            </q-td>
+          </q-tr>
         </template>
 
         <!-- 分页 -->
@@ -137,6 +164,8 @@
 <script setup>
 import api from '@/api/index';
 import Pagination from '@/components/Pagination.vue';
+import DatePickerNew from '@/components/DatePickerNew/Index.vue';
+import KeywordSearch from '@/components/KeywordSearch/Index.vue';
 import { useQuasar } from 'quasar';
 import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -190,30 +219,35 @@ const columns = [
     label: t('时间'),
     field: 'created_at',
     align: 'left',
+    style: 'width: 15%',
   },
   {
     name: 'product',
     label: t('商品信息'),
     field: 'product',
     align: 'left',
+    style: 'width: 25%',
   },
   {
     name: 'change_qty',
     label: t('变化数量'),
     field: 'stock',
-    align: 'right',
+    align: 'center',
+    style: 'width: 15%',
   },
   {
     name: 'total_qty',
     label: t('变动后库存总量'),
     field: 'stock_after',
-    align: 'right',
+    align: 'center',
+    style: 'width: 10%',
   },
   {
     name: 'type',
     label: t('类型'),
     field: 'type',
-    align: 'left',
+    align: 'center',
+    style: 'width: 15%',
     format: (val) => typeMap[val] || t('出库'),
   },
   {
@@ -221,7 +255,7 @@ const columns = [
     label: t('关联单据号'),
     field: 'reference',
     align: 'left',
-    style: 'width: 350px',
+    style: 'width: 20%',
   },
 ];
 
@@ -372,95 +406,5 @@ const handleExport = async (type) => {
 
 <style lang="scss" scoped>
 .stock-flow {
-  .product-search {
-    padding: 16px;
-    border-radius: 8px;
-    margin-bottom: 16px;
-
-    .time-group,
-    .search-group {
-      :deep(.q-field__control) {
-        border: 1px solid rgba(0, 0, 0, 0.12) !important;
-        height: 40px;
-      }
-
-      :deep(.q-field--outlined .q-field__control:before) {
-        border: none;
-      }
-
-      :deep(.q-field--outlined .q-field__control:after) {
-        border: none;
-      }
-    }
-
-    .date-range {
-      .row {
-        margin: 0;
-      }
-
-      .date-input {
-        :deep(.q-field__control) {
-          border-radius: 0 !important;
-        }
-      }
-
-      .start-date {
-        :deep(.q-field__control) {
-          border-right: none !important;
-          border-radius: 4px 0 0 4px !important;
-        }
-      }
-
-      .end-date {
-        :deep(.q-field__control) {
-          border-left: none !important;
-          border-radius: 0 4px 4px 0 !important;
-        }
-      }
-
-      .date-separator {
-        padding: 0 4px;
-        background: #fff;
-        border-top: 1px solid rgba(0, 0, 0, 0.12);
-        border-bottom: 1px solid rgba(0, 0, 0, 0.12);
-      }
-    }
-
-    .search-group {
-      .log-type-select {
-        min-width: 120px;
-        :deep(.q-field__control) {
-          border-radius: 4px !important;
-        }
-      }
-
-      .search-type-select {
-        min-width: fit-content;
-        :deep(.q-field__control) {
-          border-radius: 4px 0 0 4px !important;
-          border-right: none !important;
-        }
-      }
-
-      .keywords-input {
-        flex: 1;
-        :deep(.q-field__control) {
-          border-radius: 0 !important;
-          border-right: none !important;
-        }
-      }
-
-      .search-mode-select {
-        min-width: fit-content;
-        :deep(.q-field__control) {
-          border-radius: 0 4px 4px 0 !important;
-        }
-      }
-    }
-  }
-
-  .q-table {
-    border-radius: 8px;
-  }
 }
 </style>
