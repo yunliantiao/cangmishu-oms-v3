@@ -80,4 +80,7 @@ export default {
   // 首页模块
   homeReport: (data) => GET('reports/home-report', data), // 首页报表
   homeChart: (data) => GET('reports/home-chart', data), // 首页图表
+
+  // 渠道模块
+  getChannelAllList: (data) => GET('logistics/channels/all', data), // 所有渠道列表
 };
