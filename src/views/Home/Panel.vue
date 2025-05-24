@@ -1,7 +1,7 @@
 <template>
   <div class="panel-page">
     <div class="total-list row q-col-gutter-lg q-mb-md">
-      <div class="col-12 col-sm-6 col-md-2" v-for="item in totalList" :key="item.label">
+      <div class="col-12 col-sm-4 col-md-2-4" v-for="item in totalList" :key="item.label">
         <q-card class="common-card b-rd-16">
           <q-card-section class="p-20">
             <div class="text-grey-8 text-subtitle2 q-mb-md">
@@ -209,24 +209,20 @@ export default {
     const totalList = computed(() => {
       return [
         {
+          label: t('处理中'),
+          value: reportObj.inbound_orders_count.inbound_processing_count,
+        },
+        {
+          label: t('运输中'),
+          value: reportObj.inbound_orders_count.in_transit_count,
+        },
+        {
           label: t('待发货'),
           value: reportObj.outbound_orders_count.pending_shipment_count,
         },
         {
-          label: t('待移货'),
-          value: reportObj.outbound_orders_count.pending_transfer_count,
-        },
-        {
-          label: t('待拣货'),
-          value: reportObj.outbound_orders_count.pending_pick_count,
-        },
-        {
           label: t('待包装'),
           value: reportObj.outbound_orders_count.pending_pack_count,
-        },
-        {
-          label: t('包装中'),
-          value: reportObj.outbound_orders_count.packing_count,
         },
         {
           label: t('异常订单'),
@@ -352,94 +348,95 @@ export default {
     const getHomeChart = () => {
       api.homeChart().then((res) => {
         console.log(res);
+        setChartData(res.data);
       });
-      const data = {
-        inbound_orders: [
-          {
-            date: '2025-04-24',
-            count: 2,
-          },
-          {
-            date: '2025-04-27',
-            count: 2,
-          },
-          {
-            date: '2025-04-29',
-            count: 1,
-          },
-          {
-            date: '2025-04-30',
-            count: 1,
-          },
-          {
-            date: '2025-05-02',
-            count: 1,
-          },
-          {
-            date: '2025-05-09',
-            count: 1,
-          },
-          {
-            date: '2025-05-13',
-            count: 1,
-          },
-          {
-            date: '2025-05-14',
-            count: 8,
-          },
-          {
-            date: '2025-05-15',
-            count: 2,
-          },
-        ],
-        outbound_orders: [
-          {
-            date: '2025-04-27',
-            count: 2,
-          },
-          {
-            date: '2025-04-29',
-            count: 4,
-          },
-          {
-            date: '2025-04-30',
-            count: 9,
-          },
-          {
-            date: '2025-05-01',
-            count: 3,
-          },
-          {
-            date: '2025-05-06',
-            count: 1,
-          },
-          {
-            date: '2025-05-07',
-            count: 2,
-          },
-          {
-            date: '2025-05-08',
-            count: 3,
-          },
-          {
-            date: '2025-05-09',
-            count: 6,
-          },
-          {
-            date: '2025-05-12',
-            count: 1,
-          },
-          {
-            date: '2025-05-13',
-            count: 5,
-          },
-          {
-            date: '2025-05-14',
-            count: 2,
-          },
-        ],
-      };
-      setChartData(data);
+      // const data = {
+      //   inbound_orders: [
+      //     {
+      //       date: '2025-04-24',
+      //       count: 2,
+      //     },
+      //     {
+      //       date: '2025-04-27',
+      //       count: 2,
+      //     },
+      //     {
+      //       date: '2025-04-29',
+      //       count: 1,
+      //     },
+      //     {
+      //       date: '2025-04-30',
+      //       count: 1,
+      //     },
+      //     {
+      //       date: '2025-05-02',
+      //       count: 1,
+      //     },
+      //     {
+      //       date: '2025-05-09',
+      //       count: 1,
+      //     },
+      //     {
+      //       date: '2025-05-13',
+      //       count: 1,
+      //     },
+      //     {
+      //       date: '2025-05-14',
+      //       count: 8,
+      //     },
+      //     {
+      //       date: '2025-05-15',
+      //       count: 2,
+      //     },
+      //   ],
+      //   outbound_orders: [
+      //     {
+      //       date: '2025-04-27',
+      //       count: 2,
+      //     },
+      //     {
+      //       date: '2025-04-29',
+      //       count: 4,
+      //     },
+      //     {
+      //       date: '2025-04-30',
+      //       count: 9,
+      //     },
+      //     {
+      //       date: '2025-05-01',
+      //       count: 3,
+      //     },
+      //     {
+      //       date: '2025-05-06',
+      //       count: 1,
+      //     },
+      //     {
+      //       date: '2025-05-07',
+      //       count: 2,
+      //     },
+      //     {
+      //       date: '2025-05-08',
+      //       count: 3,
+      //     },
+      //     {
+      //       date: '2025-05-09',
+      //       count: 6,
+      //     },
+      //     {
+      //       date: '2025-05-12',
+      //       count: 1,
+      //     },
+      //     {
+      //       date: '2025-05-13',
+      //       count: 5,
+      //     },
+      //     {
+      //       date: '2025-05-14',
+      //       count: 2,
+      //     },
+      //   ],
+      // };
+      // setChartData(data);
     };
     // 设置图表数据
     const setChartData = (chartObj) => {
@@ -462,36 +459,20 @@ export default {
 
     // 所有数据
     const reportObj = reactive({
-      // 扣费记录统计
-      deduction_records_count: {
-        pending_count: 0, // 待处理扣费数量
-        rejected_count: 0, // 已拒绝扣费数量
-        approved_count: 0, // 已通过扣费数量
-      },
       // 入库订单统计
       inbound_orders_count: {
-        reported_count: 0, // 已预报入库单数量
         in_transit_count: 0, // 运输中入库单数量
         inbound_processing_count: 0, // 入库处理中数量
       },
       // 出库订单统计
       outbound_orders_count: {
         pending_shipment_count: 0, // 待发货数量
-        pending_transfer_count: 0, // 待移货数量
-        pending_pick_count: 0, // 待拣货数量
         pending_pack_count: 0, // 待包装数量
-        packing_count: 0, // 包装中数量
         exception_count: 0, // 异常订单数量
-      },
-      // 充值记录统计
-      recharge_records_count: {
-        pending_count: 0, // 待处理充值数量
-        rejected_count: 0, // 已拒绝充值数量
-        approved_count: 0, // 已通过充值数量
       },
     });
     const getReport = () => {
-      homeApi.homeReport().then((res) => {
+      api.homeReport().then((res) => {
         Object.assign(reportObj, res.data);
       });
     };
@@ -554,6 +535,7 @@ export default {
     onMounted(() => {
       // 初始化图表
       getHomeChart();
+      getReport();
       nextTick(() => {
         window.addEventListener('resize', handleResize);
       });
@@ -583,6 +565,14 @@ export default {
   // 统一所有卡片的圆角样式
   :deep(.q-card) {
     border-radius: 8px;
+  }
+
+  // 自定义列宽
+  :deep(.col-md-2-4) {
+    @media (min-width: 1024px) {
+      width: 20%;
+      flex: 0 0 20%;
+    }
   }
 
   .warehouse-select-card {

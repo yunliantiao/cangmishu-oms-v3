@@ -43,6 +43,7 @@ export default {
   getInboundSkus: (id, data) => GET(`inbound/${id}/skus`, data), // 查看入库单sku详情
   getInboundBoxes: (id, data) => GET(`inbound/${id}/boxes`, data), // 查看入库单箱详情
   getInboundLabel: (id) => GET(`inbound/${id}/label`), // 打印入库单
+  cancelInbound: (id) => POST(`inbound/${id}/cancel`), // 取消入库单
 
   // 库存模块
   getStocksList: (data) => GET('stocks', data), // 获取库存列表

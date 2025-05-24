@@ -265,6 +265,14 @@
                         >
                           <q-item-section>{{ t('删除') }}</q-item-section>
                         </q-item>
+                        <q-item
+                          clickable
+                          v-close-popup
+                          v-if="props.row.status === 'reported' || props.row.status === 'in_transit'"
+                          @click="onCancelInbound(props.row)"
+                        >
+                          <q-item-section>{{ t('取消入库') }}</q-item-section>
+                        </q-item>
                       </q-list>
                     </q-menu>
                   </q-btn>
@@ -732,6 +740,33 @@ const handleDelete = (row) => {
       }
     } catch (error) {
       console.error('删除失败:', error);
+    }
+  });
+};
+
+const onCancelInbound = (row) => {
+  $q.dialog({
+    title: t('确认取消'),
+    message: t('确定要取消该入库单吗？'),
+    cancel: {
+      label: t('取消'),
+      flat: true,
+      color: 'grey-7',
+    },
+    ok: {
+      label: t('确定'),
+      flat: true,
+      color: 'primary',
+    },
+    persistent: true,
+  }).onOk(async () => {
+    try {
+      const response = await api.cancelInbound(row.id);
+      if (response.success) {
+        fetchInboundList();
+      }
+    } catch (error) {
+      console.error('取消入库失败:', error);
     }
   });
 };
